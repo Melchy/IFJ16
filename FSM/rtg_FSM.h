@@ -45,8 +45,8 @@
 #define tkn_VOID	34
 #define tkn_WHILE	35
 
-#define LEX_ERR		-1
-#define SYN_ERR		-2
+#define LEX_ERR		-2
+#define SYN_ERR		-3
 
 #define st_NULL		0
 #define st_SLASH	1
@@ -57,9 +57,11 @@
 #define st_REALE	6
 #define st_REAL 	7
 #define st_WORD		8
+#define st_LONGID	9
 
 void set_file(FILE *);
 void read_garbage();
+int tkn_word(char *);
 int get_token(char *);
 
 #endif
