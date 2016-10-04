@@ -23,7 +23,7 @@ void read_garbage()
 	}
 }
 
-void read_garbage2()
+void read_garbage2() // pouzivana v retezcovem literalu
 {
 	int c;
 	while((c = fgetc(src)) != EOF)
@@ -127,13 +127,28 @@ bool is_octdigit(int c)
 	return (c >= '0' && c <= '7');
 }
 
-int solve_esc(int c)
+int solve_esc(int *c0)
 {
-	switch(c){
-		case '"': return '\"';
-		case 'n': return '\n';
-		case 't': return '\t';
-		case '\\': return '\\';
+	switch(*c0){
+		case '"': return *c0 = '\"';
+		case 'n': return *c0 = '\n';
+		case 't': return *c0 = '\t';
+		case '\\': return *c0 = '\\';
+	}
+	int c1 = fgetc(src); int c2 = fgetc(src);
+	int ret = 0;
+
+	if(is_octdigit(*c0)) ret += 64*(*c0-'0');
+	else return -1;
+	if(is_octdigit(c1)) ret += 8*(c1-'0');
+	else { ungetc(c1, src); return -1; }
+	if(is_octdigit(c2)) ret += (c2-'0');
+	else { ungetc(c2, src); ungetc(c1, src); return -1; }
+
+	if(ret >= 1 && ret <= 255) // rozsah \001 - \377
+	{
+		*c0 = ret;
+		return ret;
 	}
 	return -1;
 }
@@ -221,7 +236,7 @@ int get_token(char *attr)
 
 			case st_LONGID:	// class.identifikator
 				if(isalnum(c) || c == '_' || c == '$')			{ attr[cnt++] = c; flag = 1; continue; }
-				else if(flag && (is_tokenchar(c) || isspace(c))){ attr[cnt] = '\0'; return tkn_ID; }
+				else if(flag && (is_tokenchar(c) || isspace(c))){ ungetc(c, src); attr[cnt] = '\0'; return tkn_ID; }
 				else 											{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 			break;
 
@@ -240,7 +255,7 @@ int get_token(char *attr)
 				else 			{ ungetc(c, src); attr[1] = '\0'; return tkn_ASSIGN; }
 			break;
 
-			case st_LIT: // "some words etc."
+			case st_LIT: // v retezcovem literalu
 				if(c == '"')	{ attr[cnt] = '\0'; return tkn_LIT; }
 				else if(c == '\\') { state = st_LITESC; continue; }
 				else if(c == '\n') { attr[cnt] = '\0'; return LEX_ERR; }
@@ -248,8 +263,8 @@ int get_token(char *attr)
 			break;
 
 			case st_LITESC:	// v retezcovem literalu po nalezeni escape sekvence
-				if(solve_esc(c) != -1)	{ state = st_LIT; attr[cnt++] = solve_esc(c); continue; }
-				else 					{ attr[cnt] = '\0'; read_garbage2(); return LEX_ERR; }
+				if(solve_esc(&c) != -1)	{ state = st_LIT; attr[cnt++] = c; continue; }
+				else 					{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage2(); return LEX_ERR; }
 			break;
 
 			default: break;

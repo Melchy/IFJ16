@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+/* Seznam definovanych tokenu */
 #define tkn_ID		0 	// identifikator
 #define tkn_NUM		1	// 60
-#define tkn_LIT		2	// "blablabla"
+#define tkn_LIT		2	// "string"
 #define tkn_REAL	3	// 1.35 nebo 3.15e64 nebo 3e-3 nebo 4.78E-35
 
 #define tkn_BOOL	4
@@ -51,6 +52,7 @@
 #define LEX_ERR		-2
 #define SYN_ERR		-3
 
+/* Seznam definovanych stavu automatu lexikalni analyzy */
 #define st_NULL		0	// vychozi stav
 #define st_SLASH	1	// stav po precteni '/'
 #define st_LCOMM	2	// stav v line komentu
@@ -83,9 +85,11 @@ int onechar_tkn(int c);
 /* Abychom rozeznali lexikalni chybu od korektniho ukonceni tokenu (nekdy za tokenem musi byt whitespace, jindy ne, zalezi co nasleduje) */
 bool is_tokenchar(int c);
 
+/* Vraci true v pripade ze znak je platna oktalova cislice */
 bool is_octdigit(int c);
 
-int solve_esc(int c);
+/* Precte znak(y) za '\' a vyresi je jako escape sekvenci, pri uspechu ho vrati skrz pointer, jinak return -1 */
+int solve_esc(int *c);
 
 /* Konecny stavovy automat */
 int get_token(char *);
