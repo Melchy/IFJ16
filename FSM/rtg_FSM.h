@@ -2,10 +2,11 @@
 #define rtg_FSM_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #define tkn_ID		0 	// identifikator
 #define tkn_NUM		1	// 60
-#define tkn_WORD	2	// "blablabla"
+#define tkn_LIT		2	// "blablabla"
 #define tkn_REAL	3	// 1.35 nebo 3.15e64 nebo 3e-3 nebo 4.78E-35
 
 #define tkn_BOOL	4
@@ -44,24 +45,49 @@
 #define tkn_TRUE	33
 #define tkn_VOID	34
 #define tkn_WHILE	35
+#define tkn_SEMI	36
+#define tkn_COMMA	37
 
 #define LEX_ERR		-2
 #define SYN_ERR		-3
 
-#define st_NULL		0
-#define st_SLASH	1
-#define st_LCOMM	2
-#define st_BCOMM	3
-#define st_BCOMM_0	4
-#define st_NUM		5
-#define st_REALE	6
-#define st_REAL 	7
-#define st_WORD		8
-#define st_LONGID	9
+#define st_NULL		0	// vychozi stav
+#define st_SLASH	1	// stav po precteni '/'
+#define st_LCOMM	2	// stav v line komentu
+#define st_BCOMM	3	// stav v block komentu
+#define st_BCOMM_0	4	// stav, kdy v block komentu precteme '*'
+#define st_NUM		5	// stav v cisle (potencialni real)
+#define st_REALE	6	// stav v realu s exponentem
+#define st_REAL 	7	// stav v obycejnem realu
+#define st_WORD		8	// stav v identifikatoru nebo klicovem slove
+#define st_LONGID	9	// stav v dlouhem identifikatoru
+#define st_CMP		10	// stav po precteni '<' nebo '>'
+#define st_EXCL		11	// stav po precteni '!'
+#define st_EQ		12	// stav po precteni '='
+#define st_LIT		13	// v retezcovem literalu
+#define st_LITESC	14	// v retezcovem literalu v escape sekvenci
 
+/* Nastaveni file pointeru z hlavniho modulu */
 void set_file(FILE *);
+
+/* Zotaveni z chyby */
 void read_garbage();
+void read_garbage2();
+
+/* Detekce klicovych slov */
 int tkn_word(char *);
+
+/* Pro zjednoduseni v pripade jednoznakovych tokenu */
+int onechar_tkn(int c);
+
+/* Abychom rozeznali lexikalni chybu od korektniho ukonceni tokenu (nekdy za tokenem musi byt whitespace, jindy ne, zalezi co nasleduje) */
+bool is_tokenchar(int c);
+
+bool is_octdigit(int c);
+
+int solve_esc(int c);
+
+/* Konecny stavovy automat */
 int get_token(char *);
 
 #endif
