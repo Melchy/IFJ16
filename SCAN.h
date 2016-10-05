@@ -1,5 +1,5 @@
-#ifndef rtg_FSM_H
-#define rtg_FSM_H
+#ifndef SCAN_H
+#define SCAN_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -69,9 +69,6 @@
 #define st_LIT		13	// v retezcovem literalu
 #define st_LITESC	14	// v retezcovem literalu v escape sekvenci
 
-/* Nastaveni file pointeru z hlavniho modulu */
-void set_file(FILE *);
-
 /* Zotaveni z chyby */
 void read_garbage();
 void read_garbage2();
@@ -92,6 +89,6 @@ bool is_octdigit(int c);
 int solve_esc(int *c);
 
 /* Konecny stavovy automat */
-int get_token(char *);
+int SCAN_GetToken(char *c);
 
 #endif

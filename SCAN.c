@@ -1,22 +1,17 @@
-#include "rtg_FSM.h"
+#include "SCAN.h"
+#include "FIO.h"
 
-#include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
-FILE *src;
 static bool endfl = 0;	// end flag pro indikaci nalezu EOF
-
-void set_file(FILE *f)
-{
-	src = f;
-}
+static int state;
 
 void read_garbage()
 {
 	int c;
-	while((c = fgetc(src)) != EOF)
+	while((c = FIO_GetChar()) != EOF)
 	{
 		if(c == ';' || isspace(c))
 			return;
@@ -26,7 +21,7 @@ void read_garbage()
 void read_garbage2() // pouzivana v retezcovem literalu
 {
 	int c;
-	while((c = fgetc(src)) != EOF)
+	while((c = FIO_GetChar()) != EOF)
 	{
 		if(c == '"' || c == '\n')
 			return;
@@ -91,6 +86,7 @@ int onechar_tkn(int c)
 
 bool is_tokenchar(int c)
 {
+	//doplnit
 	if(c == '(')
 		return true;
 	if(c == ')')
@@ -135,15 +131,15 @@ int solve_esc(int *c0)
 		case 't': return *c0 = '\t';
 		case '\\': return *c0 = '\\';
 	}
-	int c1 = fgetc(src); int c2 = fgetc(src);
+	int c1 = FIO_GetChar(); int c2 = FIO_GetChar();
 	int ret = 0;
 
 	if(is_octdigit(*c0)) ret += 64*(*c0-'0');
 	else return -1;
 	if(is_octdigit(c1)) ret += 8*(c1-'0');
-	else { ungetc(c1, src); return -1; }
+	else { FIO_UngetChar(c1); return -1; }
 	if(is_octdigit(c2)) ret += (c2-'0');
-	else { ungetc(c2, src); ungetc(c1, src); return -1; }
+	else { FIO_UngetChar(c2); FIO_UngetChar(c1); return -1; }
 
 	if(ret >= 1 && ret <= 255) // rozsah \001 - \377
 	{
@@ -153,13 +149,13 @@ int solve_esc(int *c0)
 	return -1;
 }
 
-int get_token(char *attr)
+int SCAN_GetToken(char *attr)
 {
 	if(endfl) return EOF;
 
-	attr[0] = '\0'; 		// vycisteni atributu
+	state = st_NULL;
 
-	int state = st_NULL;	// vychozi stav automatu
+	attr[0] = '\0'; 		// vycisteni atributu
 
 	int cnt = 0;			// pocitadlo znaku ulozenych v attr
 
@@ -168,7 +164,7 @@ int get_token(char *attr)
 	int c;
 	while(!endfl)
 	{
-		c = fgetc(src);
+		c = FIO_GetChar();
 		if(c == EOF) { c = ' '; endfl = 1; } // nemuzeme hned vratit EOF, potrebujeme posledni token
 
 		switch(state){
@@ -188,7 +184,7 @@ int get_token(char *attr)
 			case st_SLASH:	// line koment, block koment nebo lomitko (deleni)
 				if(c == '/') 		{ state = st_LCOMM; continue; }
 				else if(c == '*') 	{ state = st_BCOMM; continue; }
-				else				{ ungetc(c, src); state = st_NULL; return tkn_DIV; }
+				else				{ FIO_UngetChar(c); state = st_NULL; return tkn_DIV; }
 			break;
 
 			case st_LCOMM:	// v line komentu
@@ -210,49 +206,49 @@ int get_token(char *attr)
 				if(isdigit(c)) 							{ attr[cnt++] = c; continue; }
 				else if(c == 'E' || c == 'e') 			{ state = st_REALE; attr[cnt++] = c; continue; }
 				else if(c == '.')						{ state = st_REAL; attr[cnt++] = c; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ ungetc(c, src); attr[cnt] = '\0'; return tkn_NUM; }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_NUM; }
 				else									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_REALE:	// '1561e' nebo '1561.34e'
 				if(c == '+' || c == '-' || !flag)		{ attr[cnt++] = c; flag = 1; continue; }
 				else if(isdigit(c))						{ attr[cnt++] = c; flag = 1; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ ungetc(c, src); attr[cnt] = '\0'; return tkn_REAL; }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_REAL; }
 				else 									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_REAL: // '1561.'
 				if(isdigit(c))										{ attr[cnt++] = c; flag = 1; continue; }
 				else if((c == 'E' || c == 'e') && flag)				{ state = st_REALE; flag = 0; attr[cnt++] = c; continue; }
-				else if((is_tokenchar(c) || isspace(c)) && flag)	{ ungetc(c, src); attr[cnt] = '\0'; return tkn_REAL; }
+				else if((is_tokenchar(c) || isspace(c)) && flag)	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_REAL; }
 				else												{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 
 			case st_WORD: // identifikator nebo keyword
 				if(isalnum(c) || c == '_' || c == '$')	{ attr[cnt++] = c; continue; }
 				else if(c == '.')						{ state = st_LONGID; attr[cnt++] = c; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ ungetc(c, src); attr[cnt] = '\0'; return tkn_word(attr); }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_word(attr); }
 				else 									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_LONGID:	// class.identifikator
 				if(isalnum(c) || c == '_' || c == '$')			{ attr[cnt++] = c; flag = 1; continue; }
-				else if(flag && (is_tokenchar(c) || isspace(c))){ ungetc(c, src); attr[cnt] = '\0'; return tkn_ID; }
+				else if(flag && (is_tokenchar(c) || isspace(c))){ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_ID; }
 				else 											{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_CMP: // <, >
 				if(c == '=')	{ attr[1] = c; attr[2] = '\0'; return (attr[0] == '<') ? tkn_ELOWER:tkn_EHIGHER; }
-				else 			{ ungetc(c, src); attr[1] = '\0'; return (attr[0] == '<') ? tkn_LOWER:tkn_HIGHER; }
+				else 			{ FIO_UngetChar(c); attr[1] = '\0'; return (attr[0] == '<') ? tkn_LOWER:tkn_HIGHER; }
 			break;
 
 			case st_EXCL: // !
 				if(c == '=')	{ attr[1] = c; attr[2] = '\0'; return tkn_NEQUAL; }
-				else 			{ ungetc(c, src); attr[1] = '\0'; return LEX_ERR; }
+				else 			{ FIO_UngetChar(c); attr[1] = '\0'; return LEX_ERR; }
 			break;
 
 			case st_EQ:	// =
 				if(c == '=')	{ attr[1] = c; attr[2] = '\0'; return tkn_EQUAL; }
-				else 			{ ungetc(c, src); attr[1] = '\0'; return tkn_ASSIGN; }
+				else 			{ FIO_UngetChar(c); attr[1] = '\0'; return tkn_ASSIGN; }
 			break;
 
 			case st_LIT: // v retezcovem literalu
