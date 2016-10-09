@@ -69,6 +69,8 @@
 #define st_LIT		13	// v retezcovem literalu
 #define st_LITESC	14	// v retezcovem literalu v escape sekvenci
 
+#define ATTR_SIZE	32
+
 /* Zotaveni z chyby */
 void read_garbage();
 void read_garbage2();
@@ -90,5 +92,8 @@ int solve_esc(int *c);
 
 /* Konecny stavovy automat */
 int SCAN_GetToken(char *c);
+
+/* Pocet znaku ulozenych v attr */
+size_t SCAN_cnt;
 
 #endif

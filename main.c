@@ -2,6 +2,7 @@
 #include "SCAN.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define ERR -1
 
@@ -10,7 +11,12 @@ int main(void)
 	if(!FIO_Open("java.code"))
 		return ERR;
 	int token;
-	char str[100];
+	char *str = malloc(ATTR_SIZE*(sizeof(char)));
+	if (str == NULL)
+	{
+		fprintf(stderr, "MALLOC FAILED\n");
+		return 1;
+	}
 	while((token = SCAN_GetToken(str)) != EOF)
 	{
 		printf("tkn:%d", token);

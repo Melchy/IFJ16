@@ -1,11 +1,25 @@
 #include "SCAN.h"
 #include "FIO.h"
 
+#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
+#define Add_Char (bytes_allocated == SCAN_cnt) ?\
+						(bytes_allocated *= 2, realloc(attr, bytes_allocated) == NULL ?\
+								(fprintf(stderr, "MEMORY FAIL"), exit(1), 1) :\
+								(attr[SCAN_cnt++] = c, 1)) :\
+						(attr[SCAN_cnt++] = c, 1)
+
+#define Add_Null (bytes_allocated == SCAN_cnt) ?\
+						(bytes_allocated *= 2, realloc(attr, bytes_allocated) == NULL ?\
+								(fprintf(stderr, "MEMORY FAIL"), exit(1), 1) :\
+								(attr[SCAN_cnt++] = '\0', 1)) :\
+						(attr[SCAN_cnt++] = '\0', 1)
+
 static bool endfl = 0;	// end flag pro indikaci nalezu EOF
+static size_t bytes_allocated = ATTR_SIZE;
 static int state;
 
 void read_garbage()
@@ -154,11 +168,7 @@ int SCAN_GetToken(char *attr)
 	if(endfl) return EOF;
 
 	state = st_NULL;
-
-	attr[0] = '\0'; 		// vycisteni atributu
-
-	int cnt = 0;			// pocitadlo znaku ulozenych v attr
-
+	attr[0] = '\0'; SCAN_cnt = 0;	// vycisteni atributu
 	bool flag = 0;			// pomocny flag pro rozhodovani o stavu automatu
 
 	int c;
@@ -170,15 +180,15 @@ int SCAN_GetToken(char *attr)
 		switch(state){
 			case st_NULL:
 				if(isspace(c)) 								continue;
-				else if(isalpha(c) || c == '_' || c == '$') { state = st_WORD;  attr[cnt++] = c; continue; }
-				else if(isdigit(c)) 						{ state = st_NUM; attr[cnt++] = c; continue; }
+				else if(isalpha(c) || c == '_' || c == '$') { state = st_WORD;  Add_Char; continue; }
+				else if(isdigit(c)) 						{ state = st_NUM; Add_Char; continue; }
 				else if(c == '/') 							{ state = st_SLASH; continue; } // nutno rozhodnout lomitko vs. koment
 				else if(onechar_tkn(c))						return onechar_tkn(c);
 				else if(c == '<' || c == '>')				{ state = st_CMP; attr[0] = c; continue; }
 				else if(c == '!')							{ state = st_EXCL; attr[0] = c; continue; }
 				else if(c == '=')							{ state = st_EQ; attr[0] = c; continue; }
 				else if(c == '"')							{ state = st_LIT; continue; }
-				else										{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage() ; return LEX_ERR; }
+				else										{ Add_Char; Add_Null; read_garbage() ; return LEX_ERR; }
 			break;
 
 			case st_SLASH:	// line koment, block koment nebo lomitko (deleni)
@@ -203,37 +213,37 @@ int SCAN_GetToken(char *attr)
 			break;
 
 			case st_NUM: // integer, mozna real
-				if(isdigit(c)) 							{ attr[cnt++] = c; continue; }
-				else if(c == 'E' || c == 'e') 			{ state = st_REALE; attr[cnt++] = c; continue; }
-				else if(c == '.')						{ state = st_REAL; attr[cnt++] = c; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_NUM; }
-				else									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
+				if(isdigit(c)) 							{ Add_Char; continue; }
+				else if(c == 'E' || c == 'e') 			{ state = st_REALE; Add_Char; continue; }
+				else if(c == '.')						{ state = st_REAL; Add_Char; continue; }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_NUM; }
+				else									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_REALE:	// '1561e' nebo '1561.34e'
-				if(c == '+' || c == '-' || !flag)		{ attr[cnt++] = c; flag = 1; continue; }
-				else if(isdigit(c))						{ attr[cnt++] = c; flag = 1; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_REAL; }
-				else 									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
+				if(c == '+' || c == '-' || !flag)		{ Add_Char; flag = 1; continue; }
+				else if(isdigit(c))						{ Add_Char; flag = 1; continue; }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_REAL; }
+				else 									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_REAL: // '1561.'
-				if(isdigit(c))										{ attr[cnt++] = c; flag = 1; continue; }
-				else if((c == 'E' || c == 'e') && flag)				{ state = st_REALE; flag = 0; attr[cnt++] = c; continue; }
-				else if((is_tokenchar(c) || isspace(c)) && flag)	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_REAL; }
-				else												{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
+				if(isdigit(c))										{ Add_Char; flag = 1; continue; }
+				else if((c == 'E' || c == 'e') && flag)				{ state = st_REALE; flag = 0; Add_Char; continue; }
+				else if((is_tokenchar(c) || isspace(c)) && flag)	{ FIO_UngetChar(c); Add_Null; return tkn_REAL; }
+				else												{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
 
 			case st_WORD: // identifikator nebo keyword
-				if(isalnum(c) || c == '_' || c == '$')	{ attr[cnt++] = c; continue; }
-				else if(c == '.')						{ state = st_LONGID; attr[cnt++] = c; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_word(attr); }
-				else 									{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
+				if(isalnum(c) || c == '_' || c == '$')	{ Add_Char; continue; }
+				else if(c == '.')						{ state = st_LONGID; Add_Char; continue; }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_word(attr); }
+				else 									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
 			break;
 
-			case st_LONGID:	// class.identifikator
-				if(isalnum(c) || c == '_' || c == '$')			{ attr[cnt++] = c; flag = 1; continue; }
-				else if(flag && (is_tokenchar(c) || isspace(c))){ FIO_UngetChar(c); attr[cnt] = '\0'; return tkn_ID; }
-				else 											{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage(); return LEX_ERR; }
+			case st_LONGID:	// trida.identifikator
+				if(isalnum(c) || c == '_' || c == '$')			{ Add_Char; flag = 1; continue; }
+				else if(flag && (is_tokenchar(c) || isspace(c))){ FIO_UngetChar(c); Add_Null; return tkn_ID; }
+				else 											{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
 			break;
 
 			case st_CMP: // <, >
@@ -252,15 +262,15 @@ int SCAN_GetToken(char *attr)
 			break;
 
 			case st_LIT: // v retezcovem literalu
-				if(c == '"')	{ attr[cnt] = '\0'; return tkn_LIT; }
+				if(c == '"')	{ Add_Null; return tkn_LIT; }
 				else if(c == '\\') { state = st_LITESC; continue; }
-				else if(c == '\n') { attr[cnt] = '\0'; return LEX_ERR; }
-				else 				{ attr[cnt++] = c; continue; }
+				else if(c == '\n') { Add_Null; return LEX_ERR; }
+				else 				{ Add_Char; continue; }
 			break;
 
 			case st_LITESC:	// v retezcovem literalu po nalezeni escape sekvence
-				if(solve_esc(&c) != -1)	{ state = st_LIT; attr[cnt++] = c; continue; }
-				else 					{ attr[cnt++] = c; attr[cnt] = '\0'; read_garbage2(); return LEX_ERR; }
+				if(solve_esc(&c) != -1)	{ state = st_LIT; Add_Char; continue; }
+				else 					{ Add_Char; Add_Null; read_garbage2(); return LEX_ERR; }
 			break;
 
 			default: break;
