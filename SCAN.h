@@ -1,6 +1,8 @@
 #ifndef SCAN_H
 #define SCAN_H
 
+#include "STR.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -76,7 +78,7 @@ void read_garbage();
 void read_garbage2();
 
 /* Detekce klicovych slov */
-int tkn_word(char *);
+int tkn_word();
 
 /* Pro zjednoduseni v pripade jednoznakovych tokenu */
 int onechar_tkn(int c);
@@ -91,7 +93,13 @@ bool is_octdigit(int c);
 int solve_esc(int *c);
 
 /* Konecny stavovy automat */
-int SCAN_GetToken(char *c);
+int SCAN_GetToken();
+
+/* Funkce pro nalezeni konkretniho tokenu */
+bool SCAN_FindToken(int token);
+
+/* Ukazatel na pole znaku v atributu */
+S_String SCAN_attr;
 
 /* Pocet znaku ulozenych v attr */
 size_t SCAN_cnt;

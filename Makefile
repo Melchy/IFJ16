@@ -9,8 +9,8 @@ ifj16_rtg: main.o SCAN.o FIO.o
 FIO.o: FIO.c FIO.h
 	$(CC) $(CFLAGS) -c FIO.c -o FIO.o
 
-SCAN.o: SCAN.c SCAN.h FIO.h
+SCAN.o: SCAN.c SCAN.h FIO.h STR.h
 	$(CC) $(CFLAGS) -c SCAN.c -o SCAN.o
 
-main.o: main.c SCAN.h FIO.h
+main.o: main.c SCAN.h FIO.h STR.h
 	$(CC) $(CFLAGS) -c main.c -o main.o
