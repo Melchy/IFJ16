@@ -51,9 +51,6 @@
 #define tkn_SEMI	36
 #define tkn_COMMA	37
 
-#define LEX_ERR		-2
-#define SYN_ERR		-3
-
 /* Seznam definovanych stavu automatu lexikalni analyzy */
 #define st_NULL		0	// vychozi stav
 #define st_SLASH	1	// stav po precteni '/'
@@ -71,7 +68,7 @@
 #define st_LIT		13	// v retezcovem literalu
 #define st_LITESC	14	// v retezcovem literalu v escape sekvenci
 
-#define ATTR_SIZE	32
+#define ATTR_SIZE	4
 
 /* Zotaveni z chyby */
 void read_garbage();
@@ -100,8 +97,5 @@ bool SCAN_FindToken(int token);
 
 /* Ukazatel na pole znaku v atributu */
 S_String SCAN_attr;
-
-/* Pocet znaku ulozenych v attr */
-size_t SCAN_cnt;
 
 #endif

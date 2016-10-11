@@ -1,24 +1,26 @@
 #include "SCAN.h"
 #include "FIO.h"
 #include "STR.h"
+#include "MEM.h"
+#include "ERROR.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 
-#define Add_Char (bytes_allocated == SCAN_cnt) ?\
-						(bytes_allocated *= 2, realloc(SCAN_attr.str, bytes_allocated) == NULL ?\
-								(fprintf(stderr, "MEMORY FAIL"), exit(1), 1) :\
-								(SCAN_attr.str[SCAN_cnt++] = c, 1)) :\
-						(SCAN_attr.str[SCAN_cnt++] = c, 1)
+#define Add_Char (bytes_allocated == SCAN_attr.len) ?\
+						(bytes_allocated *= 2, SCAN_attr.str = (char *)MEM_realloc(SCAN_attr.str, bytes_allocated),\
+						(SCAN_attr.str[SCAN_attr.len++] = c, 1)) \
+						:\
+						(SCAN_attr.str[SCAN_attr.len++] = c, 1)
 
-#define Add_Null (bytes_allocated == SCAN_cnt) ?\
-						(bytes_allocated *= 2, realloc(SCAN_attr.str, bytes_allocated) == NULL ?\
-								(fprintf(stderr, "MEMORY FAIL"), exit(1), 1) :\
-								(SCAN_attr.str[SCAN_cnt++] = '\0', 1)) :\
-						(SCAN_attr.str[SCAN_cnt++] = '\0', 1)
-
+#define Add_Null (bytes_allocated == SCAN_attr.len) ?\
+						(bytes_allocated *= 2, SCAN_attr.str = (char *)MEM_realloc(SCAN_attr.str, bytes_allocated),\
+						(SCAN_attr.str[SCAN_attr.len++] = '\0', 1)) \
+						:\
+						(SCAN_attr.str[SCAN_attr.len++] = '\0', 1)
+						
 static bool endfl = 0;	// end flag pro indikaci nalezu EOF
 static size_t bytes_allocated = ATTR_SIZE;
 static int state;
@@ -101,7 +103,6 @@ int onechar_tkn(int c)
 
 bool is_tokenchar(int c)
 {
-	//doplnit
 	if(c == '(')
 		return true;
 	if(c == ')')
@@ -129,6 +130,8 @@ bool is_tokenchar(int c)
 	if(c == ';')
 		return true;
 	if(c == ',')
+		return true;	
+	if(c == '"')
 		return true;
 	return false;
 }
@@ -169,8 +172,8 @@ int SCAN_GetToken()
 	if(endfl) return EOF;
 
 	state = st_NULL;
-	SCAN_attr.str[0] = '\0'; SCAN_cnt = 0;	// vycisteni atributu
-	bool flag = 0;					// pomocny flag pro rozhodovani o stavu automatu
+	SCAN_attr.str[0] = '\0'; SCAN_attr.len = 0;	// vycisteni atributu
+	bool flag = 0;								// pomocny flag pro rozhodovani o stavu automatu
 
 	int c;
 	while(!endfl)

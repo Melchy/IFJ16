@@ -1,4 +1,5 @@
 #include "FIO.h"
+#include "ERROR.h"
 
 #include <stdio.h>
 
@@ -9,9 +10,9 @@ bool FIO_Open(char *filename)
 {
 	f = fopen(filename, "r");
 	if(f == NULL){
-		fprintf(stderr, "Unable to close the source file '%s'.\n", filename);
-		return false;
+		ERROR_exit(ENV_ERR);
 	}
+	FIO_Opened = true;
 	return true;
 }
 
@@ -28,8 +29,10 @@ int FIO_UngetChar(int c)
 /* true pokud se uspesne zavre */
 bool FIO_Close()
 {
-	if(!fclose(f))
+	if(!fclose(f)){
+		FIO_Opened = false;
 		return true;
-	fprintf(stderr, "Unable to close the source file.");
+	}
+	ERROR_exit(ENV_ERR);
 	return false;
 }

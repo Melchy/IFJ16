@@ -3,7 +3,7 @@
 
 typedef struct {
 	char *str;
-	int len;
+	unsigned int len;
 } S_String;
 
 #endif
