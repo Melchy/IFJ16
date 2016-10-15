@@ -102,6 +102,7 @@ void MEM_clearAll()
 	for (int i = 0; i < SIZE_HTAB_MEM; i++)
 	{
 		p = all_pointers[i];
+		all_pointers[i] = NULL;
 		while(p != NULL)
 		{
 			free(p->ptr);
