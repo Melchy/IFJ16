@@ -26,7 +26,7 @@ static size_t bytes_allocated = ATTR_SIZE;
 static int state;
 
 /* Detekce klicovych slov */
-int tkn_word()
+static int tkn_word()
 {
 	if (!strcmp("Boolean", SCAN_attr.str))
 		return tkn_BOOL;
@@ -67,7 +67,7 @@ int tkn_word()
 }
 
 /* Pro zjednoduseni v pripade jednoznakovych tokenu */
-int onechar_tkn(int c)
+static int onechar_tkn(int c)
 {
 	switch(c){
 		case '+': return tkn_PLUS;
@@ -84,7 +84,7 @@ int onechar_tkn(int c)
 }
 
 /* Abychom rozeznali lexikalni chybu od korektniho ukonceni tokenu (nekdy za tokenem musi byt whitespace, jindy ne, zalezi co nasleduje) */
-bool is_tokenchar(int c)
+static bool is_tokenchar(int c)
 {
 	if(c == '(')
 		return true;
@@ -120,13 +120,13 @@ bool is_tokenchar(int c)
 }
 
 /* Vraci true v pripade ze znak je platna oktalova cislice */
-bool is_octdigit(int c)
+static bool is_octdigit(int c)
 {
 	return (c >= '0' && c <= '7');
 }
 
 /* Precte znak(y) za '\' a vyresi je jako escape sekvenci, pri uspechu ho vrati skrz pointer, jinak return -1 */
-int solve_esc(int *c0)
+static int solve_esc(int *c0)
 {
 	switch(*c0){
 		case '"': return *c0 = '\"';
@@ -274,7 +274,7 @@ bool SCAN_FindToken(int token)
 	int nest = 1;
 	while((t = SCAN_GetToken()) != EOF)
 	{
-		switch(token){
+		switch(token){	
 		case tkn_RPAREN:
 			if(t == tkn_LPAREN) 					nest++;
 			else if(t == tkn_RPAREN && nest == 1)	return true;
