@@ -5,15 +5,18 @@
 
 #include <stdio.h>
 
-t_Tree *Tree_Init()
+static t_Tree *T = NULL;
+
+void Tree_Create()
 {
-	t_Tree *T = MEM_malloc(sizeof(t_Tree));
+	t_Tree *tmp = T;
+	T = MEM_malloc(sizeof(t_Tree));
+	T->prev = tmp;
 	T->Top = NULL;
 	T->Act = NULL;
-	return T;
 }
 
-int priority(int token)
+static int priority(int token)
 {
 	switch(token){
 		case tkn_MUL:
@@ -35,7 +38,7 @@ int priority(int token)
 	return 0;
 }
 
-void Tree_AddOp(t_Tree *T, int token)
+void Tree_AddOp(int token)
 {
 	t_Branch *b = MEM_malloc(sizeof(t_Branch));
 	b->token = token;
@@ -57,7 +60,7 @@ void Tree_AddOp(t_Tree *T, int token)
 	T->Act = b;
 }
 
-void Tree_AddVal(t_Tree *T, int token, S_String *attr){
+void Tree_AddVal(int token, S_String *attr){
 	t_Branch *b = MEM_malloc(sizeof(t_Branch));
 	b->token = token; b->attr = attr;
 
@@ -73,7 +76,7 @@ void Tree_AddVal(t_Tree *T, int token, S_String *attr){
 	T->Act = b;
 }
 
-void Tree_NestIn(t_Tree *T)
+void Tree_NestIn()
 {
 	t_Branch *b = MEM_malloc(sizeof(t_Branch));
 	b->token = tkn_LPAREN; b->attr = NULL;
@@ -83,7 +86,7 @@ void Tree_NestIn(t_Tree *T)
 	T->Act = b;
 }
 
-void Tree_NestOut(t_Tree *T)
+void Tree_NestOut()
 {
 	while(T->Act->token != tkn_LPAREN){
 		T->Act = T->Act->parent;
@@ -113,55 +116,43 @@ static void RecursiveRemove(t_Branch *B)
 		RecursiveRemove(B->r_child);
 }
 
-void Tree_RemoveParen(t_Tree *T)
+void Tree_RemoveParen()
 {
 	if(T->Top != NULL)
 		RecursiveRemove(T->Top);
 }
 
-void Tree_GoTop(t_Tree *T)
+void Tree_GoTop()
 {
 	T->Act = T->Top;
 }
 
-void Tree_GoBot(t_Tree *T)
+void RecursiveDispose(t_Branch *B)
 {
-	t_Branch* p = T->Top;
-	while(p != NULL){
-		if(p->r_child == NULL){
-			if (p->l_child == NULL)
-			{
-				T->Act = p;
-				return;
-			} else {
-				p = p->l_child;
-			}
-		} else {
-			p = p->r_child;
-		}
-	}
+	if(B == NULL)
+		return;
+	RecursiveDispose(B->r_child);
+	RecursiveDispose(B->l_child);
+	MEM_free(B);
 }
 
-void Tree_Dispose(t_Tree *T)
+void Tree_Dispose()
 {
-	Tree_GoBot(T);
-	while(T->Act != NULL){
-		if(T->Act->l_child != NULL)
-			MEM_free(T->Act->l_child);
-		if(T->Act->r_child != NULL)
-			MEM_free(T->Act->r_child);
-		T->Act = T->Act->parent;
-	}
-	T->Top = NULL;
+	if(T == NULL)
+		return;
+	RecursiveDispose(T->Top);
+	t_Tree *tmp = T;
+	T = T->prev;
+	MEM_free(tmp);
 }
 
-void padding ( char ch, int n )
+static void padding ( char ch, int n )
 {
   for (int i = 0; i < n; i++ )
     putchar ( ch );
 }
 
-void structure ( t_Branch *root, int level )
+static void structure ( t_Branch *root, int level )
 {
   if ( root == NULL ) {
     padding ( '\t', level );
@@ -175,7 +166,7 @@ void structure ( t_Branch *root, int level )
   }
 }
 
-void Tree_Print(t_Tree *T)
+void Tree_Print()
 {
 	structure(T->Top, 0);
 }

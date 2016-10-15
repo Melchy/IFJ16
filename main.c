@@ -62,27 +62,30 @@ int test_Tree()
 	FIO_Open("java.code");
 	int token;
 	SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
-	t_Tree *Smrk;
-	Smrk = Tree_Init();
+	Tree_Create();
 	while((token = SCAN_GetToken()) != EOF)
 	{
 		if(token >= tkn_PLUS && token <= tkn_NEQUAL)
-			Tree_AddOp(Smrk, token);
+			Tree_AddOp(token);
 		else if(token == tkn_LPAREN)
-			Tree_NestIn(Smrk);
+			Tree_NestIn();
 		else if(token == tkn_RPAREN)
-			Tree_NestOut(Smrk);
+			Tree_NestOut();
 		else{
 			S_String *tmp = MEM_malloc(sizeof(S_String));
 			tmp->str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
 			strcpy(tmp->str, SCAN_attr.str);
-			Tree_AddVal(Smrk, token, tmp);
+			Tree_AddVal(token, tmp);
 			SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
 		}
 	}
-	Tree_RemoveParen(Smrk);
-	Tree_Print(Smrk);
-	Tree_Dispose(Smrk);
+	Tree_RemoveParen();
+	Tree_Print();
+	Tree_Dispose();
+	Tree_Create();
+	Tree_Create();
+	Tree_Dispose();
+	Tree_Dispose();
 	MEM_clearAll();
 	FIO_Close();
 	return 0;
