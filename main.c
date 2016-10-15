@@ -110,7 +110,8 @@ void test_MEM_free(){
 	printf("free a b\n");
 	MEM_printAll();
 }
-//nejde (SIGSEGV)
+
+
 void test_MEM_realloc(){
 	char * a = MEM_malloc(sizeof(char));
 	printf("a alloc\n");
@@ -127,11 +128,18 @@ void test_MEM_realloc(){
 }
 
 void test_MEM_clearAll(){
-	
+	int * a = MEM_malloc(sizeof(int));
+	char * b = MEM_malloc(sizeof(char));
+	double * c = MEM_malloc(sizeof(double));
+	MEM_printAll();
+	MEM_clearAll();
+	MEM_printAll();
+	MEM_clearAll();
 }
+
 int main(void)
 {
-	test_MEM_realloc();
+	test_MEM_clearAll();
 	//test_ERROR_exit();
 	//test_ERROR_exit2();
 	//test_SCAN_GetToken();
