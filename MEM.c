@@ -57,6 +57,11 @@ void *MEM_malloc(size_t size)
 void *MEM_realloc(void *ptr, size_t size)
 {
 	// vytahneme si polozku ze seznamu ven
+	if(ptr == NULL){
+		ptr = MEM_malloc(size);
+		return ptr;
+	}
+		printf("her\n");
 	t_Address *p = hash_remove(ptr);
 	if((p->ptr = realloc(p->ptr, size)) == NULL)
 	{
@@ -70,7 +75,7 @@ void *MEM_realloc(void *ptr, size_t size)
 	return p->ptr;
 }
 
-void MEM_free(void *ptr)
+void MEM_ffree(void *ptr)
 {
 	t_Address *p = all_pointers[hashf_mem((long)ptr)];
 	t_Address *p_prev = NULL;
@@ -84,7 +89,7 @@ void MEM_free(void *ptr)
 	else
 		all_pointers[hashf_mem((long)ptr)] = p->next;
 
-	free(p->ptr);
+	free(p->ptr); 
 	free(p);
 }
 

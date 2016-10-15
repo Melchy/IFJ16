@@ -5,6 +5,8 @@
 
 #define SIZE_HTAB_MEM 20
 
+#define MEM_free(p) MEM_ffree(p); p = NULL
+
 typedef struct t_Address t_Address;
 
 struct t_Address{
@@ -28,7 +30,7 @@ void *MEM_malloc(size_t size);
 void *MEM_realloc(void *ptr, size_t size);
 
 /* Uvolni uzitecnou pamet, odstrani adresu z tabulky a uvolni pamet adresy */
-void MEM_free(void *ptr);
+void MEM_ffree(void *ptr);
 
 /* Uvolni veskerou naalokovanou pamet */
 void MEM_clearAll();
