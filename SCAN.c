@@ -25,26 +25,7 @@ static bool endfl = 0;	// end flag pro indikaci nalezu EOF
 static size_t bytes_allocated = ATTR_SIZE;
 static int state;
 
-void read_garbage()
-{
-	int c;
-	while((c = FIO_GetChar()) != EOF)
-	{
-		if(c == ';' || isspace(c))
-			return;
-	}
-}
-
-void read_garbage2() // pouzivana v retezcovem literalu
-{
-	int c;
-	while((c = FIO_GetChar()) != EOF)
-	{
-		if(c == '"' || c == '\n')
-			return;
-	}
-}
-
+/* Detekce klicovych slov */
 int tkn_word()
 {
 	if (!strcmp("Boolean", SCAN_attr.str))
@@ -85,6 +66,7 @@ int tkn_word()
 	return tkn_ID;
 }
 
+/* Pro zjednoduseni v pripade jednoznakovych tokenu */
 int onechar_tkn(int c)
 {
 	switch(c){
@@ -101,6 +83,7 @@ int onechar_tkn(int c)
 	return 0;
 }
 
+/* Abychom rozeznali lexikalni chybu od korektniho ukonceni tokenu (nekdy za tokenem musi byt whitespace, jindy ne, zalezi co nasleduje) */
 bool is_tokenchar(int c)
 {
 	if(c == '(')
@@ -136,11 +119,13 @@ bool is_tokenchar(int c)
 	return false;
 }
 
+/* Vraci true v pripade ze znak je platna oktalova cislice */
 bool is_octdigit(int c)
 {
 	return (c >= '0' && c <= '7');
 }
 
+/* Precte znak(y) za '\' a vyresi je jako escape sekvenci, pri uspechu ho vrati skrz pointer, jinak return -1 */
 int solve_esc(int *c0)
 {
 	switch(*c0){
@@ -192,7 +177,7 @@ int SCAN_GetToken()
 				else if(c == '!')							{ state = st_EXCL; SCAN_attr.str[0] = c; continue; }
 				else if(c == '=')							{ state = st_EQ; SCAN_attr.str[0] = c; continue; }
 				else if(c == '"')							{ state = st_LIT; continue; }
-				else										{ Add_Char; Add_Null; read_garbage() ; return LEX_ERR; }
+				else										{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_SLASH:	// line koment, block koment nebo lomitko (deleni)
@@ -221,33 +206,33 @@ int SCAN_GetToken()
 				else if(c == 'E' || c == 'e') 			{ state = st_REALE; Add_Char; continue; }
 				else if(c == '.')						{ state = st_REAL; Add_Char; continue; }
 				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_NUM; }
-				else									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
+				else									{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_REALE:	// '1561e' nebo '1561.34e'
 				if(c == '+' || c == '-' || !flag)		{ Add_Char; flag = 1; continue; }
 				else if(isdigit(c))						{ Add_Char; flag = 1; continue; }
 				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_REAL; }
-				else 									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
+				else 									{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_REAL: // '1561.'
 				if(isdigit(c))										{ Add_Char; flag = 1; continue; }
 				else if((c == 'E' || c == 'e') && flag)				{ state = st_REALE; flag = 0; Add_Char; continue; }
 				else if((is_tokenchar(c) || isspace(c)) && flag)	{ FIO_UngetChar(c); Add_Null; return tkn_REAL; }
-				else												{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
+				else												{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 
 			case st_WORD: // identifikator nebo keyword
 				if(isalnum(c) || c == '_' || c == '$')	{ Add_Char; continue; }
 				else if(c == '.')						{ state = st_LONGID; Add_Char; continue; }
 				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_word(SCAN_attr.str); }
-				else 									{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
+				else 									{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_LONGID:	// trida.identifikator
 				if(isalnum(c) || c == '_' || c == '$')			{ Add_Char; flag = 1; continue; }
 				else if(flag && (is_tokenchar(c) || isspace(c))){ FIO_UngetChar(c); Add_Null; return tkn_ID; }
-				else 											{ Add_Char; Add_Null; read_garbage(); return LEX_ERR; }
+				else 											{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_CMP: // <, >
@@ -274,7 +259,7 @@ int SCAN_GetToken()
 
 			case st_LITESC:	// v retezcovem literalu po nalezeni escape sekvence
 				if(solve_esc(&c) != -1)	{ state = st_LIT; Add_Char; continue; }
-				else 					{ Add_Char; Add_Null; read_garbage2(); return LEX_ERR; }
+				else 					{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
 			default: break;

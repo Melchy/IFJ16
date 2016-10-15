@@ -70,32 +70,13 @@
 
 #define ATTR_SIZE	4
 
-/* Zotaveni z chyby */
-void read_garbage();
-void read_garbage2();
-
-/* Detekce klicovych slov */
-int tkn_word();
-
-/* Pro zjednoduseni v pripade jednoznakovych tokenu */
-int onechar_tkn(int c);
-
-/* Abychom rozeznali lexikalni chybu od korektniho ukonceni tokenu (nekdy za tokenem musi byt whitespace, jindy ne, zalezi co nasleduje) */
-bool is_tokenchar(int c);
-
-/* Vraci true v pripade ze znak je platna oktalova cislice */
-bool is_octdigit(int c);
-
-/* Precte znak(y) za '\' a vyresi je jako escape sekvenci, pri uspechu ho vrati skrz pointer, jinak return -1 */
-int solve_esc(int *c);
-
 /* Konecny stavovy automat */
 int SCAN_GetToken();
 
 /* Funkce pro nalezeni konkretniho tokenu */
 bool SCAN_FindToken(int token);
 
-/* Ukazatel na pole znaku v atributu */
+/* Atribut automatu */
 S_String SCAN_attr;
 
 #endif
