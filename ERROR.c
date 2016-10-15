@@ -15,5 +15,5 @@ void ERROR_exit(int errCode)
 void ERROR_exit2(int errCode, void *ptrtofree)
 {
 	free(ptrtofree);
-	ERROR_exit(errCode)
+	ERROR_exit(errCode);
 }

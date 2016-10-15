@@ -1,20 +1,24 @@
 #include "ERROR.h"
 #include "MEM.h"
-#include "SCAN.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 static t_Address *all_pointers[SIZE_HTAB_MEM];
 
-void hash_add(t_Address *address)
+static int hashf_mem(long address)
+{
+	return (int)(address/7)%SIZE_HTAB_MEM;
+}
+
+static void hash_add(t_Address *address)
 {
 	// pridani adresy na prvni pozici v seznamu - nejefektivnejsi
 	address->next = all_pointers[hashf_mem((long)address->ptr)];
 	all_pointers[hashf_mem((long)address->ptr)] = address;
 }
 
-t_Address *hash_remove(void *ptr)
+static t_Address *hash_remove(void *ptr)
 {
 	t_Address *p = all_pointers[hashf_mem((long)ptr)];
 	t_Address *p_prev = NULL;
@@ -31,10 +35,7 @@ t_Address *hash_remove(void *ptr)
 	return p;
 }
 
-int hashf_mem(long address)
-{
-	return (int)(address/7)%SIZE_HTAB_MEM;
-}
+
 
 void *MEM_malloc(size_t size)
 {
@@ -64,7 +65,7 @@ void *MEM_realloc(void *ptr, size_t size)
 		hash_add(p);
 		ERROR_exit(ENV_ERR);
 	}
-
+ 
 	// po zmene adresy ji umistime zpet (pravdepodobne jinam)
 	hash_add(p);
 	return p->ptr;
