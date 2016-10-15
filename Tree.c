@@ -82,7 +82,10 @@ void Tree_NestIn()
 	b->token = tkn_LPAREN; b->attr = NULL;
 	b->l_child = b->r_child = NULL;
 	b->parent = T->Act;
-	T->Act->r_child = b;
+	if(T->Top != NULL)
+		T->Act->r_child = b;
+	else
+		T->Top = b;
 	T->Act = b;
 }
 
@@ -109,11 +112,19 @@ static void RecursiveRemove(t_Branch *B)
 					B->r_child->parent = B->parent;
 			}
 		}
+		else
+		{
+			T->Top = B->r_child;
+			if(B->r_child != NULL)
+				B->r_child->parent = NULL;
+		}
 	}
 	if (B->l_child != NULL)
 		RecursiveRemove(B->l_child);
 	if (B->r_child != NULL)
 		RecursiveRemove(B->r_child);
+	if(B->token == tkn_LPAREN)
+		MEM_free(B);
 }
 
 void Tree_RemoveParen()
