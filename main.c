@@ -2,45 +2,33 @@
 #include "SCAN.h"
 #include "STR.h"
 #include "MEM.h"
-#include "ERROR.h"
+#include "Tree.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define ERR -1
-
 int test_MEM()
 {
-	char *ptr;
-	if(!FIO_Open("java.code"))
-		return ERR;
-	int token;
-	SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
-	char *cc;
-	while((token = SCAN_GetToken()) != EOF)
-	{
-		if (token == tkn_ID)
-		{
-			ptr = MEM_malloc(SCAN_attr.len);
-			if(!strcmp(SCAN_attr.str, "run"))
-				cc = ptr;
-			strcpy(ptr, SCAN_attr.str);
-			puts(ptr);
-		}
-	}
-	MEM_free(cc);
-	MEM_printAll();
-	MEM_clearAll();
-	if(!FIO_Close())
-		return ERR;	
+ 	char * a = MEM_malloc(sizeof(char));
+ 	printf("a alloc\n");
+ 	MEM_printAll();
+ 	a = MEM_realloc(a,sizeof(char)*2);
+ 	printf("a realloc\n");
+ 	MEM_printAll();
+ 	MEM_free(a);
+ 	MEM_printAll();
+ 	printf("free a\n");
+ 	a = MEM_realloc(a,sizeof(char)*2);
+ 	printf("free realloc a\n");
+ 	MEM_printAll();
+ 	MEM_clearAll();
 	return 0;
 }
 
 int test_SCAN_GetToken() // vypisuje hodnoty tokenu a atributu na stdout
 {
-	if(!FIO_Open("java.code"))
-		return ERR;
+	FIO_Open("java.code");
 	int token;
 	SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
 	while((token = SCAN_GetToken()) != EOF)
@@ -51,15 +39,13 @@ int test_SCAN_GetToken() // vypisuje hodnoty tokenu a atributu na stdout
 		putchar('\n');
 	}
 	MEM_clearAll();
-	if(!FIO_Close())
-		return ERR;	
+	FIO_Close();
 	return 0;
 }
 
 int test_SCAN_FindToken()
 {
-	if(!FIO_Open("java.code"))
-		return ERR;
+	FIO_Open("java.code");
 	SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
 	if(SCAN_FindToken(tkn_LBLOCK)){
 		printf("Ve slozene zavorce\n");
@@ -67,81 +53,45 @@ int test_SCAN_FindToken()
 			printf("Venku\n");
 	}
 	MEM_clearAll();
-	if(!FIO_Close())
-		return ERR;	
+	FIO_Close();
 	return 0;
 }
 
-void test_FIO(){
-
-}
-
-void test_ERROR_exit(){
-	ERROR_exit(LEX_ERR);
-}
-
-void test_ERROR_exit2(){
-	int * ptr = malloc(sizeof(int));
-	ERROR_exit2(ENV_ERR,ptr);
-}
-
-void test_MEM_malloc(){
-	int * a = MEM_malloc(sizeof(int));
-	char * b = MEM_malloc(sizeof(char));
-	double * c = MEM_malloc(sizeof(double));
-	MEM_printAll();
-}
-
-
-//Zvlastni chovani ale funguje
-void test_MEM_free(){
-	char * b = MEM_malloc(sizeof(char));
-	double * c = MEM_malloc(sizeof(double));
-	printf("b c alloc\n");
-	MEM_printAll();
-	MEM_free(c);
-	printf("free c\n");
-	MEM_printAll();
-	int * a = MEM_malloc(sizeof(int));
-	printf("alloc a\n");
-	MEM_printAll();
-	MEM_free(a);
-	MEM_free(b);
-	printf("free a b\n");
-	MEM_printAll();
-}
-
-
-void test_MEM_realloc(){
-	char * a = MEM_malloc(sizeof(char));
-	printf("a alloc\n");
-	MEM_printAll();
-	a = MEM_realloc(a,sizeof(char)*2);
-	printf("a realloc\n");
-	MEM_printAll();
-	printf("free a\n");
-	MEM_free(a);
-	MEM_printAll();
-	a = MEM_realloc(a,sizeof(char)*2);
-	printf("free realloc a\n");
-	MEM_printAll();
-}
-
-void test_MEM_clearAll(){
-	int * a = MEM_malloc(sizeof(int));
-	char * b = MEM_malloc(sizeof(char));
-	double * c = MEM_malloc(sizeof(double));
-	MEM_printAll();
+int test_Tree()
+{
+	FIO_Open("java.code");
+	int token;
+	SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
+	t_Tree *Smrk;
+	Smrk = Tree_Init();
+	while((token = SCAN_GetToken()) != EOF)
+	{
+		if(token >= tkn_PLUS && token <= tkn_NEQUAL)
+			Tree_AddOp(Smrk, token);
+		else if(token == tkn_LPAREN)
+			Tree_NestIn(Smrk);
+		else if(token == tkn_RPAREN)
+			Tree_NestOut(Smrk);
+		else{
+			S_String *tmp = MEM_malloc(sizeof(S_String));
+			tmp->str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
+			strcpy(tmp->str, SCAN_attr.str);
+			Tree_AddVal(Smrk, token, tmp);
+			SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
+		}
+	}
+	Tree_RemoveParen(Smrk);
+	Tree_Print(Smrk);
+	Tree_Dispose(Smrk);
 	MEM_clearAll();
-	MEM_printAll();
-	MEM_clearAll();
+	FIO_Close();
+	return 0;
 }
 
 int main(void)
 {
-	test_MEM_clearAll();
-	//test_ERROR_exit();
-	//test_ERROR_exit2();
+	test_Tree();
+	//test_MEM();
 	//test_SCAN_GetToken();
 	//test_SCAN_FindToken();
 	return 0;
