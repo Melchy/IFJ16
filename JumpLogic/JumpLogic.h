@@ -25,5 +25,5 @@
 		struct S_JMP * prev;
 	} S_JMP;
 
-	static S_JMP * active = NULL;
+	
 #endif

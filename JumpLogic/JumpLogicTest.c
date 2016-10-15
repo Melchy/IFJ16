@@ -7,8 +7,8 @@ int main(void)
 	class->str = malloc(sizeof(char )* 10);
 	class->len = 10;
 	class->str = "foo\0";
-
-	JL_Add(2,true,5,6,class);
+ 
+	JL_Add(2,true,5,6,class); 
 
 	S_String * class2 = malloc(sizeof(S_String));
 	class2->str = malloc(sizeof(char )* 10);

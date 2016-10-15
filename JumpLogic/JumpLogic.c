@@ -1,5 +1,7 @@
 #include "JumpLogic.h"
 
+static S_JMP * active = NULL;
+
   void JL_Add(int Offset, bool ExprAtEnd, int StateAfterJump,int NestingLevel, S_String * ClassAfterJMP){
   	S_JMP * new = malloc(sizeof(S_JMP));
   	if(new == NULL){
