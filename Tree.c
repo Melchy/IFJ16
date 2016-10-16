@@ -11,12 +11,12 @@ void Tree_Create()
 {
 	t_Tree *tmp = T;
 	T = MEM_malloc(sizeof(t_Tree));
-	T->prev = tmp;
+	T->prev = tmp; // nastaveni ukazatele na predchozi strom
 	T->Top = NULL;
 	T->Act = NULL;
 }
 
-static int priority(int token)
+static int priority(int token) // funkce vraci vyssi hodnotu pro operator s vyssi prioritou
 {
 	switch(token){
 		case tkn_MUL:
@@ -40,13 +40,15 @@ static int priority(int token)
 
 void Tree_AddOp(int token)
 {
-	t_Branch *b = MEM_malloc(sizeof(t_Branch));
+	t_Node *b = MEM_malloc(sizeof(t_Node));
 	b->token = token;
-	if(T->Top == NULL){
+	if(T->Top == NULL) // pokud je strom prazdny
+	{
 		T->Top = T->Act = b; 
 		b->parent = b->l_child = b->r_child = NULL;
 		return;
 	}
+	// dokud ma operator mensi prioritu nez predchozi, tak stoupam stromem nahoru (pokud nenarazim na levou zavorku nebo vrchol)
 	while(T->Act->parent != NULL && (priority(token) <= priority(T->Act->parent->token)) && T->Act->parent->token != tkn_LPAREN)
 		T->Act = T->Act->parent;
 	b->l_child = T->Act;
@@ -61,16 +63,16 @@ void Tree_AddOp(int token)
 }
 
 void Tree_AddVal(int token, S_String *attr){
-	t_Branch *b = MEM_malloc(sizeof(t_Branch));
+	t_Node *b = MEM_malloc(sizeof(t_Node));
 	b->token = token; b->attr = attr;
 
-	if(T->Top == NULL){
+	if(T->Top == NULL) // pokud je strom prazdny
+	{
 		T->Top = T->Act = b; 
 		b->parent = b->l_child = b->r_child = NULL;
 		return;
-	} else {
+	} else 
 		T->Act->r_child = b;
-	}
 	b->parent = T->Act;
 	b->l_child = b->r_child = NULL;
 	T->Act = b;
@@ -78,9 +80,9 @@ void Tree_AddVal(int token, S_String *attr){
 
 void Tree_NestIn()
 {
-	t_Branch *b = MEM_malloc(sizeof(t_Branch));
+	t_Node *b = MEM_malloc(sizeof(t_Node));
 	b->token = tkn_LPAREN; b->attr = NULL;
-	b->l_child = b->r_child = NULL;
+	b->l_child = b->r_child = NULL; 
 	b->parent = T->Act;
 	if(T->Top != NULL)
 		T->Act->r_child = b;
@@ -96,17 +98,21 @@ void Tree_NestOut()
 	}
 }
 
-static void RecursiveRemove(t_Branch *B)
+static void RecursiveRemove(t_Node *B)
 {
-	if(B->token == tkn_LPAREN){
+	if(B->token == tkn_LPAREN) // pokud narazime na zavorku
+	{
 		if (B->parent != NULL)
 		{
-			if(B->parent->r_child == B){
+			// zavorka muze byt levy i pravy potomek
+			if(B->parent->r_child == B)
+			{
 				B->parent->r_child = B->r_child;
 				if(B->r_child != NULL)
 					B->r_child->parent = B->parent;
 			}
-			else{
+			else
+			{
 				B->parent->l_child = B->r_child;
 				if(B->r_child != NULL)
 					B->r_child->parent = B->parent;
@@ -138,7 +144,7 @@ void Tree_GoTop()
 	T->Act = T->Top;
 }
 
-void RecursiveDispose(t_Branch *B)
+void RecursiveDispose(t_Node *B)
 {
 	if(B == NULL)
 		return;
@@ -151,7 +157,8 @@ void Tree_Dispose()
 {
 	if(T == NULL)
 		return;
-	RecursiveDispose(T->Top);
+	if(T->Top != NULL)
+		RecursiveDispose(T->Top);
 	t_Tree *tmp = T;
 	T = T->prev;
 	MEM_free(tmp);
@@ -163,7 +170,7 @@ static void padding ( char ch, int n )
     putchar ( ch );
 }
 
-static void structure ( t_Branch *root, int level )
+static void structure ( t_Node *root, int level )
 {
   if ( root == NULL ) {
     padding ( '\t', level );
