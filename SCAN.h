@@ -51,6 +51,10 @@
 #define tkn_SEMI	36
 #define tkn_COMMA	37
 
+#define tkn_EXCL	38 // '!'
+#define tkn_AND		39 // '&&'
+#define tkn_OR 		40 // '||'
+
 /* Seznam definovanych stavu automatu lexikalni analyzy */
 #define st_NULL		0	// vychozi stav
 #define st_SLASH	1	// stav po precteni '/'
@@ -67,6 +71,8 @@
 #define st_EQ		12	// stav po precteni '='
 #define st_LIT		13	// v retezcovem literalu
 #define st_LITESC	14	// v retezcovem literalu v escape sekvenci
+#define st_AND		15 	// stav po precteni '&'
+#define st_OR 		16 	// stav po precteni '|'
 
 #define ATTR_SIZE	4
 

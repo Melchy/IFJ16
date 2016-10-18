@@ -116,6 +116,10 @@ static bool is_tokenchar(int c)
 		return true;	
 	if(c == '"')
 		return true;
+	if(c == '|')
+		return true;
+	if(c == '&')
+		return true;
 	return false;
 }
 
@@ -177,6 +181,8 @@ int SCAN_GetToken()
 				else if(c == '!')							{ state = st_EXCL; SCAN_attr.str[0] = c; continue; }
 				else if(c == '=')							{ state = st_EQ; SCAN_attr.str[0] = c; continue; }
 				else if(c == '"')							{ state = st_LIT; continue; }
+				else if(c == '&')							{ state = st_AND; SCAN_attr.str[0] = c; continue; }
+				else if(c == '|')							{ state = st_OR; SCAN_attr.str[0] = c; continue; }
 				else										{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
@@ -242,7 +248,7 @@ int SCAN_GetToken()
 
 			case st_EXCL: // !
 				if(c == '=')	{ SCAN_attr.str[1] = c; SCAN_attr.str[2] = '\0'; return tkn_NEQUAL; }
-				else 			{ FIO_UngetChar(c); SCAN_attr.str[1] = '\0'; return LEX_ERR; }
+				else 			{ FIO_UngetChar(c); SCAN_attr.str[1] = '\0'; return tkn_EXCL; }
 			break;
 
 			case st_EQ:	// =
@@ -260,6 +266,16 @@ int SCAN_GetToken()
 			case st_LITESC:	// v retezcovem literalu po nalezeni escape sekvence
 				if(solve_esc(&c) != -1)	{ state = st_LIT; Add_Char; continue; }
 				else 					{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
+			break;
+
+			case st_AND: // &
+				if(c == '&')	{ SCAN_attr.str[1] = c; SCAN_attr.str[2] = '\0'; return tkn_AND; }
+				else 			{ FIO_UngetChar(c); SCAN_attr.str[1] = '\0'; ERROR_exit(LEX_ERR); }
+			break;
+
+			case st_OR: // |
+				if(c == '|')	{ SCAN_attr.str[1] = c; SCAN_attr.str[2] = '\0'; return tkn_OR; }
+				else 			{ FIO_UngetChar(c); SCAN_attr.str[1] = '\0'; ERROR_exit(LEX_ERR); }
 			break;
 
 			default: break;

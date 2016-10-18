@@ -12,6 +12,8 @@ typedef struct t_Address{
 	struct t_Address *next;
 } t_Address;
 
+typedef t_Address* t_listAddress;
+
 /* Alokuje uzitecnou pamet i pamet pro strukturu adresy a zavola hash_add */
 void *MEM_malloc(size_t size);
 
