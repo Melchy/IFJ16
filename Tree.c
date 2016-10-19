@@ -1,7 +1,8 @@
 #include "Tree.h"
-#include "SCAN.h"
+#include "Tokens.h"
 #include "MEM.h"
 #include "STR.h"
+#include "Node.h"
 
 #include <stdio.h>
 
@@ -29,37 +30,13 @@ static bool isParentUnary(t_Node *n)
 /* Vraci true, pokud je uzel prazdna zavorka */
 static bool isEmptyParen(t_Node *n)
 {
-	return (n->token == tkn_LPAREN && n->l_child == NULL);
+	return (n->token == tkn_LPAREN && n->r_child == NULL);
 }
 
 /* Vraci true, pokud je uzel plna zavorka */
 static bool isFullParen(t_Node *n)
 {
-	return (n->token == tkn_LPAREN && n->l_child != NULL);
-}
-
-/* Vraci true, pokud je uzel operator */
-static bool isOp(t_Node *n)
-{
-	switch(n->token){
-		case tkn_MUL:
-		case tkn_DIV:
-		case tkn_PLUS:
-		case tkn_MINUS:
-		case tkn_EXCL:
-		case tkn_HIGHER:
-		case tkn_LOWER:
-		case tkn_EHIGHER:
-		case tkn_ELOWER:
-		case tkn_EQUAL:
-		case tkn_NEQUAL:
-		case tkn_AND:
-		case tkn_OR:
-			return true;
-		default:
-			return false;
-	}
-	return false;
+	return (n->token == tkn_LPAREN && n->r_child != NULL);
 }
 
 /* Vraci vyssi hodnotu pro operator s vyssi prioritou, pro ostatni uzly vraci specialni hodnoty, aby strom fungoval */
@@ -152,7 +129,7 @@ static void lookupLowPrio(t_Node *n) // hleda (smerem nahoru) operator s nizsi n
 		return;
 	while(T->Act != T->Top)
 	{
-		if (priority(T->Act->parent->token) <= priority(n->token))
+		if (priority(T->Act->parent->token) < priority(n->token))
 			return;
 		T->Act = T->Act->parent;
 	}
@@ -168,7 +145,7 @@ void Tree_AddOp(int token)
 	if(isFullParen(T->Act)){
 		lookupLowPrio(n); addAbove(n); return;
 	}
-	if(isOp(T->Act)){
+	if(Node_IsOp(T->Act)){
 		lookupLowPrio(n); addRight(n); return;
 	}
 	if(isParentUnary(T->Act)){
@@ -196,9 +173,11 @@ void Tree_NestIn()
 
 void Tree_NestOut()
 {
-	while(T->Act->token != tkn_LPAREN){
+	do{
 		T->Act = T->Act->parent;
 	}
+	while(T->Act->token != tkn_LPAREN);
+	printf("nesting out %d\n", T->Act->token);
 }
 
 static void RecursiveRemove(t_Node *n)
@@ -290,4 +269,8 @@ static void structure ( t_Node *root, int level )
 void Tree_Print()
 {
 	structure(T->Top, 0);
+}
+
+t_Node *Tree_GetTopNode(){
+	return T->Top;
 }

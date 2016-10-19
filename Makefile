@@ -3,10 +3,16 @@ CFLAGS=-Wall -Wextra -std=c11 -pedantic
 
 all: ifj16_rtg
 
-ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o
-	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o -o ifj16_rtg
+ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o
+	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o -o ifj16_rtg
 
-Tree.o: Tree.c Tree.h STR.h MEM.h SCAN.h
+EXPR.o: EXPR.c EXPR.h Node.h Tree.h Tokens.h
+	$(CC) $(CFLAGS) -c EXPR.c -o EXPR.o
+
+Node.o: Node.c Node.h Tokens.h
+	$(CC) $(CFLAGS) -c Node.c -o Node.o
+
+Tree.o: Tree.c Tree.h STR.h MEM.h Tokens.h Node.h
 	$(CC) $(CFLAGS) -c Tree.c -o Tree.o
 
 MEM.o: MEM.c MEM.h ERROR.h
@@ -18,10 +24,10 @@ ERROR.o: ERROR.c ERROR.h MEM.h FIO.h
 FIO.o: FIO.c FIO.h ERROR.h
 	$(CC) $(CFLAGS) -c FIO.c -o FIO.o
 
-SCAN.o: SCAN.c SCAN.h FIO.h STR.h MEM.h ERROR.h
+SCAN.o: SCAN.c SCAN.h FIO.h STR.h MEM.h ERROR.h Tokens.h
 	$(CC) $(CFLAGS) -c SCAN.c -o SCAN.o
 
-main.o: main.c SCAN.h FIO.h STR.h MEM.h Tree.h
+main.o: main.c SCAN.h FIO.h STR.h MEM.h Tree.h Tokens.h
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
 clean: 

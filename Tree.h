@@ -2,16 +2,7 @@
 #define TREE_H
 
 #include "STR.h"
-
-/* Uzel stromu - jedna jedna rodicovska vetev, dva potomci */
-typedef struct t_Node t_Node;
-struct t_Node{
-	int token;
-	S_String *attr;
-	t_Node *parent;
-	t_Node *l_child;
-	t_Node *r_child;
-};
+#include "Node.h"
 
 /* Struktura stromu, ukazatele na top uzel stromu, aktivni uzel a na predchazejci strom */
 typedef struct t_Tree t_Tree;
@@ -47,5 +38,7 @@ void Tree_Dispose();
 
 /* Tisk stromu na konzoli */
 void Tree_Print();
+
+t_Node *Tree_GetTopNode();
 
 #endif

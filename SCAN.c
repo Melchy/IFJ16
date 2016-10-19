@@ -3,6 +3,7 @@
 #include "STR.h"
 #include "MEM.h"
 #include "ERROR.h"
+#include "Tokens.h"
 
 #include <stdlib.h>
 #include <stdbool.h>
