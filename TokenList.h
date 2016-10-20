@@ -1,7 +1,9 @@
+/* --- Include knihovny --- */
+
 #include <stdio.h>
 #include <stdlib.h>
 
-/* ---Deklarace struktur--- */
+/* --- Deklarace struktur --- */
 
 typedef struct S_Token{
 	int type;
@@ -16,7 +18,7 @@ typedef struct L_Token{
     S_Token Last;
 } L_Token;
 
-/* ---Deklarace funkci--- */
+/* --- Deklarace funkci --- */
 
 void TL_Init(L_Token *);
 void TL_Dispose(L_Token *);
