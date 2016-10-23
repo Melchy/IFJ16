@@ -4,6 +4,7 @@
 /* --- Include knihoven --- */
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 /* --- Deklarace struktur --- */
 
