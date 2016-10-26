@@ -3,6 +3,8 @@
 #include "ERROR.h"
 #include "FIO.h"
 
+#include <errno.h>
+
 S_String *STR_Create(char *value)
 {
 	S_String *s = MEM_malloc(sizeof(S_String));

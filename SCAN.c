@@ -23,7 +23,7 @@
 						(SCAN_attr.str[SCAN_attr.len++] = '\0', 1)
 						
 static bool endfl = 0;	// end flag pro indikaci nalezu EOF
-static size_t bytes_allocated = ATTR_SIZE;
+static int bytes_allocated = ATTR_SIZE;
 static int state;
 
 /* Detekce klicovych slov */

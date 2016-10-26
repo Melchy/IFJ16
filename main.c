@@ -5,9 +5,11 @@
 #include "Tree.h"
 #include "EXPR.h"
 #include "Tokens.h"
+#include "VARTAB.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 int test_MEM()
@@ -81,7 +83,6 @@ int test_Tree()
 			SCAN_attr.str = MEM_malloc(ATTR_SIZE*(sizeof(char)));
 		}
 	}
-	printf("b:%d \n", sizeof(bool));
 	Tree_RemoveParen();
 	Tree_Print();
 	printf("RESULT: %d\n", EXPR_IntSolve());
@@ -91,16 +92,27 @@ int test_Tree()
 	return 0;
 }
 
+void test_VARTAB()
+{
+	VT_InitTabs();
+	for (int i = 0; i < 50; i++)
+		VT_AddInt(i*2);
+	for (int i = 0; i < 5; i++)
+		VT_AddDouble(i*2.5);
+	for (int i = 0; i < 15; i++)
+		VT_AddStr(STR_Create("necum"));
+	for (int i = 0; i < 5; i++)
+		VT_AddBool(i%2 ? true:false);
+	VT_PrintAll();
+	MEM_clearAll();
+}
+
 int main(void)
 {
-	test_Tree();
+	test_VARTAB();
+	//test_Tree();
 	//test_MEM();
 	//test_SCAN_GetToken();
 	//test_SCAN_FindToken();
 	return 0;
 }
-
-// 2*5-1*(4+8-(-1))
-// 2*8+5-3+1/4
-// 2+5*(7+4-(-(-4)))+2*7-5
-// 4+1+5-8*2+3
