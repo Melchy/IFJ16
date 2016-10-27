@@ -21,6 +21,7 @@ S_String *STR_IntToString(int value);
 S_String *STR_LongToString(long value);
 S_String *STR_DoubleToString(double value);
 
+void STR_AddChar(S_String *s, char lastChar);
 void STR_ChangeSize(S_String *s, int newSize);
 void STR_ConCat(S_String *s1, S_String *s2);
 void STR_Trim(S_String *s);

@@ -46,6 +46,23 @@ S_String *STR_DoubleToString(double value)
   return s;
 }
 
+void STR_AddChar(S_String *s, char lastChar)
+{
+  if(s->size <= s->len + 1)
+  {
+    STR_ChangeSize(s, s->size + 1);
+    s->str[s->len] = lastChar;
+    s->str[s->len+1] = '\0';
+    s->len = s->len + 1;
+  }
+  else
+  {
+    s->str[s->len] = lastChar;
+    s->str[s->len+1] = '\0';
+    s->len = s->len + 1;
+  }
+}
+
 void STR_ChangeSize(S_String *s, int newSize)
 {
   s->str = MEM_realloc(s->str, newSize);
