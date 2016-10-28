@@ -46,6 +46,11 @@ S_String *STR_DoubleToString(double value)
   return s;
 }
 
+void STR_PrintStr(S_String *s)
+{
+    printf("\"%s\"\n", s->str);
+}
+
 void STR_AddChar(S_String *s, char lastChar)
 {
   if(s->size <= s->len + 1)
