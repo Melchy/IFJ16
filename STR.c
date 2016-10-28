@@ -51,18 +51,18 @@ void STR_PrintStr(S_String *s)
     printf("\"%s\"\n", s->str);
 }
 
-void STR_AddChar(S_String *s, char lastChar)
+void STR_AddChar(S_String *s, int lastChar)
 {
   if(s->size <= s->len + 1)
   {
     STR_ChangeSize(s, s->size + 1);
-    s->str[s->len] = lastChar;
+    s->str[s->len] = (char)lastChar;
     s->str[s->len+1] = '\0';
     s->len = s->len + 1;
   }
   else
   {
-    s->str[s->len] = lastChar;
+    s->str[s->len] = (char)lastChar;
     s->str[s->len+1] = '\0';
     s->len = s->len + 1;
   }

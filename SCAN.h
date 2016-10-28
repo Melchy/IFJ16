@@ -25,7 +25,7 @@
 #define st_AND		15 	// stav po precteni '&'
 #define st_OR 		16 	// stav po precteni '|'
 
-#define ATTR_SIZE	4
+#define ATTR_SIZE	128
 
 /* Konecny stavovy automat */
 int SCAN_GetToken();
@@ -33,7 +33,6 @@ int SCAN_GetToken();
 /* Funkce pro nalezeni konkretniho tokenu */
 bool SCAN_FindToken(int token);
 
-/* Atribut automatu */
-S_String SCAN_attr;
+S_String *SCAN_attr;
 
 #endif

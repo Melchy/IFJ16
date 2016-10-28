@@ -8,14 +8,12 @@
 
 //! int FIO_GetPosition();
 
-bool FIO_Open(char *filename);
+void FIO_Open(char *filename);
 
 int FIO_GetChar();
 
 int FIO_UngetChar(int c);
 
-bool FIO_Close();
-
-bool FIO_Opened;
+void FIO_Close();
 
 #endif

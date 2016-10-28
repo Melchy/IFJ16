@@ -7,8 +7,7 @@
 void ERROR_exit(int errCode)
 {
 	MEM_clearAll();
-	if(FIO_Opened)
-		FIO_Close();
+	FIO_Close();
 	exit(errCode);
 }
 

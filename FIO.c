@@ -4,16 +4,16 @@
 #include <stdio.h>
 
 static FILE *f;
+static bool FIO_Opened;
 
 /* true pokud se uspesne otevre */
-bool FIO_Open(char *filename)
+void FIO_Open(char *filename)
 {
 	f = fopen(filename, "r");
 	if(f == NULL){
 		ERROR_exit(ENV_ERR);
 	}
 	FIO_Opened = true;
-	return true;
 }
 
 int FIO_GetChar()
@@ -27,12 +27,8 @@ int FIO_UngetChar(int c)
 }
 
 /* true pokud se uspesne zavre */
-bool FIO_Close()
+void FIO_Close()
 {
-	if(!fclose(f)){
-		FIO_Opened = false;
-		return true;
-	}
-	ERROR_exit(ENV_ERR);
-	return false;
+	if(FIO_Opened)
+		fclose(f);
 }

@@ -3,6 +3,7 @@
 
 #include "STR.h"
 #include "Node.h"
+#include "VARTAB.h"
 
 /* Struktura stromu, ukazatele na top uzel stromu, aktivni uzel a na predchazejci strom */
 typedef struct t_Tree t_Tree;
@@ -15,11 +16,8 @@ typedef struct t_Tree{
 /* Alokace noveho stromu a pridani do seznamu stromu */
 void Tree_Create();
 
-/* Pridani operace do stromu na zaklade jejich priorit */
-void Tree_AddOp(int token);
-
-/* Pridani hodnoty (literal nebo promenna) do stromu */
-void Tree_AddVal(int token, S_String *attr);
+/* Pridani operatoru nebo operandu do stromu */
+void Tree_Add(int token);
 
 /* Pridani leve zavorky do stromu - pomocna logika */
 void Tree_NestIn();

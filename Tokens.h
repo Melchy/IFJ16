@@ -22,32 +22,35 @@
 #define tkn_MUL		14	// '*'
 #define tkn_DIV		15	// '/'
 
-#define tkn_ASSIGN	16	// '='
-#define tkn_HIGHER	17	// '>'
-#define tkn_LOWER	18	// '<'
-#define tkn_EHIGHER	19	// '>='
-#define tkn_ELOWER	20	// '<='
-#define tkn_EQUAL	21	// '=='
-#define tkn_NEQUAL	22	// '!='
+#define tkn_HIGHER	16	// '>'
+#define tkn_LOWER	17	// '<'
+#define tkn_EHIGHER	18	// '>='
+#define tkn_ELOWER	19	// '<='
+#define tkn_EQUAL	20	// '=='
+#define tkn_NEQUAL	21	// '!='
 
-#define tkn_BREAK	23
-#define tkn_CLASS	24
-#define tkn_CONT	25	// 'continue'
-#define tkn_DO 		26
-#define tkn_ELSE	27
-#define tkn_FALSE	28
-#define tkn_FOR		29
-#define tkn_IF		30
-#define tkn_RET		31	// 'return'
-#define tkn_STATIC	32
-#define tkn_TRUE	33
-#define tkn_VOID	34
-#define tkn_WHILE	35
-#define tkn_SEMI	36
-#define tkn_COMMA	37
+#define tkn_EXCL	22 // '!'
+#define tkn_AND		23 // '&&'
+#define tkn_OR 		24 // '||'
 
-#define tkn_EXCL	38 // '!'
-#define tkn_AND		39 // '&&'
-#define tkn_OR 		40 // '||'
+#define tkn_ASSIGN	25	// '='
+
+#define tkn_BREAK	26
+#define tkn_CLASS	27
+#define tkn_CONT	28	// 'continue'
+#define tkn_DO 		29
+#define tkn_ELSE	30
+#define tkn_FALSE	31
+#define tkn_FOR		32
+#define tkn_IF		33
+#define tkn_RET		34	// 'return'
+#define tkn_STATIC	35
+#define tkn_TRUE	36
+#define tkn_VOID	37
+#define tkn_WHILE	38
+#define tkn_SEMI	39
+#define tkn_COMMA	40
+
+
 
 #endif

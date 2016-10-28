@@ -1,6 +1,3 @@
-#include <stdbool.h>
+#include "VARTAB.h"
 
-int EXPR_IntSolve();
-
-// bool EXPR_BoolSolve();
-// double EXPR_DoubleSolve();
+t_Value *EXPR_Solve();

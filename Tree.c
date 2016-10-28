@@ -3,6 +3,8 @@
 #include "MEM.h"
 #include "STR.h"
 #include "Node.h"
+#include "VARTAB.h"
+#include "SCAN.h"
 
 #include <stdio.h>
 
@@ -22,7 +24,7 @@ static bool isParentUnary(t_Node *n)
 {
 	if(n == T->Top)
 		return false;
-	if(n->parent->l_child == NULL && n->parent->token != tkn_LPAREN)
+	if(n->parent->l_child == NULL && !Node_IsLParen(n->parent))
 		return true;
 	return false;
 }
@@ -30,25 +32,26 @@ static bool isParentUnary(t_Node *n)
 /* Vraci true, pokud je uzel prazdna zavorka */
 static bool isEmptyParen(t_Node *n)
 {
-	return (n->token == tkn_LPAREN && n->r_child == NULL);
+	return (n->value->type == tkn_LPAREN && n->r_child == NULL);
 }
 
 /* Vraci true, pokud je uzel plna zavorka */
 static bool isFullParen(t_Node *n)
 {
-	return (n->token == tkn_LPAREN && n->r_child != NULL);
+	return (n->value->type == tkn_LPAREN && n->r_child != NULL);
 }
 
 /* Vraci vyssi hodnotu pro operator s vyssi prioritou, pro ostatni uzly vraci specialni hodnoty, aby strom fungoval */
-static int priority(int token)
+static int priority(t_Value *v)
 {
-	switch(token){
+	switch(v->type){
+		case tkn_EXCL:
+			return 6;
 		case tkn_MUL:
 		case tkn_DIV:
 			return 5;
 		case tkn_PLUS:
 		case tkn_MINUS:
-		case tkn_EXCL:
 			return 4;
 		case tkn_HIGHER:
 		case tkn_LOWER:
@@ -61,6 +64,8 @@ static int priority(int token)
 		case tkn_AND:
 		case tkn_OR:
 			return 1;
+		case tkn_ASSIGN:
+			return -200;
 		case tkn_LPAREN:
 			return -100; // pro levou zavorku
 		default: break;
@@ -129,16 +134,22 @@ static void lookupLowPrio(t_Node *n) // hleda (smerem nahoru) operator s nizsi n
 		return;
 	while(T->Act != T->Top)
 	{
-		if (priority(T->Act->parent->token) < priority(n->token))
+		if (priority(T->Act->parent->value) < priority(n->value)){
+			//printf("PRIO: %d < %d\n", T->Act->parent->value->type, n->value->type);
 			return;
+		}
+		//printf("PRIO: %d > %d\n", T->Act->parent->value->type, n->value->type);
 		T->Act = T->Act->parent;
 	}
 }
 
-void Tree_AddOp(int token)
+static void addOp(int token)
 {
 	t_Node *n = MEM_malloc(sizeof(t_Node));
-	n->token = token;
+	n->value = VT_GetOp(token);
+	if(T->Top == NULL){
+		createTop(n); return;
+	}
 	if(isEmptyParen(T->Act)){
 		addRight(n); return;
 	}
@@ -158,31 +169,66 @@ void Tree_AddOp(int token)
 	lookupLowPrio(n); addAbove(n); // default, nejbeznejsi operace - aktualni Node je hodnota
 }
 
-void Tree_AddVal(int token, S_String *attr){
+static void addNum(){
 	t_Node *n = MEM_malloc(sizeof(t_Node));
-	n->token = token; n->attr = attr;
+	int x; STR_StringToInt(SCAN_attr, &x);
+	n->value = VT_AddInt(x);
 	addRight(n);
+}
+
+static void addLit(){
+	t_Node *n = MEM_malloc(sizeof(t_Node));
+	n->value = VT_AddStr(STR_Create(SCAN_attr->str));
+	addRight(n);
+}
+
+static void addReal(){
+	t_Node *n = MEM_malloc(sizeof(t_Node));
+	double x; STR_StringToDouble(SCAN_attr, &x);
+	n->value = VT_AddDouble(x);
+	addRight(n);
+}
+
+static void addBool(int token){
+	t_Node *n = MEM_malloc(sizeof(t_Node));
+	n->value = VT_AddBool(token);
+	addRight(n);
+}
+
+void Tree_Add(int token)
+{
+	if(token >= tkn_PLUS && token <= tkn_OR)
+		addOp(token);
+	else if(token == tkn_NUM)
+		addNum(token);
+	else if(token == tkn_LIT)
+		addLit(token);
+	else if(token == tkn_REAL)
+		addReal(token);
+	else if(token == tkn_TRUE || token == tkn_FALSE)
+		addBool(token);
 }
 
 void Tree_NestIn()
 {
 	t_Node *n = MEM_malloc(sizeof(t_Node));
-	n->token = tkn_LPAREN; n->attr = NULL;
+	n->value = VT_GetLParen();
 	addRight(n);
 }
 
 void Tree_NestOut()
 {
 	do{
+		if(T->Act->parent == NULL)
+			break;
 		T->Act = T->Act->parent;
 	}
-	while(T->Act->token != tkn_LPAREN);
-	printf("nesting out %d\n", T->Act->token);
+	while(!Node_IsLParen(T->Act));
 }
 
 static void RecursiveRemove(t_Node *n)
 {
-	if(n->token == tkn_LPAREN) // pokud narazime na zavorku
+	if(Node_IsLParen(n)) // pokud narazime na zavorku
 	{
 		if (n->parent != NULL)
 		{
@@ -211,8 +257,6 @@ static void RecursiveRemove(t_Node *n)
 		RecursiveRemove(n->l_child);
 	if (n->r_child != NULL)
 		RecursiveRemove(n->r_child);
-	if(n->token == tkn_LPAREN)
-		MEM_free(n);
 }
 
 void Tree_RemoveParen()
@@ -261,7 +305,9 @@ static void structure ( t_Node *root, int level )
   else {
     structure ( root->r_child, level + 1 );
     padding ( '\t', level );
-    printf ( "%d", root->token ); if(root->attr != NULL) printf("-%s", root->attr->str); putchar('\n');
+   
+		VT_PrintOne(root->value);
+
     structure ( root->l_child, level + 1 );
   }
 }
