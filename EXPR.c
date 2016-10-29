@@ -5,9 +5,62 @@
 #include "ERROR.h"
 #include "VARTAB.h"
 #include "SEM.h"
+#include "IDLogic.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+
+void EXPR_Create()
+{
+	Tree_Create();
+}
+
+static void Add_IDVal()
+{
+	S_String *ID = Tree_PopActStr();
+	if(ID == NULL)
+		return;
+	t_Value *val = IL_GetVal(ID);
+	if(val == NULL)
+		ERROR_exit(INIT_ERR);
+	Tree_AddNode(val);
+}
+
+void EXPR_AddSym(int token)
+{
+	if(token == tkn_ASSIGN)
+		Tree_AddAssignment();
+
+	Add_IDVal();
+
+	if(token >= tkn_PLUS && token <= tkn_OR)
+		Tree_AddOp(token);
+	else if(token == tkn_LPAREN)
+		Tree_NestIn();
+	else if(token == tkn_RPAREN)
+		Tree_NestOut();
+}
+
+void EXPR_AddVal(int token, S_String *attr)
+{
+	Add_IDVal();
+
+	if(token == tkn_NUM){
+		int x; STR_StringToInt(attr, &x);
+		Tree_AddNode(VT_AddInt(x));
+	}
+	else if(token == tkn_REAL){
+		double x; STR_StringToDouble(attr, &x);
+		Tree_AddNode(VT_AddDouble(x));
+	}
+	else if(token == tkn_LIT)
+		Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
+	else if(token == tkn_TRUE || token == tkn_FALSE)
+		Tree_AddNode(VT_AddBool(token));
+	else if(token == tkn_ID)
+		Tree_AddID(attr);
+}
+
 
 static t_Value *solve_BOOL_BOOL(t_Value *l, t_Value *r, int op)
 {
@@ -192,14 +245,29 @@ static t_Value *RecSolve(t_Node *n)
 	return NULL;
 }
 
+static void makeAssigns(t_Value *value)
+{
+	S_String *ID;
+	while((ID = Tree_PopAssign()) != NULL)
+	{
+		SEM_SafeAssignment(ID, value);
+	}
+}
+
 t_Value *EXPR_Solve()
 {
+	Add_IDVal();
+
+	Tree_RemoveParen();
+	//Tree_Print();
 	t_Value *res;
 	t_Node *n = Tree_GetTopNode();
-	if(!Node_IsOp(n)){
+	if(!Node_IsOp(n))
 		res = Node_GetValue(n);
-		return res;
-	}
-	res = RecSolve(n);
+	else
+		res = RecSolve(n);
+		//		STR_PrintStr(ret);
+	makeAssigns(res);
+	Tree_Dispose();
 	return res;
 }

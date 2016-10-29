@@ -1,5 +1,8 @@
 #include "VARTAB.h"
 #include "Tokens.h"
+#include "IDLogic.h"
+#include "HASHVAR.h"
+#include "ERROR.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -78,4 +81,40 @@ bool SEM_IsAllowed(t_Value *l, t_Value *r, int op)
 			return logic_bool(l, r);			
 	}
 	return false;
+}
+
+void SEM_SafeAssignment(S_String *ID, t_Value *value)
+{
+	t_Value *id = IL_GetVal(ID);
+	if(id == NULL){
+		ERROR_exit(SEM_ERR_DEF);
+	}
+	if(id->type == tkn_NUM){
+		if(value->type == tkn_NUM)
+			IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
+		else if(value->type == tkn_REAL)
+			IL_SetVal(ID, VT_AddInt((int)VT_GetDouble(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_REAL){
+		if(value->type == tkn_REAL)
+			IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
+		else if(value->type == tkn_NUM)
+			IL_SetVal(ID, VT_AddDouble((double)VT_GetInt(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_LIT){
+		if(value->type == tkn_LIT)
+			IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_TRUE || id->type == tkn_FALSE || id->type == tkn_BOOL){
+		if(value->type == tkn_TRUE || value->type == tkn_FALSE)
+			IL_SetVal(ID, VT_AddBool(VT_GetBool(value) ? tkn_TRUE : tkn_FALSE));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
 }

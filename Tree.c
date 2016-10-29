@@ -5,6 +5,7 @@
 #include "Node.h"
 #include "VARTAB.h"
 #include "SCAN.h"
+#include "ERROR.h"
 
 #include <stdio.h>
 
@@ -17,6 +18,9 @@ void Tree_Create()
 	T->prev = tmp; // nastaveni ukazatele na predchozi strom
 	T->Top = NULL;
 	T->Act = NULL;
+	T->LastAssign = NULL;
+	T->ActStr = NULL;
+	T->assignable = true;
 }
 
 /* Vraci true, pokud je rodic uzlu unarni operator */
@@ -143,8 +147,11 @@ static void lookupLowPrio(t_Node *n) // hleda (smerem nahoru) operator s nizsi n
 	}
 }
 
-static void addOp(int token)
+void Tree_AddOp(int token)
 {
+	if(T->assignable)
+		T->assignable = false;
+
 	t_Node *n = MEM_malloc(sizeof(t_Node));
 	n->value = VT_GetOp(token);
 	if(T->Top == NULL){
@@ -169,44 +176,50 @@ static void addOp(int token)
 	lookupLowPrio(n); addAbove(n); // default, nejbeznejsi operace - aktualni Node je hodnota
 }
 
-static void addNum(){
+void Tree_AddNode(t_Value *value){
+	if(T->assignable)
+		T->assignable = false;
+
 	t_Node *n = MEM_malloc(sizeof(t_Node));
-	int x; STR_StringToInt(SCAN_attr, &x);
-	n->value = VT_AddInt(x);
+	n->value = value;
 	addRight(n);
 }
 
-static void addLit(){
-	t_Node *n = MEM_malloc(sizeof(t_Node));
-	n->value = VT_AddStr(STR_Create(SCAN_attr->str));
-	addRight(n);
-}
-
-static void addReal(){
-	t_Node *n = MEM_malloc(sizeof(t_Node));
-	double x; STR_StringToDouble(SCAN_attr, &x);
-	n->value = VT_AddDouble(x);
-	addRight(n);
-}
-
-static void addBool(int token){
-	t_Node *n = MEM_malloc(sizeof(t_Node));
-	n->value = VT_AddBool(token);
-	addRight(n);
-}
-
-void Tree_Add(int token)
+void Tree_AddAssignment()
 {
-	if(token >= tkn_PLUS && token <= tkn_OR)
-		addOp(token);
-	else if(token == tkn_NUM)
-		addNum(token);
-	else if(token == tkn_LIT)
-		addLit(token);
-	else if(token == tkn_REAL)
-		addReal(token);
-	else if(token == tkn_TRUE || token == tkn_FALSE)
-		addBool(token);
+
+	if (T->ActStr == NULL || T->assignable == false){
+		printf("her\n");
+		ERROR_exit(SYN_ERR);
+	}
+	t_Assign *a = MEM_malloc(sizeof(t_Assign));
+	a->ID = T->ActStr;
+	T->ActStr = NULL;
+	a->prev = T->LastAssign;
+	T->LastAssign = a;
+}
+
+void Tree_AddID(S_String *attr){
+	if(T->ActStr != NULL){
+				printf("herka\n");
+
+		ERROR_exit(SYN_ERR);
+	}
+	T->ActStr = STR_Create(attr->str);
+}
+
+S_String *Tree_PopActStr(){
+	S_String *str = T->ActStr;
+	T->ActStr = NULL;
+	return str;
+}
+
+S_String *Tree_PopAssign(){
+	if(T->LastAssign == NULL)
+		return NULL;
+	S_String *ret = T->LastAssign->ID;
+	T->LastAssign = T->LastAssign->prev;
+	return ret;
 }
 
 void Tree_NestIn()

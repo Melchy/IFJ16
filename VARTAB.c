@@ -13,6 +13,7 @@ static t_Value *Operators;
 static t_Value *Bools;
 static t_Value *LParen;
 static t_Value *Zero;
+static t_Value *Empty;
 
 void VT_InitTabs()
 {
@@ -33,6 +34,12 @@ void VT_InitTabs()
 	Zero->type = tkn_NUM;
 	Zero->VT_index = 0;
 
+	Empty = MEM_malloc(4*sizeof(t_Value));
+	Empty[0].type = tkn_NUM; Empty[0].VT_index = -1;
+	Empty[1].type = tkn_LIT; Empty[1].VT_index = -1;
+	Empty[2].type = tkn_REAL; Empty[2].VT_index = -1;
+	Empty[3].type = tkn_BOOL; Empty[3].VT_index = -1;
+
 	Operators = MEM_malloc(OPS_COUNT*sizeof(t_Value));
 	for (int i = 0; i < 14; i++)
 	{
@@ -41,8 +48,8 @@ void VT_InitTabs()
 	}
 
 	Bools = MEM_malloc(2*sizeof(t_Value));
-	Bools[0].type = tkn_FALSE; 	Bools[0].VT_index = -1;
-	Bools[1].type = tkn_TRUE; 	Bools[1].VT_index = -1;
+	Bools[0].type = tkn_FALSE; 	Bools[0].VT_index = 0;
+	Bools[1].type = tkn_TRUE; 	Bools[1].VT_index = 1;
 
 	LParen = MEM_malloc(sizeof(t_Value));
 	LParen->type = tkn_LPAREN; LParen->VT_index = -1;
@@ -97,7 +104,7 @@ t_Value *VT_AddStr(S_String *val)
 		str_arr.arr = MEM_realloc(str_arr.arr, 2*str_arr.size*sizeof(S_String *));
 		str_arr.size *= 2;
 	}
-	str_arr.arr[str_arr.act_index] = val;	
+	str_arr.arr[str_arr.act_index] = STR_Create(val->str);	
 
 	return Val_Create(tkn_LIT, str_arr.act_index++);
 }
@@ -131,6 +138,17 @@ t_Value *VT_GetLParen()
 t_Value *VT_GetZeroInt()
 {
 	return Zero;
+}
+
+t_Value *VT_GetEmpty(int token)
+{
+	switch(token){
+		case tkn_NUM: return Empty;
+		case tkn_LIT: return Empty+1;
+		case tkn_REAL: return Empty+2;
+		case tkn_BOOL: return Empty+3;
+	}
+	return NULL;
 }
 
 void VT_PrintOne(t_Value *v)

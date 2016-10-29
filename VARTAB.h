@@ -49,6 +49,7 @@ bool VT_GetBool(t_Value *val);
 t_Value *VT_GetOp(int tkn_op);
 t_Value *VT_GetLParen();
 t_Value *VT_GetZeroInt();
+t_Value *VT_GetEmpty(int token);
 
 // pouze pro ucely testovani
 void VT_PrintOne(t_Value *v);

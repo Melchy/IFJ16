@@ -48,7 +48,7 @@ S_String *STR_DoubleToString(double value)
 
 void STR_PrintStr(S_String *s)
 {
-    printf("\"%s\"\n", s->str);
+    printf("%s", s->str);
 }
 
 void STR_AddChar(S_String *s, int lastChar)

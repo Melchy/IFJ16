@@ -3,10 +3,22 @@ CFLAGS=-Wall -Wextra -std=c11 -pedantic
 
 all: ifj16_rtg
 
-ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o SEM.o
-	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o SEM.o -o ifj16_rtg
+ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o SEM.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o
+	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o SEM.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o -o ifj16_rtg
 
-SEM.o: SEM.c SEM.h VARTAB.h Tokens.h
+IDLogic.o: IDLogic.c IDLogic.h STR.h VARTAB.h HASHVAR.h HASHFCE.h
+	$(CC) $(CFLAGS) -c IDLogic.c -o IDLogic.o
+
+HASH.o: HASH.c HASH.h STR.h
+	$(CC) $(CFLAGS) -c HASH.c -o HASH.o
+
+HASHFCE.o: HASHFCE.c HASHFCE.h HASH.h STR.h MEM.h
+	$(CC) $(CFLAGS) -c HASHFCE.c -o HASHFCE.o
+
+HASHVAR.o: HASHVAR.c HASHVAR.h HASH.h STR.h VARTAB.h MEM.h
+	$(CC) $(CFLAGS) -c HASHVAR.c -o HASHVAR.o
+
+SEM.o: SEM.c SEM.h VARTAB.h Tokens.h IDLogic.h HASHVAR.h ERROR.h
 	$(CC) $(CFLAGS) -c SEM.c -o SEM.o
 
 STR.o: STR.c STR.h MEM.h ERROR.h FIO.h

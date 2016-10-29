@@ -5,19 +5,38 @@
 #include "Node.h"
 #include "VARTAB.h"
 
+#include <stdbool.h>
+
+typedef struct t_Assign{
+	S_String *ID;
+	struct t_Assign *prev;
+}t_Assign;
+
 /* Struktura stromu, ukazatele na top uzel stromu, aktivni uzel a na predchazejci strom */
 typedef struct t_Tree t_Tree;
 typedef struct t_Tree{
 	t_Node *Top;
 	t_Node *Act;
+	t_Assign *LastAssign;
+	S_String *ActStr;
+	bool assignable;
 	t_Tree *prev;
 }t_Tree;
 
 /* Alokace noveho stromu a pridani do seznamu stromu */
 void Tree_Create();
 
-/* Pridani operatoru nebo operandu do stromu */
-void Tree_Add(int token);
+void Tree_AddOp(int token);
+
+void Tree_AddNode(t_Value *value);
+
+void Tree_AddAssignment();
+
+void Tree_AddID(S_String *attr);
+
+S_String *Tree_PopActStr();
+
+S_String *Tree_PopAssign();
 
 /* Pridani leve zavorky do stromu - pomocna logika */
 void Tree_NestIn();
