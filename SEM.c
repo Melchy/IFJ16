@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-
+/*
 static bool arithmetic(t_Value *l, t_Value *r)
 {
 	if(l->type == tkn_NUM){
@@ -81,7 +81,7 @@ bool SEM_IsAllowed(t_Value *l, t_Value *r, int op)
 			return logic_bool(l, r);			
 	}
 	return false;
-}
+}*/
 
 void SEM_SafeAssignment(S_String *ID, t_Value *value)
 {

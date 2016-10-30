@@ -194,8 +194,8 @@ static t_Value *solve_NUM_NUM(t_Value *l, t_Value *r, int op)
 
 static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
 {		
-	if (!SEM_IsAllowed(l, r, op))
-		ERROR_exit(SEM_ERR_TYPE);
+	/*if (!SEM_IsAllowed(l, r, op))
+		ERROR_exit(SEM_ERR_TYPE);*/
 
 	if(l == NULL && op == tkn_EXCL)
 		return VT_GetBool(r) ? VT_AddBool(tkn_FALSE) : VT_AddBool(tkn_TRUE);
@@ -211,6 +211,30 @@ static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
 	if(l->type == tkn_LIT && r->type == tkn_LIT && op == tkn_PLUS){
 		S_String *s = STR_Create("");
 		STR_ConCat(s, VT_GetStr(l->VT_index));
+		STR_ConCat(s, VT_GetStr(r->VT_index));
+		return VT_AddStr(s);
+	}
+	if(l->type == tkn_LIT && r->type == tkn_NUM && op == tkn_PLUS){
+		S_String *s = STR_Create("");
+		STR_ConCat(s, VT_GetStr(l->VT_index));
+		STR_ConCat(s, STR_IntToString(VT_GetInt(r->VT_index)));
+		return VT_AddStr(s);
+	}
+	if(l->type == tkn_NUM && r->type == tkn_LIT && op == tkn_PLUS){
+		S_String *s = STR_Create("");
+		STR_ConCat(s, STR_IntToString(VT_GetInt(l->VT_index)));
+		STR_ConCat(s, VT_GetStr(r->VT_index));
+		return VT_AddStr(s);
+	}
+	if(l->type == tkn_LIT && r->type == tkn_REAL && op == tkn_PLUS){
+		S_String *s = STR_Create("");
+		STR_ConCat(s, VT_GetStr(l->VT_index));
+		STR_ConCat(s, STR_DoubleToString(VT_GetDouble(r->VT_index)));
+		return VT_AddStr(s);
+	}
+	if(l->type == tkn_REAL && r->type == tkn_LIT && op == tkn_PLUS){
+		S_String *s = STR_Create("");
+		STR_ConCat(s, STR_DoubleToString(VT_GetDouble(l->VT_index)));
 		STR_ConCat(s, VT_GetStr(r->VT_index));
 		return VT_AddStr(s);
 	}
@@ -234,6 +258,7 @@ static t_Value *RecSolve(t_Node *n)
 	else{
 		l = Node_GetValue(Node_GetLChild(n));
 	}
+
 	if(!Node_IsBottom(Node_GetRChild(n)))
 		r = RecSolve(Node_GetRChild(n));
 	else
@@ -266,7 +291,8 @@ t_Value *EXPR_Solve()
 		res = Node_GetValue(n);
 	else
 		res = RecSolve(n);
-		//		STR_PrintStr(ret);
+	if(res == NULL)
+		ERROR_exit(SEM_ERR_TYPE);
 	makeAssigns(res);
 	Tree_Dispose();
 	return res;

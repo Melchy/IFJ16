@@ -38,10 +38,10 @@ S_String *STR_LongToString(long value)
 
 S_String *STR_DoubleToString(double value)
 {
-  int n = snprintf(NULL, 0, "%f", value);
+  int n = snprintf(NULL, 0, "%g", value);
   char buffer[n+1];
 
-  snprintf(buffer, n + 1, "%f", value);
+  snprintf(buffer, n + 1, "%g", value);
   S_String *s = STR_Create(buffer);
   return s;
 }

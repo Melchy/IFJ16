@@ -1,4 +1,3 @@
-i1 = 8+16; i1 = i1*i1; show(i1);
-b1 = true; b2 = false; b2 = b1 && b2; show(b2);
-s1 = "AHOJ " + "!!"; s2 = "??"; s2 = s1 + s2; show(s2);
-d1 = i1 + 5; show(d1);
+i1 = 5; d1 = 5.5;
+b2 = i1 < d1;
+show(b2);
