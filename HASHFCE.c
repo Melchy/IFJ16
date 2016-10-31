@@ -61,3 +61,19 @@ bool HASHFCE_Remove(S_String *ID)
 	MEM_free(tmp);
 	return true;
 }
+
+void HASHFCE_Print()
+{
+	printf("**FCE GLOBAL HASH TAB**\n");
+	S_Fce *f;
+	for (int i = 0; i < SIZETAB; i++)
+	{
+		f = global[i];
+		while(f != NULL)
+		{
+			printf("[ID]: %s [type]: %s [offset]: %ld", f->ID->str, f->type->str, f->offset);
+			f = f->next;
+		}
+	}
+	putchar('\n');
+}

@@ -155,14 +155,31 @@ void VT_PrintOne(t_Value *v)
 {
 	switch(v->type){
 		case tkn_NUM:
+			if(v->VT_index == -1){
+				printf("INT: #\n");
+				return;
+			}
 			printf("INT: %d\n", VT_GetInt(v->VT_index));
 			break;
 		case tkn_LIT:
+			if(v->VT_index == -1){
+				printf("STR: #\n");
+				return;
+			}
 			printf("STR: %s\n", VT_GetStr(v->VT_index)->str);
 			break;
 		case tkn_REAL:
+			if(v->VT_index == -1){
+				printf("DOUBLE: #\n");
+				return;
+			}
 			printf("DOUBLE: %g\n", VT_GetDouble(v->VT_index));
 			break;
+		case tkn_BOOL:
+			if(v->VT_index == -1){
+				printf("BOOL: #\n");
+				return;
+			}
 		case tkn_TRUE:
 			printf("BOOL: true\n");
 			break;

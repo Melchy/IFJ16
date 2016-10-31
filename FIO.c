@@ -25,6 +25,20 @@ int FIO_UngetChar(int c)
 	return ungetc(c, f);
 }
 
+bool FIO_MoveToPosition(long newPos)
+{
+	if(!fseek(f, newPos, SEEK_SET))
+		return true;
+	return false;
+}
+
+long FIO_GetPosition()
+{
+	if (f != NULL)
+		return ftell(f);
+	return 0;
+}
+
 void FIO_Close()
 {
 	if(FIO_Opened) // pokud je vubec otevreny

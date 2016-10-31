@@ -17,6 +17,8 @@ void EXPR_Create()
 {
 	// pro kazdy vyraz vytvorime unikatni strom
 	Tree_Create();
+	if(is_concat)
+		is_concat = false;
 }
 
 /* Funkci volame pred kazdym pridanim do stromu */
@@ -318,7 +320,7 @@ t_Value *EXPR_Solve()
 	
 	t_Value *res;
 	t_Node *n = Tree_GetTopNode();
-	if(!Node_IsOp(n)) // pokud je top hodnota, rekurze nema smysl (napr. x=5;)
+	if(!Node_IsOp(n)) // pokud je na topu hodnota, rekurze nema smysl (napr. x=5;)
 		res = Node_GetValue(n);
 	else
 		res = RecSolve(n);

@@ -146,3 +146,35 @@ bool HASHVAR_RemoveL(S_String *ID)
 	MEM_free(tmp);
 	return true;	
 }
+
+void HASHVAR_PrintG()
+{
+	printf("**GLOBAL HASH TAB**\n");
+	S_Var *v;
+	for (int i = 0; i < SIZETAB; i++)
+	{
+		v = global[i];
+		while(v != NULL)
+		{
+			printf("[ID]: %s [val]: ", v->ID->str); VT_PrintOne(v->value);
+			v = v->next;
+		}
+	}
+	putchar('\n');
+}
+
+void HASHVAR_PrintL()
+{
+	printf("**LOCAL HASH TAB**\n");
+	S_Var *v;
+	for (int i = 0; i < SIZETAB; i++)
+	{
+		v = local->tab[i];
+		while(v != NULL)
+		{
+			printf("[ID]: %s [val]: ", v->ID->str); VT_PrintOne(v->value);
+			v = v->next;
+		}
+	}
+	putchar('\n');
+}

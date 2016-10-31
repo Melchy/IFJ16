@@ -20,6 +20,7 @@ void HASHVAR_InitGlobal();
 bool HASHVAR_AddG(S_Var *data);
 S_Var *HASHVAR_FindG(S_String *ID);
 bool HASHVAR_RemoveG(S_String *ID);
+void HASHVAR_PrintG();
 
 void HASHVAR_AddTable();
 void HASHVAR_RemoveTable();

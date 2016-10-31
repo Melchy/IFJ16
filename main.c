@@ -106,7 +106,8 @@ int test_Expr()
 			EXPR_Create();
 		}
 	}
-	//VT_PrintOne(IL_GetVal(STR_Create("i1")));
+	//HASHVAR_PrintG();
+	//HASHFCE_Print();
 	MEM_clearAll();
 	FIO_Close();
 	return 0;

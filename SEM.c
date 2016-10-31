@@ -91,7 +91,8 @@ void SEM_SafeAssignment(S_String *ID, t_Value *value)
 	}
 	if(id->type == tkn_NUM){
 		if(value->type == tkn_NUM)
-			IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
 		else if(value->type == tkn_REAL)
 			IL_SetVal(ID, VT_AddInt((int)VT_GetDouble(value->VT_index)));
 		else
@@ -99,7 +100,8 @@ void SEM_SafeAssignment(S_String *ID, t_Value *value)
 	}
 	if(id->type == tkn_REAL){
 		if(value->type == tkn_REAL)
-			IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
 		else if(value->type == tkn_NUM)
 			IL_SetVal(ID, VT_AddDouble((double)VT_GetInt(value->VT_index)));
 		else
@@ -107,7 +109,8 @@ void SEM_SafeAssignment(S_String *ID, t_Value *value)
 	}
 	if(id->type == tkn_LIT){
 		if(value->type == tkn_LIT)
-			IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
