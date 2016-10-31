@@ -6,7 +6,6 @@
 static FILE *f;
 static bool FIO_Opened;
 
-/* true pokud se uspesne otevre */
 void FIO_Open(char *filename)
 {
 	f = fopen(filename, "r");
@@ -26,9 +25,8 @@ int FIO_UngetChar(int c)
 	return ungetc(c, f);
 }
 
-/* true pokud se uspesne zavre */
 void FIO_Close()
 {
-	if(FIO_Opened)
+	if(FIO_Opened) // pokud je vubec otevreny
 		fclose(f);
 }

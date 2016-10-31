@@ -9,17 +9,23 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+static bool is_concat;
 
 void EXPR_Create()
 {
+	// pro kazdy vyraz vytvorime unikatni strom
 	Tree_Create();
 }
 
+/* Funkci volame pred kazdym pridanim do stromu */
 static void Add_IDVal()
 {
 	S_String *ID = Tree_PopActStr();
-	if(ID == NULL)
+	if(ID == NULL) // pokud zadny identifikator neceka na pridani do stromu, vratime se
 		return;
+
 	t_Value *val = IL_GetVal(ID);
 	if(val == NULL)
 		ERROR_exit(INIT_ERR);
@@ -28,8 +34,10 @@ static void Add_IDVal()
 
 void EXPR_AddSym(int token)
 {
-	if(token == tkn_ASSIGN)
+	if(token == tkn_ASSIGN){
 		Tree_AddAssignment();
+		return;
+	}
 
 	Add_IDVal();
 
@@ -53,8 +61,9 @@ void EXPR_AddVal(int token, S_String *attr)
 		double x; STR_StringToDouble(attr, &x);
 		Tree_AddNode(VT_AddDouble(x));
 	}
-	else if(token == tkn_LIT)
+	else if(token == tkn_LIT){
 		Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
+	}
 	else if(token == tkn_TRUE || token == tkn_FALSE)
 		Tree_AddNode(VT_AddBool(token));
 	else if(token == tkn_ID)
@@ -199,7 +208,8 @@ static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
 
 	if(l == NULL && op == tkn_EXCL)
 		return VT_GetBool(r) ? VT_AddBool(tkn_FALSE) : VT_AddBool(tkn_TRUE);
-
+	if(l == NULL || r == NULL)
+		return NULL;
 	if(l->type == tkn_NUM && r->type == tkn_NUM)
 		return solve_NUM_NUM(l, r, op);
 	if(l->type == tkn_NUM && r->type == tkn_REAL)
@@ -241,53 +251,74 @@ static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
 	if((l->type == tkn_TRUE || l->type == tkn_FALSE ) && (r->type == tkn_TRUE || r->type == tkn_FALSE))
 		return solve_BOOL_BOOL(l, r, op);
 
+	// pokud jsme nenasli vhodnou kombinaci operandu a operatoru, vratime se = chyba
 	return NULL;
 }
 
-static t_Value *RecSolve(t_Node *n)
+static t_Value *toString(t_Value *v)
 {
+	switch(v->type){
+		case tkn_LIT:
+			return v;
+		case tkn_NUM:
+			return VT_AddStr(STR_IntToString(VT_GetInt(v->VT_index)));
+		case tkn_REAL:
+			return VT_AddStr(STR_DoubleToString(VT_GetDouble(v->VT_index)));
+	}
+	return v;
+}
+
+static t_Value *RecSolve(t_Node *n)
+{		
+	if(!is_concat && (Node_GetType(Node_GetLChild(n)) == tkn_LIT || Node_GetType(Node_GetRChild(n)) == tkn_LIT)){
+		is_concat = true;
+	}
+
 	t_Value *l; t_Value *r; int op = Node_GetType(n);
-	if(Node_GetLChild(n) == NULL){
+	if(Node_GetLChild(n) == NULL) // osetreni unarniho minus (jako levy operand dosadime nulu)
+	{
 		if(op == tkn_MINUS || op == tkn_PLUS)
 			l = VT_GetZeroInt();
 		else
 			l = NULL;
 	}
-	else if(!Node_IsBottom(Node_GetLChild(n)))
+	else if(!Node_IsBottom(Node_GetLChild(n))) // pokud levy potomek neni koncovy, volame rekurzi
 		l = RecSolve(Node_GetLChild(n));
 	else{
 		l = Node_GetValue(Node_GetLChild(n));
 	}
 
-	if(!Node_IsBottom(Node_GetRChild(n)))
+	if(!Node_IsBottom(Node_GetRChild(n))) // pokud pravy potomek neni koncovy, volame rekurzi
 		r = RecSolve(Node_GetRChild(n));
 	else
 		r = Node_GetValue(Node_GetRChild(n));
 
-	// printf("l:%d r:%d tkn:%d\n", l, r, tkn);
-	return EasySolve(l, r, op);
+	if(is_concat){
+		return EasySolve(toString(l), toString(r), op);
+	}
 
-	return NULL;
+	return EasySolve(l, r, op);
 }
 
 static void makeAssigns(t_Value *value)
 {
 	S_String *ID;
-	while((ID = Tree_PopAssign()) != NULL)
-	{
+	while((ID = Tree_PopAssign()) != NULL) // popujeme z assign listu a zpetne prirazujeme vysledek
 		SEM_SafeAssignment(ID, value);
-	}
 }
 
 t_Value *EXPR_Solve()
 {
 	Add_IDVal();
-
-	Tree_RemoveParen();
 	//Tree_Print();
+
+	Tree_RemoveParen(); // pred solve pro zjednoduseni odstranime zavorky
+	if(Tree_Empty())
+		return NULL;
+	
 	t_Value *res;
 	t_Node *n = Tree_GetTopNode();
-	if(!Node_IsOp(n))
+	if(!Node_IsOp(n)) // pokud je top hodnota, rekurze nema smysl (napr. x=5;)
 		res = Node_GetValue(n);
 	else
 		res = RecSolve(n);

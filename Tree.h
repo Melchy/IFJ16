@@ -26,6 +26,8 @@ typedef struct t_Tree{
 /* Alokace noveho stromu a pridani do seznamu stromu */
 void Tree_Create();
 
+bool Tree_Empty();
+
 void Tree_AddOp(int token);
 
 void Tree_AddNode(t_Value *value);

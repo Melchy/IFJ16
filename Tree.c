@@ -8,6 +8,7 @@
 #include "ERROR.h"
 
 #include <stdio.h>
+#include <stdbool.h>
 
 static t_Tree *T = NULL;
 
@@ -21,6 +22,12 @@ void Tree_Create()
 	T->LastAssign = NULL;
 	T->ActStr = NULL;
 	T->assignable = true;
+}
+
+bool Tree_Empty(){
+	if(T != NULL)
+		return T->Top == NULL;
+	return true;
 }
 
 /* Vraci true, pokud je rodic uzlu unarni operator */

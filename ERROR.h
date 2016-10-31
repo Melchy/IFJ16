@@ -34,7 +34,7 @@
 /* Korektni ukonceni programu */
 void ERROR_exit(int errCode);
 
-/* "ptrtofree"  je ukazatel na pamet, ktery jako jediny nefiguruje v tabulce adres */
+/* "ptrtofree"  je ukazatel na alokovanou pamet, ktery jako jediny nefiguruje v tabulce adres */
 void ERROR_exit2(int errCode, void *ptrtofree);
 
 #endif

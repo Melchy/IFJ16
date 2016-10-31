@@ -10,8 +10,8 @@
 /* Vraci true, pokud je uzel operator */
 bool Node_IsOp(t_Node *n)
 {
-	if(n->value->type >= tkn_PLUS && n->value->type <= tkn_OR)
-		return true;
+	if(n != NULL && n->value != NULL)
+		return n->value->type >= tkn_PLUS && n->value->type <= tkn_OR;
 	return false;
 }
 
@@ -22,29 +22,37 @@ bool Node_IsBottom(t_Node *n){
 }
 
 bool Node_IsUnary(t_Node *n){
-	return (n->l_child == NULL) && (n->r_child != NULL);
+	if(n != NULL)
+		return (n->l_child == NULL) && (n->r_child != NULL);
+	return false;
 }
 
 bool Node_IsLParen(t_Node *n){
-	//if(n->value != NULL)
-	//printf("TYPE:%d VT_index:%d\n", n->value->type, n->value->VT_index);
-	return n->value->type == tkn_LPAREN;
+	if(n != NULL && n->value != NULL)
+		return n->value->type == tkn_LPAREN;
+	return false;
 }
 
 t_Value *Node_GetValue(t_Node *n){
-	return n->value;
+	if(n != NULL)
+		return n->value;
+	return NULL;
 }
 
 int Node_GetType(t_Node *n){
-	return n->value->type;
+	if(n != NULL && n->value != NULL)
+		return n->value->type;
+	return -1;
 }
 
 int Node_GetIndex(t_Node *n){
-	return n->value->VT_index;
+	if(n != NULL && n->value != NULL)
+		return n->value->VT_index;
+	return -1;
 }
 
 int Node_GetInt(t_Node *n){
-	return VT_GetInt(n->value->VT_index);
+		return VT_GetInt(n->value->VT_index);
 }
 
 double Node_GetDouble(t_Node *n){
