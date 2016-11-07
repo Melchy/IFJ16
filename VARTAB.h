@@ -45,6 +45,7 @@ S_String *VT_GetStr(int index);
 
 t_Value *VT_AddBool(int tkn_bool);
 bool VT_GetBool(t_Value *val);
+bool VT_GetBoolSafe(t_Value *val);
 
 t_Value *VT_GetOp(int tkn_op);
 t_Value *VT_GetLParen();

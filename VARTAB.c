@@ -125,6 +125,12 @@ bool VT_GetBool(t_Value *val)
 	return val->type == tkn_TRUE;
 }
 
+bool VT_GetBoolSafe(t_Value *val)
+{
+	val->type != tkn_TRUE && val->type != tkn_FALSE ? ERROR_exit(SEM_ERR_TYPE) : return val->type == tkn_TRUE;
+	return false;
+}
+
 t_Value *VT_GetOp(int tkn_op)
 {
 	return Operators+(tkn_op-OPS_OFFSET);
