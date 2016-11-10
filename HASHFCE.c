@@ -7,7 +7,7 @@
 
 static htabF global;
 
-void HASHFCE_InitFce()
+void HASHFCE_InitFceTab()
 {
 	global = MEM_malloc(SIZETAB*(sizeof(S_Fce *)));
 	for (int i = 0; i < SIZETAB; i++)

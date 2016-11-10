@@ -5,16 +5,23 @@
 
 #include <stdbool.h>
 
+typedef struct S_Param{
+	S_String *ID;
+	int type;
+	struct S_Param *next;
+}S_Param;
+
 typedef struct S_Fce{
 	S_String *ID;
 	S_String *type;
 	long offset;
+	S_Param *firstParam;
 	struct S_Fce *next;
 }S_Fce;
 
 typedef S_Fce** htabF;
 
-void HASHFCE_InitFce();
+void HASHFCE_InitFceTab();
 
 bool HASHFCE_Add(S_Fce *data);
 

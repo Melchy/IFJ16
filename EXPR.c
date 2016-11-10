@@ -43,6 +43,7 @@ void EXPR_AddSym(int token)
 
 	Add_IDVal();
 
+	// pokud se jedna o operator, pridame ho, v pripade zavorek se zanorime/vynorime
 	if(token >= tkn_PLUS && token <= tkn_OR)
 		Tree_AddOp(token);
 	else if(token == tkn_LPAREN)
@@ -54,22 +55,36 @@ void EXPR_AddSym(int token)
 void EXPR_AddVal(int token, S_String *attr)
 {
 	Add_IDVal();
+	int x; double y;
+	// pridame do stromu konkretni t_Value podle prichoziho tokenu
+	switch(token){
+		case tkn_NUM:
+			STR_StringToInt(attr, &x);
+			Tree_AddNode(VT_AddInt(x));
+		break;
+		case tkn_REAL:
+			STR_StringToDouble(attr, &y);
+			Tree_AddNode(VT_AddDouble(y));
+		break;
+		case tkn_LIT:
+			Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
+		break;
+		case tkn_TRUE:
+		case tkn_FALSE:
+			Tree_AddNode(VT_AddBool(token));
+		break;
+		case tkn_ID:
+			Tree_AddID(attr);
+		break;
+		default: break;
+	}
+}
 
-	if(token == tkn_NUM){
-		int x; STR_StringToInt(attr, &x);
-		Tree_AddNode(VT_AddInt(x));
-	}
-	else if(token == tkn_REAL){
-		double x; STR_StringToDouble(attr, &x);
-		Tree_AddNode(VT_AddDouble(x));
-	}
-	else if(token == tkn_LIT){
-		Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
-	}
-	else if(token == tkn_TRUE || token == tkn_FALSE)
-		Tree_AddNode(VT_AddBool(token));
-	else if(token == tkn_ID)
-		Tree_AddID(attr);
+void EXPR_AddVal2(t_Value *value)
+{	
+	Add_IDVal();
+
+	Tree_AddNode(value);
 }
 
 
@@ -204,19 +219,16 @@ static t_Value *solve_NUM_NUM(t_Value *l, t_Value *r, int op)
 
 
 static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
-{		
-	/*if (!SEM_IsAllowed(l, r, op))
-		ERROR_exit(SEM_ERR_TYPE);*/
-
-	if(l == NULL && op == tkn_EXCL)
+{
+	if(l == NULL && op == tkn_EXCL) // pokud se jedna o negaci boolu
 		return VT_GetBool(r) ? VT_AddBool(tkn_FALSE) : VT_AddBool(tkn_TRUE);
-	if(l == NULL || r == NULL)
+	if(l == NULL || r == NULL) // pokud neni co resit
 		return NULL;
-	if(l->type == tkn_NUM && r->type == tkn_NUM)
+	if(l->type == tkn_NUM && r->type == tkn_NUM) // pokud se jedna o dva integery
 		return solve_NUM_NUM(l, r, op);
-	if(l->type == tkn_NUM && r->type == tkn_REAL)
+	if(l->type == tkn_NUM && r->type == tkn_REAL) // pokud se jedna o integer a double
 		return solve_NUM_REAL(l, r, op);
-	if(l->type == tkn_REAL && r->type == tkn_NUM)
+	if(l->type == tkn_REAL && r->type == tkn_NUM) // ...
 		return solve_REAL_NUM(l, r, op);
 	if(l->type == tkn_REAL && r->type == tkn_REAL)
 		return solve_REAL_REAL(l, r, op);
@@ -271,10 +283,12 @@ static t_Value *toString(t_Value *v)
 }
 
 static t_Value *RecSolve(t_Node *n)
-{		
-	if(!is_concat && (Node_GetType(Node_GetLChild(n)) == tkn_LIT || Node_GetType(Node_GetRChild(n)) == tkn_LIT)){
+{	
+	// IMPORTANT - pokud je jeden jediny operand literal, jedna se o konkatenaci 
+	// a je potreba volat easysolve se stringovymi operandy (tostring(value))
+
+	if(!is_concat && (Node_GetType(Node_GetLChild(n)) == tkn_LIT || Node_GetType(Node_GetRChild(n)) == tkn_LIT))
 		is_concat = true;
-	}
 
 	t_Value *l; t_Value *r; int op = Node_GetType(n);
 	if(Node_GetLChild(n) == NULL) // osetreni unarniho minus (jako levy operand dosadime nulu)
@@ -295,9 +309,8 @@ static t_Value *RecSolve(t_Node *n)
 	else
 		r = Node_GetValue(Node_GetRChild(n));
 
-	if(is_concat){
+	if(is_concat)
 		return EasySolve(toString(l), toString(r), op);
-	}
 
 	return EasySolve(l, r, op);
 }

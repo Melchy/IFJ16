@@ -2,6 +2,7 @@
 #include "STR.h"
 #include "MEM.h"
 #include "Tokens.h"
+#include "ERROR.h"
 
 #include <stdbool.h>
 
@@ -127,8 +128,9 @@ bool VT_GetBool(t_Value *val)
 
 bool VT_GetBoolSafe(t_Value *val)
 {
-	val->type != tkn_TRUE && val->type != tkn_FALSE ? ERROR_exit(SEM_ERR_TYPE) : return val->type == tkn_TRUE;
-	return false;
+	if(val->type != tkn_TRUE && val->type != tkn_FALSE)
+		ERROR_exit(SEM_ERR_TYPE);
+	return val->type == tkn_TRUE;
 }
 
 t_Value *VT_GetOp(int tkn_op)

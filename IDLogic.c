@@ -110,3 +110,22 @@ S_Fce *IL_GetFce(S_String *ID)
 
 	return f;
 }
+
+bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
+{
+	S_Param *par = fce->firstParam;
+	for (int i = 0; i < argNumber; i++)
+	{
+		if(par == NULL)
+			return false;
+		par = par->next;
+	}
+	if(par == NULL)
+		return false;
+
+	IL_AllocVar(par->ID, val->type, false);
+	IL_SetVal(par->ID, val);
+	if(par->next == NULL)
+		return true;
+	return false;
+}

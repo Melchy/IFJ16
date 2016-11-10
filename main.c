@@ -18,11 +18,10 @@
 static void initAll()
 {
 	FIO_Open("java.code");
-	SCAN_attr = STR_Create("");
-	STR_ChangeSize(SCAN_attr, ATTR_SIZE);
+	SCAN_InitAttr();
 	VT_InitTabs();
 	HASHVAR_InitGlobal();
-	HASHFCE_InitFce();
+	HASHFCE_InitFceTab();
 }
 
 int test_MEM()
@@ -46,8 +45,8 @@ int test_SCAN_GetToken() // vypisuje hodnoty tokenu a atributu na stdout
 	while((token = SCAN_GetToken()) != EOF)
 	{
 		printf("tkn:%d", token);
-		if(SCAN_attr->str[0] != '\0')
-			printf("\t\tattr:%s", SCAN_attr->str);
+		if(SCAN_GetAttr()->str[0] != '\0')
+			printf("\t\tattr:%s", SCAN_GetAttr()->str);
 		putchar('\n');
 	}
 	MEM_clearAll();
@@ -91,8 +90,8 @@ int test_Expr()
 	strelbadonohy:
 	while((token = SCAN_GetToken()) != EOF)
 	{
-		if(token == tkn_ID && !STR_Compare(SCAN_attr, p)){
-			SCAN_GetToken(); SCAN_GetToken(); STR_PrintStr(SCAN_attr); printf(" = "); VT_PrintOne(IL_GetVal(SCAN_attr));
+		if(token == tkn_ID && !STR_Compare(SCAN_GetAttr(), p)){
+			SCAN_GetToken(); SCAN_GetToken(); STR_PrintStr(SCAN_GetAttr()); printf(" = "); VT_PrintOne(IL_GetVal(SCAN_GetAttr()));
 			while(SCAN_GetToken() != tkn_SEMI)
 				;
 			goto strelbadonohy;
@@ -100,7 +99,7 @@ int test_Expr()
 		else if(token == tkn_LPAREN || token == tkn_RPAREN || (token >= tkn_PLUS && token <= tkn_ASSIGN))
 			EXPR_AddSym(token);
 		else if(token == tkn_NUM || token == tkn_REAL || token == tkn_TRUE || token == tkn_FALSE || token == tkn_ID || token == tkn_LIT)
-			EXPR_AddVal(token, SCAN_attr);
+			EXPR_AddVal(token, SCAN_GetAttr());
 		else if(token == tkn_SEMI){
 			EXPR_Solve();
 			EXPR_Create();
