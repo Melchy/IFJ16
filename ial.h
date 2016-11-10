@@ -21,4 +21,6 @@
 void HS_Sort(S_String *s);
 void HS_Heapify(S_String *s, int i);
 
+int BM_BCRule(S_String *s, S_String *search);
+
 #endif
