@@ -10,7 +10,7 @@ static S_String *ActClass;
 
 void IL_SetClass(S_String *newClass)
 {
-	ActClass = newClass;
+	ActClass = STR_Create(newClass->str);
 }
 
 S_String *IL_GetClass()
@@ -87,15 +87,16 @@ t_Value *IL_GetVal(S_String *ID)
 	return var->value;
 }
 
-void IL_InitFce(S_String *ID, S_String *type, size_t offset)
+void IL_InitFce(S_String *ID, int returnType, long offset, S_Param *firstParam)
 {
 	S_Fce *new = MEM_malloc(sizeof(S_Fce));
 	S_String *fullID = STR_Create(ActClass->str);
 	STR_AddChar(fullID, '.');
 	STR_ConCat(fullID, ID);
 	new->ID = fullID;
-	new->type = STR_Create(type->str);
+	new->returnType = returnType;
 	new->offset = offset;
+	new->firstParam = firstParam;
 	new->next = NULL;
 	if(HASHVAR_FindG(new->ID) != NULL || HASHFCE_Find(new->ID) != NULL){
 		ERROR_exit(SEM_ERR_DEF);

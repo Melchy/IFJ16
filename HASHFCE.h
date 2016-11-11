@@ -13,7 +13,7 @@ typedef struct S_Param{
 
 typedef struct S_Fce{
 	S_String *ID;
-	S_String *type;
+	int returnType;
 	long offset;
 	S_Param *firstParam;
 	struct S_Fce *next;

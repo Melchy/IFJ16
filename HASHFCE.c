@@ -57,7 +57,14 @@ bool HASHFCE_Remove(S_String *ID)
 		prev->next = tmp->next;
 	}
 	MEM_free(tmp->ID);
-	MEM_free(tmp->type);
+	S_Param *q;
+	S_Param *p = tmp->firstParam;
+	while(p != NULL)
+	{
+		q = p;
+		MEM_free(q);
+		p = p->next;
+	}
 	MEM_free(tmp);
 	return true;
 }
@@ -71,7 +78,7 @@ void HASHFCE_Print()
 		f = global[i];
 		while(f != NULL)
 		{
-			printf("[ID]: %s [type]: %s [offset]: %ld", f->ID->str, f->type->str, f->offset);
+			printf("[ID]: %s [returnType]: %d [offset]: %ld", f->ID->str, f->returnType, f->offset);
 			f = f->next;
 		}
 	}

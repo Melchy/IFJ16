@@ -17,7 +17,7 @@ void IL_SetVal(S_String *ID, t_Value *value);
 
 t_Value *IL_GetVal(S_String *ID);
 
-void IL_InitFce(S_String *ID, S_String *type,size_t offset);
+void IL_InitFce(S_String *ID, int returnType, long offset, S_Param *firstParam);
 
 S_Fce *IL_GetFce(S_String *ID);
 
