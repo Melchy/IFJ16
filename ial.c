@@ -1,6 +1,66 @@
 #include "ial.h"
 #include "stdio.h"
 
+char *read_line()
+{
+    char *line = malloc(100);
+    char *linep = line;
+    size_t lenmax = 100;
+    size_t len = lenmax;
+    int c;
+
+    if(line == NULL)
+        return NULL;
+
+    while((c=fgetc(stdin)) != EOF)
+    {    
+        if(--len == 0) {
+            len = lenmax;
+            char * linen = realloc(linep, lenmax *= 2);
+
+            if(linen == NULL) {
+                free(linep);
+                return NULL;
+            }
+            line = linen + (line - linep);
+            linep = linen;
+        }
+
+        if((*line++ = c) == '\n')
+        {
+            line--;
+            break;
+        }
+    }
+    *line = '\0';
+    return linep;
+}
+
+int length(S_String *s)
+{
+    return strlen(s->str);
+}
+
+int compare(S_String *s1, S_String *s2)
+{
+    return strcmp(s1->str, s2->str);
+}
+
+S_String *substr(S_String *s, int i, int n)
+{
+    char tmp[n];
+
+    for(int j = 0; j < n; j++, i++)
+    {
+        tmp[j] = s->str[i];
+    }
+
+    tmp[n] = '\0';
+    S_String *s_result = STR_Create(tmp);
+
+    return s_result;
+}
+
 int total;
 int max_value(int a, int b) { return (a > b)? a: b; }
 
@@ -33,16 +93,16 @@ void HS_Sort(S_String *s)
     total = strlen(s->str) - 1;
 
     // Rearrange the heap according to heap property (maxheap ... root > children).
-    for (int i = total / 2; i >= 0; i--)
+    for (int level = total / 2; level >= 0; level--)
     {
-        HS_Heapify(s, i);
+        HS_Heapify(s, level);
     }
 
     // Extraction of the "maximal" element.
-    for (int i = total; i > 0; i--)
+    for (int last = total; last > 0; last--)
     {
         // Move current root to the end.
-        SWAP(s->str, 0, i);
+        SWAP(s->str, 0, last);
         total--;
         // Rearrange the reduced heap.
         HS_Heapify(s, 0);
