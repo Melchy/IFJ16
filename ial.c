@@ -1,6 +1,68 @@
 #include "ial.h"
+#include "stdio.h"
+
+char *read_line()
+{
+    char *line = malloc(100);
+    char *linep = line;
+    size_t lenmax = 100;
+    size_t len = lenmax;
+    int c;
+
+    if(line == NULL)
+        return NULL;
+
+    while((c=fgetc(stdin)) != EOF)
+    {    
+        if(--len == 0) {
+            len = lenmax;
+            char * linen = realloc(linep, lenmax *= 2);
+
+            if(linen == NULL) {
+                free(linep);
+                return NULL;
+            }
+            line = linen + (line - linep);
+            linep = linen;
+        }
+
+        if((*line++ = c) == '\n')
+        {
+            line--;
+            break;
+        }
+    }
+    *line = '\0';
+    return linep;
+}
+
+int length(S_String *s)
+{
+    return strlen(s->str);
+}
+
+int compare(S_String *s1, S_String *s2)
+{
+    return strcmp(s1->str, s2->str);
+}
+
+S_String *substr(S_String *s, int i, int n)
+{
+    char tmp[n];
+
+    for(int j = 0; j < n; j++, i++)
+    {
+        tmp[j] = s->str[i];
+    }
+
+    tmp[n] = '\0';
+    S_String *s_result = STR_Create(tmp);
+
+    return s_result;
+}
 
 int total;
+int max_value(int a, int b) { return (a > b)? a: b; }
 
 void HS_Heapify(S_String *s, int i)
 {
@@ -31,18 +93,75 @@ void HS_Sort(S_String *s)
     total = strlen(s->str) - 1;
 
     // Rearrange the heap according to heap property (maxheap ... root > children).
-    for (int i = total / 2; i >= 0; i--)
+    for (int level = total / 2; level >= 0; level--)
     {
-        HS_Heapify(s, i);
+        HS_Heapify(s, level);
     }
 
     // Extraction of the "maximal" element.
-    for (int i = total; i > 0; i--)
+    for (int last = total; last > 0; last--)
     {
         // Move current root to the end.
-        SWAP(s->str, 0, i);
+        SWAP(s->str, 0, last);
         total--;
         // Rearrange the reduced heap.
         HS_Heapify(s, 0);
     }
+}
+
+int BM_BCRule(S_String *s, S_String *search)
+{
+    int charJump[255];
+    int i;
+
+    // Initialize all occurrences as -1
+    for (i = 0; i < 255; i++)
+    {
+        charJump[i] = -1;
+    }
+
+    // Fill the actual value of last occurrence of a character
+    for (i = 0; i < search->len; i++)
+    {
+        charJump[(int) search->str[i]] = i; 
+    }
+
+    int shift = 0;  // s is shift of the pattern with respect to text
+
+    while(shift <= (s->len - search->len))
+    {
+        int j = search->len-1;
+        
+        /* Keep reducing index j of pattern while characters of
+           pattern and text are matching at this shift s */
+        while(j >= 0 && search->str[j] == s->str[shift+j])
+        {
+            j--;
+        }
+
+        /* If the pattern is present at current shift, then index j
+           will become -1 after the above loop */
+        if (j < 0)
+        {
+            return shift;
+            
+            /* Shift the pattern so that the next character in text
+               aligns with the last occurrence of it in pattern.
+               The condition s+m < n is necessary for the case when
+               pattern occurs at the end of text */
+            shift += (shift+search->len < s->len) ? search->len - charJump[(int)s->str[shift+search->len]] : 1;
+ 
+        }
+        else
+        {
+            /* Shift the pattern so that the bad character in text
+               aligns with the last occurrence of it in pattern. The
+               max function is used to make sure that we get a positive
+               shift. We may get a negative shift if the last occurrence
+               of bad character in pattern is on the right side of the
+               current character. */
+            shift += max_value(1, j - charJump[(int)s->str[shift+j]]);
+        }
+    }
+    return -1;
 }

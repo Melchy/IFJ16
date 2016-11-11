@@ -16,6 +16,7 @@ static t_Value *LParen;
 static t_Value *Zero;
 static t_Value *Empty;
 
+//testovano
 void VT_InitTabs()
 {
 	int_arr.arr = MEM_malloc(INIT_SIZE*sizeof(int));
@@ -55,7 +56,7 @@ void VT_InitTabs()
 	LParen = MEM_malloc(sizeof(t_Value));
 	LParen->type = tkn_LPAREN; LParen->VT_index = -1;
 }
-
+//testovano
 t_Value *Val_Create(int type, int index)
 {
 	t_Value *value = MEM_malloc(sizeof(t_Value));
@@ -63,7 +64,7 @@ t_Value *Val_Create(int type, int index)
 	value->VT_index = index;
 	return value;
 }
-
+//testovano
 t_Value *VT_AddInt(int val)
 {
 	if(int_arr.act_index == int_arr.size){
@@ -74,13 +75,15 @@ t_Value *VT_AddInt(int val)
 
 	return Val_Create(tkn_NUM, int_arr.act_index++);
 }
+//testovano
 int VT_GetInt(int index)
 {
-	if(index < int_arr.act_index)
+	if(index < int_arr.act_index && index >= 0)
 		return int_arr.arr[index];
 	return -1;
 }
 
+//testovano
 t_Value *VT_AddDouble(double val)
 {
 	if(double_arr.act_index == double_arr.size){
@@ -91,14 +94,15 @@ t_Value *VT_AddDouble(double val)
 
 	return Val_Create(tkn_REAL, double_arr.act_index++);
 }
+//testovano
 double VT_GetDouble(int index)
 {
-	if(index < double_arr.act_index)
+	if(index < double_arr.act_index && index >= 0)
 		return double_arr.arr[index];
 	return 0.0;
 }
 
-
+//testovano
 t_Value *VT_AddStr(S_String *val)
 {
 	if(str_arr.act_index == str_arr.size){
@@ -109,45 +113,46 @@ t_Value *VT_AddStr(S_String *val)
 
 	return Val_Create(tkn_LIT, str_arr.act_index++);
 }
+//testovano
 S_String *VT_GetStr(int index)
 {
 	if(index < str_arr.act_index)
 		return str_arr.arr[index];
 	return NULL;
 }
-
+//testovano
 t_Value *VT_AddBool(int tkn_bool)
 {
 	return tkn_bool == tkn_FALSE ? Bools : Bools+1;
 }
-
+//testovano
 bool VT_GetBool(t_Value *val)
 {
 	return val->type == tkn_TRUE;
 }
-
+//testovano
 bool VT_GetBoolSafe(t_Value *val)
 {
 	if(val->type != tkn_TRUE && val->type != tkn_FALSE)
 		ERROR_exit(SEM_ERR_TYPE);
 	return val->type == tkn_TRUE;
 }
-
+//testovano
 t_Value *VT_GetOp(int tkn_op)
 {
 	return Operators+(tkn_op-OPS_OFFSET);
 }
-
+//testovano
 t_Value *VT_GetLParen()
 {
 	return LParen;
 }
-
+//testovano
 t_Value *VT_GetZeroInt()
 {
 	return Zero;
 }
-
+//testovano
 t_Value *VT_GetEmpty(int token)
 {
 	switch(token){

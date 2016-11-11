@@ -120,12 +120,21 @@ void STR_Trim(S_String *s)
   s->str[j] = s->str[i];
 }
 
+void STR_Copy(S_String *s1, S_String *s2)
+{
+  MEM_free(s1);
+
+  s1 = STR_Create(s2->str);
+}
+
 /*
 Return values:
 -----------------------------------------------
--1 ... First string is less than the other one.
-0 .... Strings are equal.
-1 .... First string is more than the other one.
+if Return value < 0 then it indicates s1 is less than s2.
+
+if Return value > 0 then it indicates s2 is less than s1.
+
+if Return value = 0 then it indicates s1 is equal to s2.
 ----------------------------------------------- 
 */
 
@@ -169,30 +178,54 @@ else ... Index to the beginning of the substring in the observed string.
 
 int STR_SubStr(S_String *s, S_String *s_sub, int start)
 {
-  int i = start;
-  int j = 0;
-  int result = -1;
+  int position = 0;
+  char *a;
+  char *b;
+  char *x;
+  char *y;
 
-  if(s_sub->str[0] == '\0')
+  a = s->str + start;
+  b = s_sub->str;
+  x = a;
+  y = b;
+
+  if(!*b)
   {
     return 0;
   }
 
-  while(s->str[i] != '\0')
+  while(*a)
   {
-    while(s->str[i] == s_sub->str[j])
+    while(*x == *y)
     {
-      j++;
-      if(s_sub->str[j] == '\0')
+      x++;
+      y++;
+
+      if(*x == '\0' || *y == '\0')
       {
-        printf("%d a %d \n", i, j);
-        result = i - (j - 1);
-        return result ;
+        break;
       }
     }
-    i++;
+    
+    if(*y == '\0')
+    {
+      break;
+    }
+
+    a++;
+    position++;
+    x = a;
+    y = b;
   }
-  return result;
+
+  if(*a)
+  {
+    return (position + start);
+  }
+  else
+  {
+    return -1;
+  }
 }
 
 /*
