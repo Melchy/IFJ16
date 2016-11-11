@@ -123,9 +123,9 @@ void STR_Trim(S_String *s)
 /*
 Return values:
 -----------------------------------------------
--1 ... First string is less than the other one.
+false ... First string is shorter than the other one.
 0 .... Strings are equal.
-1 .... First string is more than the other one.
+true .... First string is longer than the other one.
 ----------------------------------------------- 
 */
 
@@ -185,7 +185,6 @@ int STR_SubStr(S_String *s, S_String *s_sub, int start)
       j++;
       if(s_sub->str[j] == '\0')
       {
-        printf("%d a %d \n", i, j);
         result = i - (j - 1);
         return result ;
       }

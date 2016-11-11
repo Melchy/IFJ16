@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
+/*
 static void initAll()
 {
 	FIO_Open("java.code");
@@ -110,6 +110,67 @@ int test_Expr()
 	MEM_clearAll();
 	FIO_Close();
 	return 0;
+}*/
+
+
+
+void test_VARTABInit()
+{
+	VT_InitTabs();
+	MEM_clearAll();
+}
+
+
+void test_VARTABInt()
+{
+	VT_InitTabs();
+	VT_AddInt(200);
+	printf("%d\n",VT_GetInt(1));
+	VT_AddInt(-100);
+	printf("%d\n",VT_GetInt(2));
+	VT_AddInt(0.2);
+	printf("%d\n",VT_GetInt(3));
+	printf("%d\n",VT_GetInt(4));
+	printf("%d\n",VT_GetInt(-2));
+	VT_PrintAll();
+	MEM_clearAll();
+}
+void test_VARTABDouble()
+{
+	VT_InitTabs();
+	VT_AddDouble(200);
+	printf("%g\n",VT_GetDouble(0));
+	VT_AddDouble(-100);
+	printf("%g\n",VT_GetDouble(1));
+	VT_AddDouble(0.2f);
+	printf("%g\n",VT_GetDouble(2));
+	printf("%g\n",VT_GetDouble(3));
+	printf("%g\n",VT_GetDouble(-2));
+	VT_PrintAll();
+	MEM_clearAll();
+}
+void test_VARTABStr()
+{
+	VT_InitTabs();
+	VT_AddStr(STR_Create("pes"));
+	printf("%s\n",VT_GetStr(0)->str);
+	VT_AddStr(STR_Create("kocka"));
+	printf("%s\n",VT_GetStr(1)->str);
+	VT_AddStr(STR_Create("asd"));
+	printf("%s\n",VT_GetStr(2)->str);
+	VT_PrintAll();
+	MEM_clearAll();
+}
+void test_VARTABBool()
+{
+	VT_InitTabs();
+	printf("%d\n",VT_GetBool(VT_AddBool(tkn_FALSE)));
+	printf("%d\n",VT_GetBool(VT_AddBool(1)));
+	printf("%d\n",VT_GetBool(VT_AddBool(2)));
+	printf("%d\n",VT_GetBoolSafe(VT_AddBool(tkn_FALSE)));
+	//VT_GetBoolSafe(VT_AddDouble(2));
+	VT_PrintAll();
+	MEM_clearAll();
 }
 
 void test_VARTAB()
@@ -125,12 +186,76 @@ void test_VARTAB()
 	MEM_clearAll();
 }
 
+void test_STRTo()
+{
+	S_String *test = STR_Create("ahoj");
+	STR_PrintStr(test);
+	putchar('\n');
+	S_String *sInt = STR_IntToString(20);
+	STR_PrintStr(sInt);
+	putchar('\n');
+	S_String *sLong = STR_LongToString(200);
+	STR_PrintStr(sLong);
+	putchar('\n');
+	S_String *sDouble =STR_DoubleToString(2.3);
+	STR_PrintStr(sDouble);
+	putchar('\n');
+	sDouble =STR_DoubleToString(0x23);
+	STR_PrintStr(sDouble);
+	putchar('\n');
+	
+}
+void test_STRChange()
+{
+	S_String *test = STR_Create(" ahoj ");
+	STR_PrintStr(test);
+	putchar('\n');
+	STR_Trim(test);
+	STR_PrintStr(test);
+	putchar('\n');
+	S_String *test2 = STR_Create("svete");
+	STR_AddChar(test, ' ');
+	STR_ConCat(test, test2);
+	STR_PrintStr(test);
+	putchar('\n');
+	STR_PrintStr(test2);
+	putchar('\n');
+}
+void test_STRSearch()
+{	
+	S_String *test = STR_Create("asc");
+	S_String *test2 = STR_Create("ac");
+	printf("%d\n",STR_Compare(test, test2));//-1
+	printf("%d\n",STR_FindChar(test, 'a'));//true
+	printf("%d\n",STR_FindChar(test, 'd'));//false
+	printf("%d\n",STR_SubStr(test, test2,0));//nefunguje
+	printf("%d\n",STR_SubStr(test, STR_Create("asd"),0));//-1
+	S_String **foo = &test2;
+	printf("%d\n",STR_GetAfter(test, foo,'x'));//1
+	STR_PrintStr(*foo);
+	putchar('\n');
+	printf("%d\n",STR_GetAfter(test, foo,'s'));//0
+	STR_PrintStr(*foo);
+	putchar('\n');
+	printf("%d\n",STR_GetAfter(test, foo,'c'));//2
+	STR_PrintStr(*foo);
+	putchar('\n');
+}
+void test_STRStrTo()
+{
+	//verim tomu :D 
+}
+
+
+
 int main(void)
 {
 	//test_VARTAB();
-	test_Expr();
+	//test_Expr();
 	//test_MEM();
 	//test_SCAN_GetToken();
 	//test_SCAN_FindToken();
+	//test_VARTABBool();
+	test_STRSearch();
 	return 0;
 }
