@@ -123,9 +123,11 @@ void STR_Trim(S_String *s)
 /*
 Return values:
 -----------------------------------------------
-false ... First string is shorter than the other one.
-0 .... Strings are equal.
-true .... First string is longer than the other one.
+if Return value < 0 then it indicates s1 is less than s2.
+
+if Return value > 0 then it indicates s2 is less than s1.
+
+if Return value = 0 then it indicates s1 is equal to s2.
 ----------------------------------------------- 
 */
 
