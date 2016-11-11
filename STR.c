@@ -120,6 +120,13 @@ void STR_Trim(S_String *s)
   s->str[j] = s->str[i];
 }
 
+void STR_Copy(S_String *s1, S_String *s2)
+{
+  MEM_free(s1);
+
+  s1 = STR_Create(s2->str);
+}
+
 /*
 Return values:
 -----------------------------------------------
