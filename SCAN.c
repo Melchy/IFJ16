@@ -10,49 +10,52 @@
 #include <string.h>
 #include <ctype.h>
 
-#define Add_Char STR_AddChar(SCAN_attr, c)
+#define Add_Char STR_AddChar(attr, c)
 
-#define Add_Null STR_AddChar(SCAN_attr, '\0')
+#define Add_Null STR_AddChar(attr, '\0')
+
+#define ATTR_SIZE	128
 						
 static bool endfl = 0;	// end flag pro indikaci nalezu EOF
 static int state;
+static S_String *attr;
 
 /* Detekce klicovych slov */
 static int tkn_word()
 {
-	if (!strcmp("Boolean", SCAN_attr->str))
+	if (!strcmp("Boolean", attr->str))
 		return tkn_BOOL;
-	if (!strcmp("break", SCAN_attr->str))
+	if (!strcmp("break", attr->str))
 		return tkn_BREAK;
-	if (!strcmp("class", SCAN_attr->str))
+	if (!strcmp("class", attr->str))
 		return tkn_CLASS;
-	if (!strcmp("continue", SCAN_attr->str))
+	if (!strcmp("continue", attr->str))
 		return tkn_CONT;
-	if (!strcmp("do", SCAN_attr->str))
+	if (!strcmp("do", attr->str))
 		return tkn_DO;
-	if (!strcmp("double", SCAN_attr->str))
+	if (!strcmp("double", attr->str))
 		return tkn_DOUBLE;
-	if (!strcmp("else", SCAN_attr->str))
+	if (!strcmp("else", attr->str))
 		return tkn_ELSE;
-	if (!strcmp("false", SCAN_attr->str))
+	if (!strcmp("false", attr->str))
 		return tkn_FALSE;
-	if (!strcmp("for", SCAN_attr->str))
+	if (!strcmp("for", attr->str))
 		return tkn_FOR;
-	if (!strcmp("if", SCAN_attr->str))
+	if (!strcmp("if", attr->str))
 		return tkn_IF;
-	if (!strcmp("int", SCAN_attr->str))
+	if (!strcmp("int", attr->str))
 		return tkn_INT;
-	if (!strcmp("return", SCAN_attr->str))
+	if (!strcmp("return", attr->str))
 		return tkn_RET;
-	if (!strcmp("String", SCAN_attr->str))
+	if (!strcmp("String", attr->str))
 		return tkn_STRING;
-	if (!strcmp("static", SCAN_attr->str))
+	if (!strcmp("static", attr->str))
 		return tkn_STATIC;
-	if (!strcmp("true", SCAN_attr->str))
+	if (!strcmp("true", attr->str))
 		return tkn_TRUE;
-	if (!strcmp("void", SCAN_attr->str))
+	if (!strcmp("void", attr->str))
 		return tkn_VOID;
-	if (!strcmp("while", SCAN_attr->str))
+	if (!strcmp("while", attr->str))
 		return tkn_WHILE;
 
 	return tkn_ID;
@@ -153,7 +156,7 @@ int SCAN_GetToken()
 	if(endfl) return EOF;
 
 	state = st_NULL;
-	SCAN_attr->str[0] = '\0'; SCAN_attr->len = 0;	// vycisteni atributu
+	attr->str[0] = '\0'; attr->len = 0;			// vycisteni atributu
 	bool flag = 0;								// pomocny flag pro rozhodovani o stavu automatu
 
 	int c;
@@ -169,12 +172,12 @@ int SCAN_GetToken()
 				else if(isdigit(c)) 						{ state = st_NUM; Add_Char; continue; }
 				else if(c == '/') 							{ state = st_SLASH; continue; } // nutno rozhodnout lomitko vs. koment
 				else if(onechar_tkn(c))						return onechar_tkn(c);
-				else if(c == '<' || c == '>')				{ state = st_CMP; SCAN_attr->str[0] = c; continue; }
-				else if(c == '!')							{ state = st_EXCL; SCAN_attr->str[0] = c; continue; }
-				else if(c == '=')							{ state = st_EQ; SCAN_attr->str[0] = c; continue; }
+				else if(c == '<' || c == '>')				{ state = st_CMP; attr->str[0] = c; continue; }
+				else if(c == '!')							{ state = st_EXCL; attr->str[0] = c; continue; }
+				else if(c == '=')							{ state = st_EQ; attr->str[0] = c; continue; }
 				else if(c == '"')							{ state = st_LIT; continue; }
-				else if(c == '&')							{ state = st_AND; SCAN_attr->str[0] = c; continue; }
-				else if(c == '|')							{ state = st_OR; SCAN_attr->str[0] = c; continue; }
+				else if(c == '&')							{ state = st_AND; attr->str[0] = c; continue; }
+				else if(c == '|')							{ state = st_OR; attr->str[0] = c; continue; }
 				else										{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
@@ -223,7 +226,7 @@ int SCAN_GetToken()
 			case st_WORD: // identifikator nebo keyword
 				if(isalnum(c) || c == '_' || c == '$')	{ Add_Char; continue; }
 				else if(c == '.')						{ state = st_LONGID; Add_Char; continue; }
-				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_word(SCAN_attr->str); }
+				else if(is_tokenchar(c) || isspace(c))	{ FIO_UngetChar(c); Add_Null; return tkn_word(attr->str); }
 				else 									{ Add_Char; Add_Null; ERROR_exit(LEX_ERR); }
 			break;
 
@@ -234,18 +237,18 @@ int SCAN_GetToken()
 			break;
 
 			case st_CMP: // <, >
-				if(c == '=')	{ SCAN_attr->str[1] = c; SCAN_attr->str[2] = '\0'; return (SCAN_attr->str[0] == '<') ? tkn_ELOWER:tkn_EHIGHER; }
-				else 			{ FIO_UngetChar(c); SCAN_attr->str[1] = '\0'; return (SCAN_attr->str[0] == '<') ? tkn_LOWER:tkn_HIGHER; }
+				if(c == '=')	{ attr->str[1] = c; attr->str[2] = '\0'; return (attr->str[0] == '<') ? tkn_ELOWER:tkn_EHIGHER; }
+				else 			{ FIO_UngetChar(c); attr->str[1] = '\0'; return (attr->str[0] == '<') ? tkn_LOWER:tkn_HIGHER; }
 			break;
 
 			case st_EXCL: // !
-				if(c == '=')	{ SCAN_attr->str[1] = c; SCAN_attr->str[2] = '\0'; return tkn_NEQUAL; }
-				else 			{ FIO_UngetChar(c); SCAN_attr->str[1] = '\0'; return tkn_EXCL; }
+				if(c == '=')	{ attr->str[1] = c; attr->str[2] = '\0'; return tkn_NEQUAL; }
+				else 			{ FIO_UngetChar(c); attr->str[1] = '\0'; return tkn_EXCL; }
 			break;
 
 			case st_EQ:	// =
-				if(c == '=')	{ SCAN_attr->str[1] = c; SCAN_attr->str[2] = '\0'; return tkn_EQUAL; }
-				else 			{ FIO_UngetChar(c); SCAN_attr->str[1] = '\0'; return tkn_ASSIGN; }
+				if(c == '=')	{ attr->str[1] = c; attr->str[2] = '\0'; return tkn_EQUAL; }
+				else 			{ FIO_UngetChar(c); attr->str[1] = '\0'; return tkn_ASSIGN; }
 			break;
 
 			case st_LIT: // v retezcovem literalu
@@ -261,19 +264,28 @@ int SCAN_GetToken()
 			break;
 
 			case st_AND: // &
-				if(c == '&')	{ SCAN_attr->str[1] = c; SCAN_attr->str[2] = '\0'; return tkn_AND; }
-				else 			{ FIO_UngetChar(c); SCAN_attr->str[1] = '\0'; ERROR_exit(LEX_ERR); }
+				if(c == '&')	{ attr->str[1] = c; attr->str[2] = '\0'; return tkn_AND; }
+				else 			{ FIO_UngetChar(c); attr->str[1] = '\0'; ERROR_exit(LEX_ERR); }
 			break;
 
 			case st_OR: // |
-				if(c == '|')	{ SCAN_attr->str[1] = c; SCAN_attr->str[2] = '\0'; return tkn_OR; }
-				else 			{ FIO_UngetChar(c); SCAN_attr->str[1] = '\0'; ERROR_exit(LEX_ERR); }
+				if(c == '|')	{ attr->str[1] = c; attr->str[2] = '\0'; return tkn_OR; }
+				else 			{ FIO_UngetChar(c); attr->str[1] = '\0'; ERROR_exit(LEX_ERR); }
 			break;
 
 			default: break;
 		}
 	}
 	return EOF;
+}
+
+void SCAN_InitAttr(){
+	attr = STR_Create("");
+	STR_ChangeSize(attr, ATTR_SIZE);
+}
+
+S_String *SCAN_GetAttr(){
+	return attr;
 }
 
 bool SCAN_FindToken(int token)

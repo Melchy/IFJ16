@@ -30,9 +30,13 @@
 /* Konecny stavovy automat */
 int SCAN_GetToken();
 
+/* Inicializace atributu - se startem programu */
+void SCAN_InitAttr();
+
+/* Vrati ukazatel na atribut */
+S_String *SCAN_GetAttr();
+
 /* Funkce pro nalezeni konkretniho tokenu */
 bool SCAN_FindToken(int token);
-
-S_String *SCAN_attr;
 
 #endif
