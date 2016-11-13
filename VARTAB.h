@@ -2,6 +2,9 @@
 #define VARTAB_H
 
 #include "STR.h"
+#include "MEM.h"
+#include "Tokens.h"
+#include "ERROR.h"
 
 #include <stdbool.h>
 

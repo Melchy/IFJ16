@@ -1,10 +1,4 @@
 #include "VARTAB.h"
-#include "STR.h"
-#include "MEM.h"
-#include "Tokens.h"
-#include "ERROR.h"
-
-#include <stdbool.h>
 
 static ArrInt_t 	int_arr;
 static ArrDouble_t 	double_arr;
@@ -133,6 +127,9 @@ bool VT_GetBool(t_Value *val)
 //testovano
 bool VT_GetBoolSafe(t_Value *val)
 {
+	if(val == NULL){
+		ERROR_exit(SEM_ERR_TYPE);
+	}
 	if(val->type != tkn_TRUE && val->type != tkn_FALSE)
 		ERROR_exit(SEM_ERR_TYPE);
 	return val->type == tkn_TRUE;

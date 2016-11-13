@@ -9,20 +9,24 @@
 #include "HASHVAR.h"
 #include "IDLogic.h"
 #include "HASHFCE.h"
+#include "JL.h"
+#include "Pars.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-/*
+
 static void initAll()
 {
 	FIO_Open("java.code");
 	SCAN_InitAttr();
 	VT_InitTabs();
 	HASHVAR_InitGlobal();
-	HASHFCE_InitFceTab();
+	HASHFCE_InitFceTab();   
 }
+/*
+
 
 int test_MEM()
 {
@@ -246,6 +250,19 @@ void test_STRStrTo()
 	//verim tomu :D 
 }
 
+void test_IL()
+{
+	S_String * trida = STR_Create("trida");
+	IL_SetClass(trida);//kopiruje
+	S_String * variable = STR_Create("varName");//kopiruje
+	IL_AllocVar(variable, tkn_NUM, false); //kopiruje
+	IL_SetVal(variable, VT_AddInt(200));//nekopiruje
+	//t_Value *IL_GetVal(S_String *ID) 
+	//void IL_InitFce(S_String *ID, S_String *type, long offset) kopiruje, stara verze
+	//S_Fce *IL_GetFce(S_String *ID)
+	//bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
+}
+
 
 
 int main(void)
@@ -256,6 +273,11 @@ int main(void)
 	//test_SCAN_GetToken();
 	//test_SCAN_FindToken();
 	//test_VARTABBool();
-	test_STRSearch();
+	//test_STRSearch();
+	//JL_Add(10, 2, 2);
+	initAll();
+	
+	//PH_MakeTree();
+	//PH_AllocTable();
 	return 0;
 }
