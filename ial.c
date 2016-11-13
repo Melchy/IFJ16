@@ -1,39 +1,58 @@
 #include "ial.h"
-#include "stdio.h"
 
-char *read_line()
+int readInt()
 {
-    char *line = malloc(100);
-    char *linep = line;
-    size_t lenmax = 100;
-    size_t len = lenmax;
-    int c;
+    int *result = MEM_malloc(sizeof(int));;
+    int control;
 
-    if(line == NULL)
-        return NULL;
+    S_String *s = STR_Create(read_line());
 
-    while((c=fgetc(stdin)) != EOF)
-    {    
-        if(--len == 0) {
-            len = lenmax;
-            char * linen = realloc(linep, lenmax *= 2);
-
-            if(linen == NULL) {
-                free(linep);
-                return NULL;
-            }
-            line = linen + (line - linep);
-            linep = linen;
-        }
-
-        if((*line++ = c) == '\n')
-        {
-            line--;
-            break;
-        }
+    if(s->str[0] == '-' || s->str[0] == '+')
+    {
+        return -7;
     }
-    *line = '\0';
-    return linep;
+    
+    control = STR_StringToInt(s, result);
+
+    if(control == 0)
+    {
+        return (int)*result;
+    }
+    else
+    {
+        return -7;
+    }
+}
+
+double readDouble()
+{
+    double *result = MEM_malloc(sizeof(int));;
+    int control;
+
+    S_String *s = STR_Create(read_line());
+
+    if(s->str[0] == '-' || s->str[0] == '+')
+    {
+        return -7;
+    }
+    
+    control = STR_StringToDouble(s, result);
+
+    if(control == 0)
+    {
+        return *result;
+    }
+    else
+    {
+        return -7;
+    }
+}
+
+S_String *readString()
+{
+    S_String *s = STR_Create(read_line());
+
+    return s;
 }
 
 int length(S_String *s)
@@ -64,6 +83,33 @@ S_String *substr(S_String *s, int i, int n)
 int total;
 int max_value(int a, int b) { return (a > b)? a: b; }
 
+S_String *sort(S_String *s)
+{
+    HS_Sort(s);
+    return s;
+}
+
+void HS_Sort(S_String *s)
+{
+    total = strlen(s->str) - 1;
+
+    // Rearrange the heap according to heap property (maxheap ... root > children).
+    for (int level = total / 2; level >= 0; level--)
+    {
+        HS_Heapify(s, level);
+    }
+
+    // Extraction of the "maximal" element.
+    for (int last = total; last > 0; last--)
+    {
+        // Move current root to the end.
+        SWAP(s->str, 0, last);
+        total--;
+        // Rearrange the reduced heap.
+        HS_Heapify(s, 0);
+    }
+}
+
 void HS_Heapify(S_String *s, int i)
 {
     int largest = i;        // Root is the largest.
@@ -88,28 +134,12 @@ void HS_Heapify(S_String *s, int i)
     }
 }
 
-void HS_Sort(S_String *s)
+int find(S_String *s, S_String *search)
 {
-    total = strlen(s->str) - 1;
-
-    // Rearrange the heap according to heap property (maxheap ... root > children).
-    for (int level = total / 2; level >= 0; level--)
-    {
-        HS_Heapify(s, level);
-    }
-
-    // Extraction of the "maximal" element.
-    for (int last = total; last > 0; last--)
-    {
-        // Move current root to the end.
-        SWAP(s->str, 0, last);
-        total--;
-        // Rearrange the reduced heap.
-        HS_Heapify(s, 0);
-    }
+    return BM_BCR(s, search);
 }
 
-int BM_BCRule(S_String *s, S_String *search)
+int BM_BCR(S_String *s, S_String *search)
 {
     int charJump[255];
     int i;
@@ -164,4 +194,44 @@ int BM_BCRule(S_String *s, S_String *search)
         }
     }
     return -1;
+}
+
+char *read_line()
+{
+    char *line = MEM_malloc(100);
+    char *line_start = line;
+    size_t length_max = 100;
+    size_t length = length_max;
+    int c;
+
+    if(line == NULL)
+    {
+        return NULL;
+    }
+
+    while((c = fgetc(stdin)) != EOF)
+    {    
+        if(--length == 0) 
+        {
+            length = length_max;
+            char * line_new = MEM_realloc(line_start, length_max *= 2);
+
+            if(line_new == NULL)
+            {
+                MEM_free(line_start);
+                return NULL;
+            }
+
+            line = line_new + (line - line_start);
+            line_start = line_new;
+        }
+
+        if((*line++ = c) == '\n')
+        {
+            line--;
+            break;
+        }
+    }
+    *line = '\0';
+    return line_start;
 }
