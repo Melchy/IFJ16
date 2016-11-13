@@ -34,7 +34,7 @@ static void Add_IDVal()
 	Tree_AddNode(val);
 }
 
-void EXPR_AddSym(int token)
+void EXPR_AddVal(int token, S_String *attr)
 {
 	if(token == tkn_ASSIGN){
 		Tree_AddAssignment();
@@ -42,6 +42,7 @@ void EXPR_AddSym(int token)
 	}
 
 	Add_IDVal();
+	int x; double y;
 
 	// pokud se jedna o operator, pridame ho, v pripade zavorek se zanorime/vynorime
 	if(token >= tkn_PLUS && token <= tkn_OR)
@@ -50,12 +51,7 @@ void EXPR_AddSym(int token)
 		Tree_NestIn();
 	else if(token == tkn_RPAREN)
 		Tree_NestOut();
-}
 
-void EXPR_AddVal(int token, S_String *attr)
-{
-	Add_IDVal();
-	int x; double y;
 	// pridame do stromu konkretni t_Value podle prichoziho tokenu
 	switch(token){
 		case tkn_NUM:
