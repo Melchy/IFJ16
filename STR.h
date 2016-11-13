@@ -25,8 +25,8 @@ void STR_PrintStr(S_String *s);
 void STR_AddChar(S_String *s, int lastChar);
 void STR_ChangeSize(S_String *s, int newSize);
 void STR_ConCat(S_String *s1, S_String *s2);
-void STR_Trim(S_String *s);
 void STR_Copy(S_String *s1, S_String *s2);
+void STR_Trim(S_String *s);
 
 int STR_Compare(S_String *s1, S_String *s2);
 int STR_FindChar(S_String *s, char subChar);

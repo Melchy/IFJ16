@@ -89,6 +89,13 @@ void STR_ConCat(S_String *s1, S_String *s2)
   }
 }
 
+void STR_Copy(S_String *s1, S_String *s2)
+{
+  MEM_free(s1);
+
+  s1 = STR_Create(s2->str);
+}
+
 void STR_Trim(S_String *s)
 {
   int i = 0;
@@ -118,13 +125,6 @@ void STR_Trim(S_String *s)
 
   s->len -= i - j;
   s->str[j] = s->str[i];
-}
-
-void STR_Copy(S_String *s1, S_String *s2)
-{
-  MEM_free(s1);
-
-  s1 = STR_Create(s2->str);
 }
 
 /*
@@ -279,7 +279,7 @@ int STR_StringToInt(S_String *s, int *result)
 
   *result = (int)strtol(s->str, &ptr, 10);
 
-  if(ptr == s->str)
+  if(*ptr != '\0')
   {
     return 1;
   }
@@ -318,7 +318,7 @@ int STR_StringToLong(S_String *s, long *result)
 
   *result = strtol(s->str, &ptr, 10);
 
-  if(ptr == s->str)
+  if(*ptr != '\0')
   {
     return 1;
   }
@@ -351,7 +351,7 @@ int STR_StringToDouble(S_String *s, double *result)
 
   *result = strtod(s->str, &ptr);
 
-  if(ptr == s->str)
+  if(*ptr != '\0')
   {
     return 1;
   }
