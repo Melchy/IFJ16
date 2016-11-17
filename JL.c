@@ -18,7 +18,9 @@ static S_JMP * active = NULL;
 			MEM_free(foo);
 		}
 	}
-
+	S_JMP * JL_Get(){
+		return active;
+	}
 	long JL_GetOffset(){
 		if(active == NULL){
 			return -10;

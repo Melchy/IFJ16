@@ -23,7 +23,7 @@ static S_String *attr;
 /* Detekce klicovych slov */
 static int tkn_word()
 {
-	if (!strcmp("Boolean", attr->str))
+	if (!strcmp("boolean", attr->str))
 		return tkn_BOOL;
 	if (!strcmp("break", attr->str))
 		return tkn_BREAK;
@@ -153,7 +153,12 @@ static int solve_esc(int *c0)
 
 int SCAN_GetToken()
 {
-	if(endfl) return EOF;
+	if(endfl) {
+		endfl = 0;
+		//return EOF;
+	}
+		
+	
 
 	state = st_NULL;
 	attr->str[0] = '\0'; attr->len = 0;			// vycisteni atributu

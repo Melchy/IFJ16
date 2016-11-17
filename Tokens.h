@@ -51,6 +51,6 @@
 #define tkn_SEMI	39
 #define tkn_COMMA	40
 
-
+#define tkn_EOF -1
 
 #endif

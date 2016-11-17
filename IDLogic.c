@@ -62,7 +62,7 @@ void IL_SetVal(S_String *ID, t_Value *value)
 	}
 	if(var == NULL)
 		ERROR_exit(SEM_ERR_DEF);
-
+	
 	var->value = value;
 }
 
@@ -106,9 +106,18 @@ void IL_InitFce(S_String *ID, int returnType, long offset, S_Param *firstParam)
 
 S_Fce *IL_GetFce(S_String *ID)
 {
-	S_Fce *f = HASHFCE_Find(ID);
-	if(f == NULL) ERROR_exit(SEM_ERR_DEF);
+	S_String *fullID;
+	if(STR_FindChar(ID, '.') == -1){
+		fullID = STR_Create(ActClass->str);
+		STR_AddChar(fullID, '.');
+		STR_ConCat(fullID, ID);
+	}else{
+		fullID = STR_Create(ID->str);
+	}
 
+	S_Fce *f = HASHFCE_Find(fullID);
+	if(f == NULL) ERROR_exit(SEM_ERR_DEF);
+	MEM_free(fullID);
 	return f;
 }
 

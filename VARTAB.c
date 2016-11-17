@@ -157,6 +157,9 @@ t_Value *VT_GetEmpty(int token)
 		case tkn_LIT: return Empty+1;
 		case tkn_REAL: return Empty+2;
 		case tkn_BOOL: return Empty+3;
+		case tkn_INT: return Empty;
+		case tkn_DOUBLE: return Empty+2;
+		case tkn_STRING: return Empty+1;
 	}
 	return NULL;
 }

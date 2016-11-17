@@ -24,6 +24,7 @@ static void initAll()
 	VT_InitTabs();
 	HASHVAR_InitGlobal();
 	HASHFCE_InitFceTab();   
+	
 }
 /*
 
@@ -276,7 +277,7 @@ int main(void)
 	//test_STRSearch();
 	//JL_Add(10, 2, 2);
 	initAll();
-	
+	PARS_Run();
 	//PH_MakeTree();
 	//PH_AllocTable();
 	return 0;

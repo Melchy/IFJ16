@@ -1,4 +1,18 @@
-d1 = 8.5;
-d2 = d1 + d1;
-s1 = "AHOJ " + d1;
-show(s1);
+class Main{
+	static void Run(){
+			do{
+
+			}(B.A(2))
+	}
+}
+
+class B{
+	static boolean A(int b){
+		if(b == 2){
+			return true;
+		}else{
+			return false;
+		}
+		
+	}
+}

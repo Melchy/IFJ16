@@ -363,3 +363,13 @@ int STR_StringToDouble(S_String *s, double *result)
 
   return 0;
 }
+
+S_String * STR_GetBefore(S_String * str, char ch){
+  int dotPos = STR_FindChar(str, ch);
+  if(dotPos == -1){
+    return NULL;
+  }
+  S_String * result = STR_Create(str->str);
+  result->str[dotPos+1] = '\0';
+  return result;
+}

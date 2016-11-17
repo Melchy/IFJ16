@@ -37,4 +37,5 @@ int STR_StringToInt(S_String *s, int *result);
 int STR_StringToLong(S_String *s, long *result);
 int STR_StringToDouble(S_String *s, double *result);
 
+S_String * STR_GetBefore(S_String * str, char ch);
 #endif
