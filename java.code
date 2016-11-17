@@ -1,12 +1,13 @@
 class Main{
 	static void Run(){
+			boolean a = true;
 			do{
 
-			}(B.A(2))
+			}(a)
 	}
 }
 
-class B{
+/*class B{
 	static boolean A(int b){
 		if(b == 2){
 			return true;
@@ -15,4 +16,4 @@ class B{
 		}
 		
 	}
-}
+}*/

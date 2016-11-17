@@ -8,14 +8,52 @@ void PARS_Run(){
     //TODO neoveruje stejna jmena trid
     //TODO Expr check, do te doby nejde prirazeni
     //TODO Vestavene fce
+    //TODO platnost promenych jen v cyklu
+    EXPR_Create();
     S_String * foo = STR_Create("Main");
     State = st_Start;
     FR_load();
+    IntitIfj16Fce();
     IL_SetClass(foo);
     foo->str = "Run";
-
+    EXPR_Dispose();
     SolveFce(foo,false);
+    MEM_free(foo);
 }
+
+void IntitIfj16Fce(){
+    S_String * cl = STR_Create("ifj16");
+    S_String * readInt = STR_Create("readInt");
+    S_String * readDouble = STR_Create("readDouble");
+    S_String * readString = STR_Create("readString");
+    S_String * printFoo = STR_Create("print");
+    S_String * length = STR_Create("length");
+    S_String * substr = STR_Create("substr");
+    S_String * compare = STR_Create("compare");
+    S_String * find = STR_Create("find");
+    S_String * sort = STR_Create("sort");
+    IL_SetClass(cl);
+    IL_InitFce(readInt,tkn_INT, -1,NULL);
+    IL_InitFce(readDouble,tkn_DOUBLE, -1,NULL);
+    IL_InitFce(readString,tkn_STRING, -1,NULL);
+    IL_InitFce(printFoo,tkn_VOID, -1,NULL);
+    IL_InitFce(length,tkn_INT, -1,NULL);
+    IL_InitFce(substr,tkn_STRING, -1,NULL);
+    IL_InitFce(compare,tkn_INT, -1,NULL);
+    IL_InitFce(find,tkn_INT, -1,NULL);
+    IL_InitFce(sort,tkn_STRING, -1,NULL);
+    MEM_free(cl);
+    MEM_free(readInt);
+    MEM_free(readDouble);
+    MEM_free(readString);
+    MEM_free(printFoo);
+    MEM_free(length);
+    MEM_free(substr);
+    MEM_free(compare);
+    MEM_free(find);
+    MEM_free(sort);
+}
+
 
 void FR_load(){
     while(true){
@@ -81,13 +119,13 @@ void FR_ElseSt(int * nestingLevel,bool canElse){
     (*nestingLevel)++;
 }
 void FR_IfSt(int * nestingLevel){
-    Tree_Create();
+    
     FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
     (*nestingLevel)++;
 }
 
 void FR_ReturnSt(){
-    Tree_Create();
+    
     FR_checkExpr(tkn_SEMI,-1, NULL, false,true);
 }
 
@@ -106,8 +144,7 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
     }else{
         int jmpNesting = JL_GetNestingLevel();
         if(JL_GetJumpType() == 3){ 
-            Tree_Create();
-            FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition
+            FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition     
         }
         if((*nestingLevel) == jmpNesting){
             (*nestingLevel)--;
@@ -123,7 +160,6 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
 }
 void FR_cycleWhile(int * nestingLevel){
     checkIfNextTokenIsSmt(tkn_LPAREN);
-    Tree_Create();
     FR_checkExpr(tkn_RPAREN,-1, NULL, false,false);
     checkIfNextTokenIsSmt(tkn_LBLOCK);
     (*nestingLevel)++;
@@ -136,15 +172,15 @@ void FR_cycleFor(int * nestingLevel){
     if(FR_checkVarType(token)){
         FR_DECLR();
     }else{
-        Tree_Create();
+        
         EXPR_AddVal(token, SCAN_GetAttr());
         FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
     }
-    Tree_Create();
+    
     //for("";"zde")
     FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
      //for("";"";"zde")
-    Tree_Create();
+    
     FR_checkExpr(tkn_RPAREN,-1, NULL, false,false);
     //for("";"";"zde"){
     checkIfNextTokenIsSmt(tkn_LBLOCK);
@@ -194,9 +230,9 @@ void FR_tknID(bool canFce){
         }
         FR_FceParamsSyntax();
     }else if(token == tkn_ASSIGN){
-        Tree_Create();
+        
         S_String * empty = STR_Create("");
-        EXPR_AddVal2(empty);
+        EXPR_AddVal(tkn_ID,empty);
         MEM_free(empty);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
@@ -211,7 +247,9 @@ void FR_tknID(bool canFce){
 void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty){
     int token;
     bool skipToken = false;
-    bool first = true;
+    static int a = 0;
+    printf("%d\n", a);
+    a++;
     while(true)
     {
         if(!skipToken){
@@ -226,29 +264,25 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
             if(addEndToken){
                 EXPR_AddVal(token,NULL);
             }
-            if(first == true && canEmpty == true){
-                return;
-            }
-            if(EXPR_Solve() == NULL){//TODO EXPR CHECK
-                FR_SynError();
-            }
-
+            EXPR_CheckSyntax(canEmpty);
             return; 
         }
-        first = false;
         if(!PH_checkValidToken(token)){
             FR_SynError();
         }
+
         if(token == tkn_ID){
             token = SCAN_GetToken();
             if(token != tkn_LPAREN){
-                S_String * foo = STR_Create("");
-                EXPR_AddVal2(foo);
-                MEM_free(foo);
+                S_String * empty = STR_Create("");
+                EXPR_AddVal(tkn_ID,empty);
+                MEM_free(empty);
                 skipToken = true;
-            }else{
+            }else if(token == tkn_LPAREN){
                 FR_FceParamsSyntax();
                 EXPR_AddVal2(VT_GetEmpty(tkn_INT));
+            }else{
+                FR_SynError();
             }
             continue;
         }
@@ -259,7 +293,7 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
 void FR_FceParamsSyntax(){
     int * token = MEM_malloc(sizeof(int));
     while(true){
-        Tree_Create();
+        
         FR_checkExpr(tkn_COMMA,tkn_RPAREN, token, false,true);
         if((*token) == tkn_RPAREN){
             return;
@@ -351,7 +385,6 @@ void FR_DeclrFceGlobal(S_String * ID,int type){
 void FR_DeclrVarGlobal(S_String * ID,int type,int token){
     IL_AllocVar(ID, type,true);
     if(token == tkn_ASSIGN){
-        Tree_Create();
         EXPR_AddVal(tkn_ID,ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         FR_Solve();
@@ -403,19 +436,60 @@ t_Value * SolveFce(S_String * ID,bool run){
     S_Fce * fce = IL_GetFce(ID);
 
     FC_Call();
+
     if(run){
         FC_LoadArgs(fce);
         SCAN_GetToken(); //strednik
     }
     returnPos = FIO_GetPosition();
-    FIO_MoveToPosition(fce->offset);
-    t_Value * result = FceMat();
-    CheckReturn(fce,result);
-    FIO_MoveToPosition(returnPos);
+    t_Value * result;
+
+    if(STR_Compare(IL_GetClass(), STR_GetIfj16Dot()) == 0){
+        result = PA_ifj16(ID);
+    }else{
+        FIO_MoveToPosition(fce->offset);
+        result = FceMat();
+        CheckReturn(fce,result);
+        FIO_MoveToPosition(returnPos);
+    }
+
     IL_SetClass(class);
     MEM_free(class);
     MEM_free(newClass);
+    EXPR_Dispose();
     return result;
+}
+
+t_Value * PA_ifj16(S_String * ID){
+    S_String ** fceNamePP = MEM_malloc(sizeof(S_String *));
+    int foo = STR_GetAfter(ID,fceNamePP,'.');
+    if(foo == 1 || foo == 2){
+        ERROR();
+    }
+    S_String * fceNameP = *(fceNamePP);
+
+    if(STR_Compare2(fceNameP,"readInt") == 0){
+        return VT_AddInt(readInt());
+    }else if(STR_Compare2(fceNameP,"readDouble") == 0){
+        return VT_AddDouble(readDouble());
+    }else if(STR_Compare2(fceNameP,"readString") == 0){
+        return VT_AddStr(readString());
+    }else if(STR_Compare2(fceNameP,"print") == 0){
+
+    }else if(STR_Compare2(fceNameP,"length") == 0){
+       // length(S_String *s)
+    }else if(STR_Compare2(fceNameP,"substr") == 0){
+       // substr(S_String *s, int i, int n)
+    }else if(STR_Compare2(fceNameP,"compare") == 0){
+        //compare(S_String *s1, S_String *s2)
+    }else if(STR_Compare2(fceNameP,"find") == 0){
+        //find(S_String *s, S_String *search)
+    }else if(STR_Compare2(fceNameP,"sort") == 0){
+        //sort(S_String *s);
+    }else{
+        ERROR();
+    }
+    return NULL;
 }
 
 void CheckReturn(S_Fce * fce,t_Value * result){
@@ -448,7 +522,7 @@ void FC_LoadArgs(S_Fce * fce){
     
     bool noNextParam = false;
 
-    EXPR_Create();
+    
     val = PH_Solve(tkn_RPAREN,tkn_COMMA,endToken,false);
 
     while((*endToken) != tkn_RPAREN){
@@ -457,7 +531,7 @@ void FC_LoadArgs(S_Fce * fce){
         }else{
             noNextParam = FC_AddParamToTable(fce,val,argNumber);
         }
-        EXPR_Create();
+        
         val = PH_Solve(tkn_RPAREN,tkn_COMMA,endToken,false);
         if(val == NULL){
             ERROR();
@@ -481,6 +555,7 @@ bool FC_AddParamToTable(S_Fce * fce, t_Value * val,int argNumber){
 t_Value * FceMat(){
     int * nestingLevel = MEM_malloc(sizeof(int));
     *(nestingLevel) = 0;
+
     while(true){
         switch(SCAN_GetToken()){
             case tkn_ID: tknID();  continue;
@@ -509,7 +584,7 @@ t_Value * FceMat(){
 
 t_Value * ReturnSt(){
 
-    EXPR_Create();
+    
     return PH_Solve(tkn_SEMI,-1, NULL, false);
 }
 
@@ -519,7 +594,6 @@ void ElseSt(int * nestingLevel){
 }
 
 void IfSt(int * nestingLevel){
-    EXPR_Create();
     if(VT_GetBoolSafe(PH_Solve(tkn_LBLOCK, -1, NULL, false))){
         (*nestingLevel)++;
     }else{
@@ -539,7 +613,7 @@ bool RBool(int * nestingLevel){
     int type = JL_GetJumpType();
 
     if(type == 3){//do
-        EXPR_Create();
+        
         if(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true))){
             FIO_MoveToPosition(JL_GetOffset());
         }else{
@@ -559,13 +633,13 @@ bool RBool(int * nestingLevel){
     }else if(type == 2){//for
         int position = FIO_GetPosition();
         FIO_MoveToPosition(JL_GetOffset());
-        EXPR_Create();
+        
         if(!(VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false)))){
             (*nestingLevel)--;
             JL_Remove();
             FIO_MoveToPosition(position);
         }else{
-            EXPR_Create();
+            
             PH_Solve(tkn_RPAREN, -1, NULL, false);
             SCAN_GetToken();
         }
@@ -583,7 +657,7 @@ void tknID(){
     if(token == tkn_LPAREN){
         SolveFce(ID,true);
     }else if(token == tkn_ASSIGN){
-        EXPR_Create();
+        
         EXPR_AddVal(tkn_ID,ID);
         MEM_free(ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
@@ -596,8 +670,9 @@ void DECLR(int type){
     int token = SCAN_GetToken();
     S_String * ID = STR_Create(SCAN_GetAttr()->str);
     IL_AllocVar(ID,type,false);
+    token = SCAN_GetToken();
     if(token == tkn_ASSIGN){
-        EXPR_Create();
+        
         EXPR_AddVal(tkn_ID,ID);
         MEM_free(ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
@@ -629,7 +704,7 @@ void cycleFor(int * nestingLevel){
     if(token == tkn_BOOL || token == tkn_DOUBLE || token == tkn_INT || token == tkn_STRING){
         DECLR(token);
     }else{
-        EXPR_Create();
+        
         EXPR_AddVal(token, SCAN_GetAttr());
         PH_Solve(tkn_SEMI, -1, NULL, false);
     }
@@ -637,7 +712,7 @@ void cycleFor(int * nestingLevel){
     (*nestingLevel)++;
     MakeJump(2,*nestingLevel);
     //for("";"zde")
-    EXPR_Create();
+    
     bool foo = VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false));
      //for("";"";"preskoci"){
     SCAN_FindToken(tkn_LBLOCK);
@@ -671,7 +746,7 @@ void ContinueSt(int * nestingLevel){
     long position = FIO_GetPosition();
     FIO_MoveToPosition(JL_GetOffset());
     if(type == 1){//while
-        EXPR_Create();
+        
         if(!(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true)))){
             (*nestingLevel)--;
             JL_Remove();
@@ -680,13 +755,13 @@ void ContinueSt(int * nestingLevel){
             SCAN_GetToken();
         }
     }else if(type == 2){//for
-        EXPR_Create();
+        
         if(!(VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false)))){
             (*nestingLevel)--;
             JL_Remove();
             FIO_MoveToPosition(position);
         }else{
-            EXPR_Create();
+            
             PH_Solve(tkn_RPAREN, -1, NULL, false);
             SCAN_GetToken();
         }
@@ -709,13 +784,11 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             EndToken1  == tkn_RBLOCK || 
             EndToken2  == tkn_RPAREN || 
             EndToken2  == tkn_RBLOCK){
-            nesting--;
-        }
-        if(EndToken1  == tkn_LPAREN || 
-            EndToken1  == tkn_LBLOCK || 
-            EndToken2  == tkn_LPAREN || 
-            EndToken2  == tkn_LBLOCK){
-            nesting++;
+            if(token == tkn_LPAREN || token == tkn_LBLOCK){
+                nesting++;
+            } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
+                nesting--;
+            }  
         }
         skipToken = false;
         if(token == EndToken1 || token == EndToken2){
@@ -729,10 +802,12 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
                 return EXPR_Solve();
             }  
         }
+
         if(token == tkn_ID){
             ID = STR_Create(SCAN_GetAttr()->str);
             token = SCAN_GetToken();
             if(token != tkn_LPAREN){
+
                 skipToken = true;
                 EXPR_AddVal(tkn_ID, ID);
                 MEM_free(ID);
