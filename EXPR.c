@@ -404,13 +404,13 @@ static void RecSyntax(t_Node *n)
 	}
 	if(val->type == tkn_PLUS){
 		if(par != NULL){
-			if(par->value->type == tkn_PLUS && Node_IsUnary(par))
+			if(par->value->type == tkn_PLUS && (Node_IsUnary(par) || Node_IsUnary(n)))
 				ERROR_exit(SYN_ERR);
 		}
 	}
 	if(val->type == tkn_MINUS){
 		if(par != NULL){
-			if(par->value->type == tkn_MINUS && Node_IsUnary(par))
+			if(par->value->type == tkn_MINUS && (Node_IsUnary(par) || Node_IsUnary(n)))
 				ERROR_exit(SYN_ERR);
 		}
 	}
