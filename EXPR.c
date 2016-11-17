@@ -45,34 +45,38 @@ void EXPR_AddVal(int token, S_String *attr)
 	int x; double y;
 
 	// pokud se jedna o operator, pridame ho, v pripade zavorek se zanorime/vynorime
-	if(token >= tkn_PLUS && token <= tkn_OR)
-		Tree_AddOp(token);
-	else if(token == tkn_LPAREN)
-		Tree_NestIn();
-	else if(token == tkn_RPAREN)
-		Tree_NestOut();
+	if(token >= tkn_PLUS && token <= tkn_OR){
+		Tree_AddOp(token); return;
+	}
+	else if(token == tkn_LPAREN){
+		Tree_NestIn(); return;
+	}
+	else if(token == tkn_RPAREN){
+		Tree_NestOut(); return;
+	}
 
 	// pridame do stromu konkretni t_Value podle prichoziho tokenu
 	switch(token){
 		case tkn_NUM:
 			STR_StringToInt(attr, &x);
 			Tree_AddNode(VT_AddInt(x));
-		break;
+			return;
 		case tkn_REAL:
 			STR_StringToDouble(attr, &y);
 			Tree_AddNode(VT_AddDouble(y));
-		break;
+			return;
 		case tkn_LIT:
 			Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
-		break;
+			return;
 		case tkn_TRUE:
 		case tkn_FALSE:
 			Tree_AddNode(VT_AddBool(token));
-		break;
+			return;
 		case tkn_ID:
 			Tree_AddID(attr);
-		break;
-		default: break;
+			return;
+		default: 
+			ERROR_exit(SYN_ERR);
 	}
 }
 
@@ -267,6 +271,9 @@ static t_Value *EasySolve(t_Value *l, t_Value *r, int op)
 
 static t_Value *toString(t_Value *v)
 {
+	if(v == NULL)
+		return NULL;
+	
 	switch(v->type){
 		case tkn_LIT:
 			return v;
@@ -311,11 +318,50 @@ static t_Value *RecSolve(t_Node *n)
 	return EasySolve(l, r, op);
 }
 
+static void safeAssignment(S_String *ID, t_Value *value)
+{
+	t_Value *id = IL_GetVal(ID);
+	if(id == NULL){
+		ERROR_exit(SEM_ERR_DEF);
+	}
+	if(id->type == tkn_NUM){
+		if(value->type == tkn_NUM)
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
+		else if(value->type == tkn_REAL)
+			IL_SetVal(ID, VT_AddInt((int)VT_GetDouble(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_REAL){
+		if(value->type == tkn_REAL)
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
+		else if(value->type == tkn_NUM)
+			IL_SetVal(ID, VT_AddDouble((double)VT_GetInt(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_LIT){
+		if(value->type == tkn_LIT)
+			IL_SetVal(ID, value);
+			//IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+	if(id->type == tkn_TRUE || id->type == tkn_FALSE || id->type == tkn_BOOL){
+		if(value->type == tkn_TRUE || value->type == tkn_FALSE)
+			IL_SetVal(ID, VT_AddBool(VT_GetBool(value) ? tkn_TRUE : tkn_FALSE));
+		else
+			ERROR_exit(SEM_ERR_TYPE);
+	}
+}
+
 static void makeAssigns(t_Value *value)
 {
 	S_String *ID;
 	while((ID = Tree_PopAssign()) != NULL) // popujeme z assign listu a zpetne prirazujeme vysledek
-		SEM_SafeAssignment(ID, value);
+		safeAssignment(ID, value);
 }
 
 t_Value *EXPR_Solve()
@@ -337,5 +383,85 @@ t_Value *EXPR_Solve()
 		ERROR_exit(SEM_ERR_TYPE);
 	makeAssigns(res);
 	Tree_Dispose();
+	Tree_Create();
 	return res;
+}
+
+static void RecSyntax(t_Node *n)
+{
+	if(n == NULL)
+		return;
+
+	RecSyntax(Node_GetLChild(n));
+	RecSyntax(Node_GetRChild(n));
+
+	t_Value *val = Node_GetValue(n);
+	t_Node *par = Node_GetParent(n);
+
+	if(Node_IsOp(n)){
+		if(Node_IsBottom(n))
+			ERROR_exit(SYN_ERR);
+	}
+	if(val->type == tkn_PLUS){
+		if(par != NULL){
+			if(par->value->type == tkn_PLUS && Node_IsUnary(par))
+				ERROR_exit(SYN_ERR);
+		}
+	}
+	if(val->type == tkn_MINUS){
+		if(par != NULL){
+			if(par->value->type == tkn_MINUS && Node_IsUnary(par))
+				ERROR_exit(SYN_ERR);
+		}
+	}
+	if(val->type == tkn_MUL ||
+		val->type == tkn_DIV ||
+		val->type == tkn_OR ||
+		val->type == tkn_AND ||
+		val->type == tkn_HIGHER ||
+		val->type == tkn_LOWER ||
+		val->type == tkn_EHIGHER ||
+		val->type == tkn_ELOWER ||
+		val->type == tkn_EQUAL ||
+		val->type == tkn_NEQUAL ) 
+	{
+		if(Node_IsUnary(n))
+			ERROR_exit(SYN_ERR);
+	}
+	if(val->type == tkn_EXCL && !Node_IsUnary(n))
+		ERROR_exit(SYN_ERR);
+	if(val->type == tkn_NUM ||
+		val->type == tkn_REAL ||
+		val->type == tkn_LIT ||
+		val->type == tkn_TRUE ||
+		val->type == tkn_FALSE ||
+		val->type == tkn_BOOL )
+	{
+		if(par != NULL){
+			if(par->value->type == tkn_NUM ||
+				par->value->type == tkn_REAL ||
+				par->value->type == tkn_LIT ||
+				par->value->type == tkn_TRUE ||
+				par->value->type == tkn_FALSE ||
+				par->value->type == tkn_BOOL )
+				ERROR_exit(SYN_ERR);
+		}
+	}
+	if(val->type == tkn_LPAREN && !Node_IsUnary(n))
+		ERROR_exit(SYN_ERR);
+}
+
+void EXPR_CheckSyntax(bool emptyAllowed)
+{
+	if(Tree_Empty() && !emptyAllowed)
+		ERROR_exit(SYN_ERR);
+	if(Tree_GetNest() != 0)
+		ERROR_exit(SYN_ERR);
+
+	t_Node *n = Tree_GetTopNode();
+	RecSyntax(n);
+}
+
+void EXPR_Dispose(){
+	Tree_Dispose();
 }

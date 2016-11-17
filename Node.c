@@ -23,7 +23,7 @@ bool Node_IsBottom(t_Node *n){
 
 bool Node_IsUnary(t_Node *n){
 	if(n != NULL)
-		return (n->l_child == NULL) && (n->r_child != NULL);
+		return ((n->l_child == NULL) && (n->r_child != NULL)) || ((n->l_child != NULL) && (n->r_child == NULL));
 	return false;
 }
 
@@ -69,4 +69,8 @@ t_Node *Node_GetLChild(t_Node *n){
 
 t_Node *Node_GetRChild(t_Node *n){
 	return n->r_child;
+}
+
+t_Node *Node_GetParent(t_Node *n){
+	return n->parent;
 }

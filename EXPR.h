@@ -16,4 +16,10 @@ void EXPR_AddVal2(t_Value *value);
 /* Vyresi vyraz, vrati ukazatel na vysledek */
 t_Value *EXPR_Solve();
 
+/* Kontorla syntaxe vyrazu */
+void EXPR_CheckSyntax(bool emptyAllowed);
+
+/* Uvolneni vyrazu */
+void EXPR_Dispose();
+
 #endif

@@ -22,6 +22,7 @@ void Tree_Create()
 	T->LastAssign = NULL;
 	T->ActStr = NULL;
 	T->assignable = true;
+	T->nest = 0;
 }
 
 bool Tree_Empty(){
@@ -84,7 +85,8 @@ static int priority(t_Value *v)
 	return 100; // pro hodnoty (promenne, literaly)
 }
 
-static void createTop(t_Node *n) // vytvori vrchol stromu
+/* Vytvori vrchol stromu */
+static void createTop(t_Node *n)
 {
 	n->parent = n->l_child = n->r_child = NULL;
 	T->Top = T->Act = n;
@@ -104,7 +106,8 @@ static void createTop(t_Node *n) // vytvori vrchol stromu
 	T->Act = n;
 }*/
 
-static void addRight(t_Node *n) // prida uzel jako praveho potomka aktivniho uzlu
+/* Prida uzel jako praveho potomka aktivniho uzlu */
+static void addRight(t_Node *n) // 
 {
 	if(T->Top == NULL){
 		createTop(n); return;
@@ -118,7 +121,8 @@ static void addRight(t_Node *n) // prida uzel jako praveho potomka aktivniho uzl
 	T->Act = n;
 }
 
-static void addAbove(t_Node *n) // prida uzel jako rodice aktivniho uzlu
+/* Prida uzel jako rodice aktivniho uzlu */
+static void addAbove(t_Node *n) 
 {
 	if(T->Top == NULL){
 		createTop(n); return;
@@ -139,7 +143,8 @@ static void addAbove(t_Node *n) // prida uzel jako rodice aktivniho uzlu
 	T->Act = n;
 }
 
-static void lookupLowPrio(t_Node *n) // hleda (smerem nahoru) operator s nizsi nebo stejnou prioritou
+/* Hleda (smerem nahoru) operator s nizsi nebo stejnou prioritou */
+static void lookupLowPrio(t_Node *n)
 {
 	if(T->Act == NULL)
 		return;
@@ -195,10 +200,8 @@ void Tree_AddNode(t_Value *value){
 void Tree_AddAssignment()
 {
 
-	if (T->ActStr == NULL || T->assignable == false){
-		printf("her\n");
+	if (T->ActStr == NULL || T->assignable == false)
 		ERROR_exit(SYN_ERR);
-	}
 	t_Assign *a = MEM_malloc(sizeof(t_Assign));
 	a->ID = T->ActStr;
 	T->ActStr = NULL;
@@ -207,11 +210,8 @@ void Tree_AddAssignment()
 }
 
 void Tree_AddID(S_String *attr){
-	if(T->ActStr != NULL){
-				printf("herka\n");
-
+	if(T->ActStr != NULL)
 		ERROR_exit(SYN_ERR);
-	}
 	T->ActStr = STR_Create(attr->str);
 }
 
@@ -234,10 +234,14 @@ void Tree_NestIn()
 	t_Node *n = MEM_malloc(sizeof(t_Node));
 	n->value = VT_GetLParen();
 	addRight(n);
+	T->nest++;
 }
 
 void Tree_NestOut()
 {
+	T->nest--;
+	if(T->nest < 0)
+		ERROR_exit(SYN_ERR);
 	do{
 		if(T->Act->parent == NULL)
 			break;
@@ -339,4 +343,8 @@ void Tree_Print()
 
 t_Node *Tree_GetTopNode(){
 	return T->Top;
+}
+
+int Tree_GetNest(){
+	return T->nest;
 }

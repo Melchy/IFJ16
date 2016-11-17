@@ -20,24 +20,32 @@ typedef struct t_Tree{
 	t_Assign *LastAssign;
 	S_String *ActStr;
 	bool assignable;
+	int nest;
 	t_Tree *prev;
 }t_Tree;
 
 /* Alokace noveho stromu a pridani do seznamu stromu */
 void Tree_Create();
 
+/* Vraci true v pripade, ze je strom prazdny */
 bool Tree_Empty();
 
+/* Prida operator do stromu */
 void Tree_AddOp(int token);
 
+/* Prida node do stromu (hodnotu) */
 void Tree_AddNode(t_Value *value);
 
+/* Vytvori prirazeni */
 void Tree_AddAssignment();
 
+/* Prida ID do stromu (i pro prirazeni i pro operand) */
 void Tree_AddID(S_String *attr);
 
+/* Provadi pop identifikatoru, ktery byl poslan do stromu v predchozim kroku */
 S_String *Tree_PopActStr();
 
+/* Provadi pop posledniho identifikatoru z assign listu */
 S_String *Tree_PopAssign();
 
 /* Pridani leve zavorky do stromu - pomocna logika */
@@ -59,5 +67,7 @@ void Tree_Dispose();
 void Tree_Print();
 
 t_Node *Tree_GetTopNode();
+
+int Tree_GetNest();
 
 #endif
