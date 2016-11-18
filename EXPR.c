@@ -471,6 +471,9 @@ void EXPR_CheckSyntax(bool emptyAllowed)
 
 	t_Node *n = Tree_GetTopNode();
 	RecSyntax(n);
+
+	Tree_Dispose();
+	Tree_Create();
 }
 
 void EXPR_Dispose(){
