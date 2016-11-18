@@ -27,7 +27,7 @@ void VT_InitTabs()
 	str_arr.act_index = 0;
 
 	Zero = VT_AddInt(0);
-	AnyStr = VT_AddStr(STR_Create("str"));
+	AnyStr = VT_AddStr(STR_Create(""));
 
 	Empty = MEM_malloc(4*sizeof(t_Value));
 	Empty[0].type = tkn_NUM; Empty[0].VT_index = -1;
@@ -149,7 +149,7 @@ t_Value *VT_GetZeroInt()
 	return Zero;
 }
 
-t_Value *VT_GetAnyString()
+t_Value *VT_GetEmptyString()
 {
 	return AnyStr;
 }

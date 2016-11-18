@@ -27,6 +27,10 @@ static void Add_IDVal()
 	S_String *ID = Tree_PopActStr();
 	if(ID == NULL) // pokud zadny identifikator neceka na pridani do stromu, vratime se
 		return;
+	if(!STR_Compare(ID, VT_GetStr(VT_GetEmptyString()->VT_index))){
+		Tree_AddNode(VT_GetEmpty(tkn_NUM));
+		return;
+	}
 
 	t_Value *val = IL_GetVal(ID);
 	if(val == NULL)

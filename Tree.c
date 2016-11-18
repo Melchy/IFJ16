@@ -213,7 +213,7 @@ void Tree_AddID(S_String *attr){
 	if(T->ActStr != NULL)
 		ERROR_exit(SYN_ERR);
 	if(attr == NULL)
-		T->ActStr = VT_GetStr(VT_GetAnyString()->VT_index);
+		T->ActStr = VT_GetStr(VT_GetEmptyString()->VT_index);
 	else
 		T->ActStr = STR_Create(attr->str);
 }
