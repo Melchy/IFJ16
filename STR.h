@@ -16,6 +16,7 @@ typedef struct {
 
 /* --- Deklarace funkci --- */
 
+S_String *STR_GetIfj16Dot();
 S_String *STR_Create(char *value);
 S_String *STR_IntToString(int value);
 S_String *STR_LongToString(long value);
@@ -29,6 +30,7 @@ void STR_Copy(S_String *s1, S_String *s2);
 void STR_Trim(S_String *s);
 
 int STR_Compare(S_String *s1, S_String *s2);
+int STR_Compare2(S_String *s1, char * str);
 int STR_FindChar(S_String *s, char subChar);
 int STR_SubStr(S_String *s, S_String *s_sub, int start);
 int STR_GetAfter(S_String *s, S_String **s_after, char separator);

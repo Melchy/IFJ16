@@ -5,6 +5,17 @@
 
 #include <errno.h>
 
+
+static S_String * ifj16Dot;
+
+
+S_String * STR_GetIfj16Dot(){
+  if(ifj16Dot == NULL){
+    ifj16Dot = STR_Create("ifj16.");
+  }
+  return ifj16Dot;
+}
+
 S_String *STR_Create(char *value)
 {
 	S_String *s = MEM_malloc(sizeof(S_String));
@@ -143,6 +154,9 @@ int STR_Compare(S_String *s1, S_String *s2)
   return strcmp(s1->str, s2->str);
 }
 
+int STR_Compare2(S_String *s1, char * str){
+  return strcmp(s1->str, str);
+}
 /*
 Return values:
 -------------------------------------------------------

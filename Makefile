@@ -3,8 +3,8 @@ CFLAGS=-Wall -Wextra -std=c11 -pedantic
 
 all: ifj16_rtg
 
-ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o
-	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o -o ifj16_rtg
+ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o
+	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o -o ifj16_rtg
 
 IDLogic.o: IDLogic.c IDLogic.h STR.h VARTAB.h HASHVAR.h HASHFCE.h
 	$(CC) $(CFLAGS) -c IDLogic.c -o IDLogic.o
@@ -48,11 +48,14 @@ SCAN.o: SCAN.c SCAN.h FIO.h STR.h MEM.h ERROR.h Tokens.h
 JL.o: JL.c JL.h MEM.h
 	$(CC) $(CFLAGS) -c JL.c -o JL.o
 
-Pars.o: Pars.c Pars.h SCAN.h FIO.h STR.h MEM.h Tree.h Tokens.h EXPR.h VARTAB.h HASHVAR.h IDLogic.h HASHFCE.h JL.h
+ial.o: MEM.h MEM.c STR.h STR.c
+	$(CC) $(CFLAGS) -c ial.c -o ial.o
+
+Pars.o: Pars.c Pars.h SCAN.h FIO.h STR.h MEM.h Tree.h Tokens.h EXPR.h VARTAB.h HASHVAR.h IDLogic.h HASHFCE.h JL.h ial.h
 	$(CC) $(CFLAGS) -c Pars.c -o Pars.o
 
 
-main.o: main.c SCAN.h FIO.h STR.h MEM.h Tree.h Tokens.h EXPR.h VARTAB.h HASHVAR.h IDLogic.h HASHFCE.h JL.h Pars.h
+main.o: main.c SCAN.h FIO.h STR.h MEM.h Tree.h Tokens.h EXPR.h VARTAB.h HASHVAR.h IDLogic.h HASHFCE.h JL.h Pars.h ial.h
 	$(CC) $(CFLAGS) -c main.c -o main.o
 
 

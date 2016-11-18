@@ -21,6 +21,9 @@
 	#include "IDLogic.h"
 	#include "HASHFCE.h"
 	#include "JL.h"
+	#include "ial.h"
+
+
 
 	#define st_Start 0
 	#define st_Class 1
@@ -56,6 +59,8 @@
 	void PH_MakeTree();
 	void ElseSt(int * nestingLevel);
 	void CheckReturn(S_Fce * fce,t_Value * result);
+	void IntitIfj16Fce();
+	t_Value * PA_ifj16(S_String * ID);
 
 	void checkIfNextTokenIsSmt(int token);
 	void FR_tknID(bool canFce);
