@@ -58,22 +58,15 @@ void EXPR_AddVal(int token, S_String *attr)
 	// pridame do stromu konkretni t_Value podle prichoziho tokenu
 	switch(token){
 		case tkn_NUM:
-			if(attr == NULL)
-				Tree_AddNode(VT_GetEmpty(tkn_NUM));
-			else
-				{ STR_StringToInt(attr, &x); Tree_AddNode(VT_AddInt(x)); }
+			STR_StringToInt(attr, &x);
+			Tree_AddNode(VT_AddInt(x));
 			return;
 		case tkn_REAL:
-			if(attr == NULL)
-				Tree_AddNode(VT_GetEmpty(tkn_REAL));
-			else
-				{ STR_StringToDouble(attr, &y); Tree_AddNode(VT_AddDouble(y)); }
+			STR_StringToDouble(attr, &y);
+			Tree_AddNode(VT_AddDouble(y));
 			return;
 		case tkn_LIT:
-			if(attr == NULL)
-				Tree_AddNode(VT_GetEmpty(tkn_LIT));
-			else
-				Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
+			Tree_AddNode(VT_AddStr(STR_Create(attr->str)));
 			return;
 		case tkn_TRUE:
 		case tkn_FALSE:

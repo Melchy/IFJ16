@@ -212,10 +212,7 @@ void Tree_AddAssignment()
 void Tree_AddID(S_String *attr){
 	if(T->ActStr != NULL)
 		ERROR_exit(SYN_ERR);
-	if(attr == NULL)
-		T->ActStr = VT_GetStr(VT_GetAnyString()->VT_index);
-	else
-		T->ActStr = STR_Create(attr->str);
+	T->ActStr = STR_Create(attr->str);
 }
 
 S_String *Tree_PopActStr(){

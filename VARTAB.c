@@ -8,7 +8,6 @@ static t_Value *Operators;
 static t_Value *Bools;
 static t_Value *LParen;
 static t_Value *Zero;
-static t_Value *AnyStr;
 static t_Value *Empty;
 
 //testovano
@@ -26,8 +25,10 @@ void VT_InitTabs()
 	double_arr.act_index = 
 	str_arr.act_index = 0;
 
-	Zero = VT_AddInt(0);
-	AnyStr = VT_AddStr(STR_Create("str"));
+	VT_AddInt(0);
+	Zero = MEM_malloc(sizeof(t_Value));
+	Zero->type = tkn_NUM;
+	Zero->VT_index = 0;
 
 	Empty = MEM_malloc(4*sizeof(t_Value));
 	Empty[0].type = tkn_NUM; Empty[0].VT_index = -1;
@@ -147,11 +148,6 @@ t_Value *VT_GetLParen()
 t_Value *VT_GetZeroInt()
 {
 	return Zero;
-}
-
-t_Value *VT_GetAnyString()
-{
-	return AnyStr;
 }
 //testovano
 t_Value *VT_GetEmpty(int token)
