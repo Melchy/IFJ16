@@ -464,6 +464,8 @@ static void RecSyntax(t_Node *n)
 
 void EXPR_CheckSyntax(bool emptyAllowed)
 {
+	Add_IDVal();
+
 	if(Tree_Empty() && !emptyAllowed)
 		ERROR_exit(SYN_ERR);
 	if(Tree_GetNest() != 0)
