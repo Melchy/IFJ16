@@ -323,6 +323,11 @@ static t_Value *RecSolve(t_Node *n)
 	else
 		r = Node_GetValue(Node_GetRChild(n));
 
+	if(l != NULL && l->VT_index == -1)
+		ERROR_exit(INIT_ERR);
+	if(r != NULL && r->VT_index == -1)
+		ERROR_exit(INIT_ERR);
+
 	if(is_concat)
 		return EasySolve(toString(l), toString(r), op);
 
@@ -336,7 +341,7 @@ static void safeAssignment(S_String *ID, t_Value *value)
 		ERROR_exit(SEM_ERR_DEF);
 	}
 
-	if(id->type == tkn_INT){
+	if(id->type == tkn_NUM || id->type == tkn_INT){
 		if(value->type == tkn_NUM)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
@@ -345,7 +350,7 @@ static void safeAssignment(S_String *ID, t_Value *value)
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_DOUBLE){
+	if(id->type == tkn_DOUBLE || id->type == tkn_REAL){
 		if(value->type == tkn_REAL)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
@@ -354,14 +359,14 @@ static void safeAssignment(S_String *ID, t_Value *value)
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_STRING){
+	if(id->type == tkn_STRING || id->type == tkn_LIT){
 		if(value->type == tkn_LIT)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_BOOL){
+	if(id->type == tkn_BOOL || id->type == tkn_TRUE || id->type == tkn_FALSE){
 		if(value->type == tkn_TRUE || value->type == tkn_FALSE)
 			IL_SetVal(ID, VT_AddBool(VT_GetBool(value) ? tkn_TRUE : tkn_FALSE));
 		else
