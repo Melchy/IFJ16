@@ -1,14 +1,11 @@
 class Main{
-	static int a = 2;
-	static void Run(){
-		for(int i=0;i<3;i = i +1){
-			a = a + i;
-		}
+	static void run(){
+		B.A(true);
 	}
 }
 
 class B{
 	static int A(int b){
-		return b;
+		return 1;
 	}
 }

@@ -16,7 +16,7 @@ void PARS_Run(){
     FR_load();
     IntitIfj16Fce();
     IL_SetClass(foo);
-    foo->str = "Run";
+    foo->str = "run";
     EXPR_Dispose();
     SolveFce(foo,true);
     MEM_free(foo);
@@ -27,10 +27,7 @@ void IntitIfj16Fce(){
     S_String * readInt = STR_Create("readInt");
     S_String * readDouble = STR_Create("readDouble");
     S_String * readString = STR_Create("readString");
-    S_String * printDouble = STR_Create("printDouble");
-    S_String * printStr = STR_Create("printStr");
-    S_String * printInt = STR_Create("printInt");
-    S_String * printBool = STR_Create("printBool");
+    S_String * prnt = STR_Create("print");
     S_String * length = STR_Create("length");
     S_String * substr = STR_Create("substr");
     S_String * compare = STR_Create("compare");
@@ -50,7 +47,6 @@ void IntitIfj16Fce(){
     str1->ID = frst;
     str1->type = tkn_STRING;
 
-    IL_InitFce(printStr,tkn_VOID, -1,str1);
     IL_InitFce(length,tkn_INT, -1,str1);
     IL_InitFce(sort,tkn_STRING, -1,str1);
 
@@ -85,35 +81,22 @@ void IntitIfj16Fce(){
 
     S_Param * bool1 = MEM_malloc(sizeof(S_Param));
     bool1->ID = frst;
-    bool1->type = tkn_BOOL;
+    bool1->type = tkn_ALLTYPES;
 
-    IL_InitFce(printBool,tkn_VOID, -1,bool1);
-
-    int1 = MEM_malloc(sizeof(S_Param));
-    int1->ID = frst;
-    int1->type = tkn_INT;
-
-    IL_InitFce(printInt,tkn_VOID, -1,int1);
-
-    S_Param * double1 = MEM_malloc(sizeof(S_Param));
-    double1->ID = frst;
-    double1->type = tkn_DOUBLE;
-
-    IL_InitFce(printDouble,tkn_VOID, -1,double1);
+    IL_InitFce(prnt,tkn_VOID, -1,bool1);
 
     MEM_free(cl);
     MEM_free(readInt);
     MEM_free(readDouble);
     MEM_free(readString);
-    MEM_free(printDouble);
-    MEM_free(printStr);
-    MEM_free(printInt);
-    MEM_free(printBool);
+    MEM_free(prnt);
     MEM_free(length);
     MEM_free(substr);
     MEM_free(compare);
     MEM_free(find);
     MEM_free(sort);
+
+   // HASHFCE_Print();
 }
 
 
@@ -504,12 +487,12 @@ t_Value * SolveFce(S_String * ID,bool run){
     }
     IL_SetClass(newClass);
     //end
-
     S_Fce * fce = IL_GetFce(ID);
 
     FC_Call();
 
     if(!run){
+
         FC_LoadArgs(fce);
     }
     returnPos = FIO_GetPosition();
@@ -537,6 +520,7 @@ t_Value * SolveFce(S_String * ID,bool run){
 t_Value * PA_ifj16(S_String * ID){
     S_String ** fceNamePP = MEM_malloc(sizeof(S_String *));
     int foo = STR_GetAfter(ID,fceNamePP,'.');
+
     if(foo == 1 || foo == 2){
         ERROR();
     }
@@ -549,7 +533,21 @@ t_Value * PA_ifj16(S_String * ID){
     }else if(STR_Compare2(fceNameP,"readString") == 0){
         return VT_AddStr(readString());
     }else if(STR_Compare2(fceNameP,"print") == 0){
-
+    	S_String * frst = STR_Create("first");
+    	t_Value * param = IL_GetVal(frst);
+    	if(param->type == tkn_TRUE){
+    		printf("%s", "true");
+    	}else if(param->type == tkn_FALSE){
+    		printf("%s", "false");
+    	}else if(param->type == tkn_DOUBLE || param->type == tkn_REAL){
+    		printf("%g", VT_GetDouble(param->VT_index));
+    	}else if(param->type == tkn_INT || param->type == tkn_NUM){
+    		printf("%d", VT_GetInt(param->VT_index));
+    	}else if(param->type == tkn_STRING || param->type == tkn_LIT){
+    		printf("%s", VT_GetStr(param->VT_index)->str);
+    	}else{
+    		ERROR();
+    	}
     }else if(STR_Compare2(fceNameP,"length") == 0){
        // length(S_String *s)
     }else if(STR_Compare2(fceNameP,"substr") == 0){

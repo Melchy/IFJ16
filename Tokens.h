@@ -53,4 +53,7 @@
 
 #define tkn_EOF -1
 
+#define tkn_ALLTYPES	100 //parser (pretezovani)
+
+
 #endif

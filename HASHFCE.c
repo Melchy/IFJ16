@@ -80,6 +80,7 @@ void HASHFCE_Print()
 		{
 			printf("[ID]: %s [returnType]: %d [offset]: %ld", f->ID->str, f->returnType, f->offset);
 			f = f->next;
+			putchar('\n');
 		}
 	}
 	putchar('\n');
