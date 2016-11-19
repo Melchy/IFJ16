@@ -1,11 +1,17 @@
 class Main{
 	static void run(){
-		B.A(true);
+		String a = "pes";
+		B.A((a));
+		//ifj16.length((a));
+		/*String substr(String s, int i, int n)
+		int compare(String s1, String s2)
+		int find(String s, String search)
+		String sort(String s)*/
 	}
 }
 
 class B{
-	static int A(int b){
+	static int A(String b){
 		return 1;
 	}
 }

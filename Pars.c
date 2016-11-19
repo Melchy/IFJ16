@@ -4,10 +4,7 @@ int State = -1;
 
 //PARSER
 void PARS_Run(){
-    //TODO nesting zavorek ve vyrazech v prvnim pruchodu
     //TODO neoveruje stejna jmena trid
-    //TODO Expr check, do te doby nejde prirazeni
-    //TODO Vestavene fce
     //TODO platnost promenych jen v cyklu
     //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti
     EXPR_Create();
@@ -96,7 +93,7 @@ void IntitIfj16Fce(){
     MEM_free(find);
     MEM_free(sort);
 
-   // HASHFCE_Print();
+    HASHFCE_Print();
 }
 
 
@@ -292,22 +289,22 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
     int token;
     bool skipToken = false;
     int nesting = 0;
+    if(EndToken1  == tkn_RPAREN || 
+            EndToken1  == tkn_RBLOCK || 
+            EndToken2  == tkn_RPAREN || 
+            EndToken2  == tkn_RBLOCK){
+    	nesting++;
+    }
     while(true)
     {
         if(!skipToken){
             token = SCAN_GetToken();
         }
-        
-        if(EndToken1  == tkn_RPAREN || 
-            EndToken1  == tkn_RBLOCK || 
-            EndToken2  == tkn_RPAREN || 
-            EndToken2  == tkn_RBLOCK){
-            if(token == tkn_LPAREN || token == tkn_LBLOCK){
-                nesting++;
-            } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
-                nesting--;
-            }  
-        }
+        if(token == tkn_LPAREN || token == tkn_LBLOCK){
+            nesting++;
+        } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
+            nesting--;
+        } 
         skipToken = false;     
         if(token == EndToken1 || token == EndToken2){
 
@@ -526,6 +523,9 @@ t_Value * PA_ifj16(S_String * ID){
     }
     S_String * fceNameP = *(fceNamePP);
 
+    S_String * frst = STR_Create("first");
+	S_String * second = STR_Create("second");
+	S_String * third = STR_Create("third");
     if(STR_Compare2(fceNameP,"readInt") == 0){
         return VT_AddInt(readInt());
     }else if(STR_Compare2(fceNameP,"readDouble") == 0){
@@ -533,31 +533,42 @@ t_Value * PA_ifj16(S_String * ID){
     }else if(STR_Compare2(fceNameP,"readString") == 0){
         return VT_AddStr(readString());
     }else if(STR_Compare2(fceNameP,"print") == 0){
-    	S_String * frst = STR_Create("first");
-    	t_Value * param = IL_GetVal(frst);
-    	if(param->type == tkn_TRUE){
+    	
+    	t_Value * param1 = IL_GetVal(frst);
+    	if(param1->type == tkn_TRUE){
     		printf("%s", "true");
-    	}else if(param->type == tkn_FALSE){
+    	}else if(param1->type == tkn_FALSE){
     		printf("%s", "false");
-    	}else if(param->type == tkn_DOUBLE || param->type == tkn_REAL){
-    		printf("%g", VT_GetDouble(param->VT_index));
-    	}else if(param->type == tkn_INT || param->type == tkn_NUM){
-    		printf("%d", VT_GetInt(param->VT_index));
-    	}else if(param->type == tkn_STRING || param->type == tkn_LIT){
-    		printf("%s", VT_GetStr(param->VT_index)->str);
+    	}else if(param1->type == tkn_DOUBLE || param1->type == tkn_REAL){
+    		printf("%g", VT_GetDouble(param1->VT_index));
+    	}else if(param1->type == tkn_INT || param1->type == tkn_NUM){
+    		printf("%d", VT_GetInt(param1->VT_index));
+    	}else if(param1->type == tkn_STRING || param1->type == tkn_LIT){
+    		printf("%s", VT_GetStr(param1->VT_index)->str);
     	}else{
     		ERROR();
     	}
+    	return NULL;
     }else if(STR_Compare2(fceNameP,"length") == 0){
-       // length(S_String *s)
+    	S_String * frst = STR_Create("first");
+    	t_Value * param1 = IL_GetVal(frst);
+        return VT_AddInt(length(VT_GetStr(param1->VT_index)));
     }else if(STR_Compare2(fceNameP,"substr") == 0){
-       // substr(S_String *s, int i, int n)
+    	t_Value * param1 = IL_GetVal(frst);
+    	t_Value * param2 = IL_GetVal(second);
+    	t_Value * param3 = IL_GetVal(third);
+        return VT_AddStr(substr(VT_GetStr(param1->VT_index), VT_GetInt(param2->VT_index), VT_GetInt(param3->VT_index)));
     }else if(STR_Compare2(fceNameP,"compare") == 0){
-        //compare(S_String *s1, S_String *s2)
+    	t_Value * param1 = IL_GetVal(frst);
+    	t_Value * param2 = IL_GetVal(second);
+        return VT_AddInt(compare(VT_GetStr(param1->VT_index), VT_GetStr(param2->VT_index)));
     }else if(STR_Compare2(fceNameP,"find") == 0){
-        //find(S_String *s, S_String *search)
+    	t_Value * param1 = IL_GetVal(frst);
+    	t_Value * param2 = IL_GetVal(second);
+        return VT_AddInt(find(VT_GetStr(param1->VT_index), VT_GetStr(param2->VT_index)));
     }else if(STR_Compare2(fceNameP,"sort") == 0){
-        //sort(S_String *s);
+    	t_Value * param1 = IL_GetVal(frst);
+        return VT_AddStr(sort(VT_GetStr(param1->VT_index)));
     }else{
         ERROR();
     }
@@ -572,7 +583,7 @@ void CheckReturn(S_Fce * fce,t_Value * result){
         ERROR();
     }
     if(fce->returnType == tkn_BOOL){
-        if(result->type != tkn_TRUE && result->type != tkn_FALSE){
+        if(result->type != tkn_BOOL && result->type != tkn_TRUE && result->type != tkn_FALSE){
             ERROR();
         }
         return;
@@ -589,7 +600,7 @@ void CheckReturn(S_Fce * fce,t_Value * result){
         }
         return;
     }
-    if(fce->returnType == tkn_DOUBLE){
+    if(fce->returnType == tkn_STRING){
         if(result->type != tkn_STRING && result->type != tkn_LIT){
             ERROR();
         }
@@ -858,22 +869,23 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
     S_String * ID;
     bool skipToken = false;
     int nesting = 0;
+    if(EndToken1  == tkn_RPAREN || 
+            EndToken1  == tkn_RBLOCK || 
+            EndToken2  == tkn_RPAREN || 
+            EndToken2  == tkn_RBLOCK){
+    	nesting++;
+    }
     while(true)
     {
         if(!skipToken){
             token = SCAN_GetToken();
         }
-        if(EndToken1  == tkn_RPAREN || 
-            EndToken1  == tkn_RBLOCK || 
-            EndToken2  == tkn_RPAREN || 
-            EndToken2  == tkn_RBLOCK){
-            if(token == tkn_LPAREN || token == tkn_LBLOCK){
-                nesting++;
-            } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
-                nesting--;
-            }  
-        }
         skipToken = false;
+        if(token == tkn_LPAREN || token == tkn_LBLOCK){
+            nesting++;
+        } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
+            nesting--;
+        }
         if(token == EndToken1 || token == EndToken2){
             if(rEndToken != NULL){
                 (*rEndToken) = token;
@@ -881,6 +893,7 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             if(addEndToken){
                 EXPR_AddVal(token,NULL);
             }
+            
             if(nesting <= 0){
                 return EXPR_Solve();
             }  
@@ -899,7 +912,6 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             continue;
         }
         EXPR_AddVal(token,SCAN_GetAttr());
-
     }
     return NULL;
 }

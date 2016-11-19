@@ -156,6 +156,7 @@ bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
 			else
 				ERROR_exit(SEM_ERR_TYPE);
 		break;
+		case tkn_STRING:
 		case tkn_LIT:
 			if(par->type != tkn_STRING)
 				ERROR_exit(SEM_ERR_TYPE);
