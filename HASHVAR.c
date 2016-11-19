@@ -31,9 +31,27 @@ void HASHVAR_AddTable()
 
 }
 
+void HASHVAR_PrintL()
+{
+	printf("**LOCAL HASH TAB**\n");
+	S_Var *v;
+	for (int i = 0; i < SIZETAB; i++)
+	{
+		v = local->tab[i];
+		while(v != NULL)
+		{
+			printf("[ID]: %s [val]: ", v->ID->str); VT_PrintOne(v->value);
+			v = v->next;
+		}
+	}
+	putchar('\n');
+}
+
 void HASHVAR_RemoveTable()
 {
 	htabL *tmp = local->prev;
+	printf("%s\n", "vypis toho co by se melo smazat (HASHVAR.c rade 53)");
+	HASHVAR_PrintL();
 	if(local != NULL){
 		S_Var *act; S_Var *prev = NULL;
 		for (int i = 0; i < SIZETAB; i++)
@@ -163,18 +181,3 @@ void HASHVAR_PrintG()
 	putchar('\n');
 }
 
-void HASHVAR_PrintL()
-{
-	printf("**LOCAL HASH TAB**\n");
-	S_Var *v;
-	for (int i = 0; i < SIZETAB; i++)
-	{
-		v = local->tab[i];
-		while(v != NULL)
-		{
-			printf("[ID]: %s [val]: ", v->ID->str); VT_PrintOne(v->value);
-			v = v->next;
-		}
-	}
-	putchar('\n');
-}

@@ -77,7 +77,9 @@ void *MEM_realloc(void *ptr, size_t size)
 
 void MEM_ffree(void *ptr)
 {
+
 	t_Address *p = hash_remove(ptr);
+
 	free(p->ptr); 
 	free(p);
 }

@@ -30,6 +30,7 @@ void IL_AllocVar(S_String *ID, int token, bool global)
 		new->ID = STR_Create(ID->str);
 	}
 	new->value = VT_GetEmpty(token);
+
 	new->next = NULL;
 	if(global){
 		if(HASHVAR_FindG(new->ID) != NULL || HASHFCE_Find(new->ID) != NULL){

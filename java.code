@@ -1,19 +1,14 @@
 class Main{
 	static void Run(){
-			boolean a = true;
-			do{
+		boolean a = B.A(2);
+		/*do{
 
-			}(a)
+		}(B.A(2))*/
 	}
 }
 
-/*class B{
+class B{
 	static boolean A(int b){
-		if(b == 2){
-			return true;
-		}else{
-			return false;
-		}
-		
+		return true;
 	}
-}*/
+}

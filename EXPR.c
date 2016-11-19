@@ -335,7 +335,8 @@ static void safeAssignment(S_String *ID, t_Value *value)
 	if(id == NULL){
 		ERROR_exit(SEM_ERR_DEF);
 	}
-	if(id->type == tkn_NUM){
+
+	if(id->type == tkn_INT){
 		if(value->type == tkn_NUM)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddInt(VT_GetInt(value->VT_index)));
@@ -344,7 +345,7 @@ static void safeAssignment(S_String *ID, t_Value *value)
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_REAL){
+	if(id->type == tkn_DOUBLE){
 		if(value->type == tkn_REAL)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddDouble(VT_GetDouble(value->VT_index)));
@@ -353,14 +354,14 @@ static void safeAssignment(S_String *ID, t_Value *value)
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_LIT){
+	if(id->type == tkn_STRING){
 		if(value->type == tkn_LIT)
 			IL_SetVal(ID, value);
 			//IL_SetVal(ID, VT_AddStr(VT_GetStr(value->VT_index)));
 		else
 			ERROR_exit(SEM_ERR_TYPE);
 	}
-	if(id->type == tkn_TRUE || id->type == tkn_FALSE || id->type == tkn_BOOL){
+	if(id->type == tkn_BOOL){
 		if(value->type == tkn_TRUE || value->type == tkn_FALSE)
 			IL_SetVal(ID, VT_AddBool(VT_GetBool(value) ? tkn_TRUE : tkn_FALSE));
 		else

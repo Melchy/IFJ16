@@ -9,6 +9,7 @@ void PARS_Run(){
     //TODO Expr check, do te doby nejde prirazeni
     //TODO Vestavene fce
     //TODO platnost promenych jen v cyklu
+    //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti
     EXPR_Create();
     S_String * foo = STR_Create("Main");
     State = st_Start;
@@ -17,7 +18,7 @@ void PARS_Run(){
     IL_SetClass(foo);
     foo->str = "Run";
     EXPR_Dispose();
-    SolveFce(foo,false);
+    SolveFce(foo,true);
     MEM_free(foo);
 }
 
@@ -26,27 +27,88 @@ void IntitIfj16Fce(){
     S_String * readInt = STR_Create("readInt");
     S_String * readDouble = STR_Create("readDouble");
     S_String * readString = STR_Create("readString");
-    S_String * printFoo = STR_Create("print");
+    S_String * printDouble = STR_Create("printDouble");
+    S_String * printStr = STR_Create("printStr");
+    S_String * printInt = STR_Create("printInt");
+    S_String * printBool = STR_Create("printBool");
     S_String * length = STR_Create("length");
     S_String * substr = STR_Create("substr");
     S_String * compare = STR_Create("compare");
     S_String * find = STR_Create("find");
     S_String * sort = STR_Create("sort");
+
+    S_String * frst = STR_Create("first");
+    S_String * second = STR_Create("second");
+    S_String * thr = STR_Create("third");
+
     IL_SetClass(cl);
     IL_InitFce(readInt,tkn_INT, -1,NULL);
     IL_InitFce(readDouble,tkn_DOUBLE, -1,NULL);
     IL_InitFce(readString,tkn_STRING, -1,NULL);
-    IL_InitFce(printFoo,tkn_VOID, -1,NULL);
-    IL_InitFce(length,tkn_INT, -1,NULL);
-    IL_InitFce(substr,tkn_STRING, -1,NULL);
-    IL_InitFce(compare,tkn_INT, -1,NULL);
-    IL_InitFce(find,tkn_INT, -1,NULL);
-    IL_InitFce(sort,tkn_STRING, -1,NULL);
+
+    S_Param * str1 = MEM_malloc(sizeof(S_Param));
+    str1->ID = frst;
+    str1->type = tkn_STRING;
+
+    IL_InitFce(printStr,tkn_VOID, -1,str1);
+    IL_InitFce(length,tkn_INT, -1,str1);
+    IL_InitFce(sort,tkn_STRING, -1,str1);
+
+    str1 = MEM_malloc(sizeof(S_Param));
+    str1->ID = frst;
+    str1->type = tkn_STRING;
+
+    S_Param * str2 = MEM_malloc(sizeof(S_Param));
+    str2->ID = second;
+    str2->type = tkn_STRING;
+
+    str1->next = str2;
+    
+    IL_InitFce(compare,tkn_INT, -1,str1);//str str
+    IL_InitFce(find,tkn_INT, -1,str1);//str str
+
+    str1 = MEM_malloc(sizeof(S_Param));
+    str1->ID = frst;
+    str1->type = tkn_STRING;
+
+    S_Param * int1 = MEM_malloc(sizeof(S_Param));
+    int1->ID = second;
+    int1->type = tkn_INT;
+
+    S_Param * int2 = MEM_malloc(sizeof(S_Param));
+    int2->ID = thr;
+    int2->type = tkn_INT;
+
+    str1->next = int1;
+    int1->next = int2;
+    IL_InitFce(substr,tkn_STRING, -1,str1);//str int int
+
+    S_Param * bool1 = MEM_malloc(sizeof(S_Param));
+    bool1->ID = frst;
+    bool1->type = tkn_BOOL;
+
+    IL_InitFce(printBool,tkn_VOID, -1,bool1);
+
+    int1 = MEM_malloc(sizeof(S_Param));
+    int1->ID = frst;
+    int1->type = tkn_INT;
+
+    IL_InitFce(printInt,tkn_VOID, -1,int1);
+
+    S_Param * double1 = MEM_malloc(sizeof(S_Param));
+    double1->ID = frst;
+    double1->type = tkn_DOUBLE;
+
+    IL_InitFce(printDouble,tkn_VOID, -1,double1);
+
     MEM_free(cl);
     MEM_free(readInt);
     MEM_free(readDouble);
     MEM_free(readString);
-    MEM_free(printFoo);
+    MEM_free(printDouble);
+    MEM_free(printStr);
+    MEM_free(printInt);
+    MEM_free(printBool);
     MEM_free(length);
     MEM_free(substr);
     MEM_free(compare);
@@ -125,7 +187,6 @@ void FR_IfSt(int * nestingLevel){
 }
 
 void FR_ReturnSt(){
-    
     FR_checkExpr(tkn_SEMI,-1, NULL, false,true);
 }
 
@@ -159,9 +220,7 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
     return false;
 }
 void FR_cycleWhile(int * nestingLevel){
-    checkIfNextTokenIsSmt(tkn_LPAREN);
-    FR_checkExpr(tkn_RPAREN,-1, NULL, false,false);
-    checkIfNextTokenIsSmt(tkn_LBLOCK);
+    FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
     (*nestingLevel)++;
     JL_Add(0, 1, (*nestingLevel));
 }
@@ -230,10 +289,8 @@ void FR_tknID(bool canFce){
         }
         FR_FceParamsSyntax();
     }else if(token == tkn_ASSIGN){
-        
-        S_String * empty = STR_Create("");
-        EXPR_AddVal(tkn_ID,empty);
-        MEM_free(empty);
+
+        EXPR_AddVal(tkn_ID,NULL);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
     }else{
@@ -247,36 +304,45 @@ void FR_tknID(bool canFce){
 void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty){
     int token;
     bool skipToken = false;
-    static int a = 0;
-    printf("%d\n", a);
-    a++;
+    int nesting = 0;
     while(true)
     {
         if(!skipToken){
             token = SCAN_GetToken();
         }
-        skipToken = false;        
+        
+        if(EndToken1  == tkn_RPAREN || 
+            EndToken1  == tkn_RBLOCK || 
+            EndToken2  == tkn_RPAREN || 
+            EndToken2  == tkn_RBLOCK){
+            if(token == tkn_LPAREN || token == tkn_LBLOCK){
+                nesting++;
+            } else if(token == tkn_RPAREN || token == tkn_RBLOCK){
+                nesting--;
+            }  
+        }
+        skipToken = false;     
         if(token == EndToken1 || token == EndToken2){
 
             if(rEndToken != NULL){
                 (*rEndToken) = token;
             }
+
             if(addEndToken){
                 EXPR_AddVal(token,NULL);
             }
-            EXPR_CheckSyntax(canEmpty);
-            return; 
+            if(nesting <= 0){
+                EXPR_CheckSyntax(canEmpty);
+                return; 
+            }  
         }
         if(!PH_checkValidToken(token)){
             FR_SynError();
         }
-
         if(token == tkn_ID){
             token = SCAN_GetToken();
             if(token != tkn_LPAREN){
-                S_String * empty = STR_Create("");
-                EXPR_AddVal(tkn_ID,empty);
-                MEM_free(empty);
+                EXPR_AddVal(tkn_ID,NULL);
                 skipToken = true;
             }else if(token == tkn_LPAREN){
                 FR_FceParamsSyntax();
@@ -286,16 +352,18 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
             }
             continue;
         }
-        EXPR_AddVal(token,SCAN_GetAttr());
+        EXPR_AddVal(token,NULL);
     }
 }
 
 void FR_FceParamsSyntax(){
+
+    EXPR_Create();
     int * token = MEM_malloc(sizeof(int));
     while(true){
-        
         FR_checkExpr(tkn_COMMA,tkn_RPAREN, token, false,true);
         if((*token) == tkn_RPAREN){
+            EXPR_Dispose();
             return;
         }
     }
@@ -437,9 +505,8 @@ t_Value * SolveFce(S_String * ID,bool run){
 
     FC_Call();
 
-    if(run){
+    if(!run){
         FC_LoadArgs(fce);
-        SCAN_GetToken(); //strednik
     }
     returnPos = FIO_GetPosition();
     t_Value * result;
@@ -452,11 +519,13 @@ t_Value * SolveFce(S_String * ID,bool run){
         CheckReturn(fce,result);
         FIO_MoveToPosition(returnPos);
     }
-
     IL_SetClass(class);
     MEM_free(class);
     MEM_free(newClass);
     EXPR_Dispose();
+	printf("%s\n", "pred volanim HASHVAR_RemoveTable melo by probehnout 2x (Pars.c radek 526)");
+    HASHVAR_RemoveTable();
+    printf("%s\n", "po zavolani HASHVAR_RemoveTable melo by probehnout 2x (Pars.c radek 528)");
     return result;
 }
 
@@ -505,8 +574,23 @@ void CheckReturn(S_Fce * fce,t_Value * result){
         }
         return;
     }
-    if(fce->returnType != result->type){
-        ERROR();
+    if(fce->returnType == tkn_INT){
+        if(result->type != tkn_INT && result->type != tkn_NUM && result->type != tkn_REAL){
+            ERROR();
+        }
+        return;
+    }
+    if(fce->returnType == tkn_DOUBLE){
+        if(result->type != tkn_DOUBLE && result->type != tkn_NUM && result->type != tkn_REAL){
+            ERROR();
+        }
+        return;
+    }
+    if(fce->returnType == tkn_DOUBLE){
+        if(result->type != tkn_STRING && result->type != tkn_LIT){
+            ERROR();
+        }
+        return;
     }
 }
 
@@ -555,7 +639,6 @@ bool FC_AddParamToTable(S_Fce * fce, t_Value * val,int argNumber){
 t_Value * FceMat(){
     int * nestingLevel = MEM_malloc(sizeof(int));
     *(nestingLevel) = 0;
-
     while(true){
         switch(SCAN_GetToken()){
             case tkn_ID: tknID();  continue;
@@ -583,8 +666,6 @@ t_Value * FceMat(){
 }
 
 t_Value * ReturnSt(){
-
-    
     return PH_Solve(tkn_SEMI,-1, NULL, false);
 }
 
@@ -605,7 +686,6 @@ bool RBool(int * nestingLevel){
     if((*nestingLevel) == 0){//konec fce
         return true;
     }
-
     if((*nestingLevel) != JL_GetNestingLevel()){
         (*nestingLevel)--;
         return false;
@@ -613,7 +693,6 @@ bool RBool(int * nestingLevel){
     int type = JL_GetJumpType();
 
     if(type == 3){//do
-        
         if(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true))){
             FIO_MoveToPosition(JL_GetOffset());
         }else{
@@ -655,7 +734,7 @@ void tknID(){
     S_String * ID = STR_Create(SCAN_GetAttr()->str);
     int token = SCAN_GetToken();
     if(token == tkn_LPAREN){
-        SolveFce(ID,true);
+        SolveFce(ID,false);
     }else if(token == tkn_ASSIGN){
         
         EXPR_AddVal(tkn_ID,ID);
@@ -672,7 +751,6 @@ void DECLR(int type){
     IL_AllocVar(ID,type,false);
     token = SCAN_GetToken();
     if(token == tkn_ASSIGN){
-        
         EXPR_AddVal(tkn_ID,ID);
         MEM_free(ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
@@ -807,16 +885,14 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             ID = STR_Create(SCAN_GetAttr()->str);
             token = SCAN_GetToken();
             if(token != tkn_LPAREN){
-
                 skipToken = true;
                 EXPR_AddVal(tkn_ID, ID);
                 MEM_free(ID);
             }else{
-                EXPR_AddVal2(SolveFce(ID,true));
+                EXPR_AddVal2(SolveFce(ID,false));
             }
             continue;
         }
-
         EXPR_AddVal(token,SCAN_GetAttr());
     }
     return NULL;
