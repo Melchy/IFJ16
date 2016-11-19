@@ -57,6 +57,22 @@ t_Value *Val_Create(int type, int index)
 	value->VT_index = index;
 	return value;
 }
+t_Value *VT_Copy(t_Value *val)
+{
+	if(val != NULL){
+		switch(val->type){
+			case tkn_NUM:
+			return VT_AddInt(VT_GetInt(val->VT_index));
+			case tkn_LIT:
+			return VT_AddStr(VT_GetStr(val->VT_index));
+			case tkn_REAL:
+			return VT_AddDouble(VT_GetDouble(val->VT_index));
+			default:
+			break;
+		}
+	}
+	return val;
+}
 //testovano
 t_Value *VT_AddInt(int val)
 {

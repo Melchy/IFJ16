@@ -388,7 +388,7 @@ t_Value *EXPR_Solve()
 	t_Value *res;
 	t_Node *n = Tree_GetTopNode();
 	if(!Node_IsOp(n)) // pokud je na topu hodnota, rekurze nema smysl (napr. x=5;)
-		res = Node_GetValue(n);
+		res = VT_Copy(Node_GetValue(n));
 	else
 		res = RecSolve(n);
 	if(res == NULL)

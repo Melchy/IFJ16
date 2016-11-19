@@ -36,6 +36,7 @@ typedef struct ArrStr_t{
 }ArrStr_t;
 
 void VT_InitTabs();
+t_Value *VT_Copy(t_Value *val);
 
 t_Value *VT_AddInt(int val);
 int VT_GetInt(int index);
