@@ -60,7 +60,8 @@ void HASHVAR_RemoveTable()
 			while(act != NULL){
 				prev = act;
 				MEM_free(act->ID);
-				MEM_free(act->value);
+				if(act->value->type != tkn_TRUE && act->value->type != tkn_FALSE && act->value->VT_index != -1)
+					MEM_free(act->value);
 				MEM_free(act);
 				act = prev->next;
 			}
