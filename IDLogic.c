@@ -134,6 +134,9 @@ bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
 	}
 	if(par == NULL)
 		return false;
+	if(par->type == tkn_ALLTYPES)
+		goto skipSwitch;
+
 	switch(val->type){
 		case tkn_NUM:
 		case tkn_INT:
@@ -166,6 +169,8 @@ bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
 		break;
 	}
 
+	skipSwitch:
+	
 	IL_AllocVar(par->ID, val->type, false);
 	IL_SetVal(par->ID, val);
 	if(par->next == NULL)
