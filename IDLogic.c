@@ -61,8 +61,9 @@ void IL_SetVal(S_String *ID, t_Value *value)
 			var = HASHVAR_FindG(fullID);
 		}
 	}
-	if(var == NULL)
+	if(var == NULL){
 		ERROR_exit(SEM_ERR_DEF);
+	}
 	
 	var->value = value;
 }
@@ -133,6 +134,37 @@ bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
 	}
 	if(par == NULL)
 		return false;
+	switch(val->type){
+		case tkn_NUM:
+		case tkn_INT:
+			if(par->type == tkn_INT)
+				break;
+			if(par->type == tkn_DOUBLE)
+				val = VT_AddDouble(VT_GetInt(val->VT_index));
+			else
+				ERROR_exit(SEM_ERR_TYPE);
+		break;
+		case tkn_REAL:
+		case tkn_DOUBLE:
+			if(par->type == tkn_DOUBLE)
+				break;
+			if(par->type == tkn_INT)
+				val = VT_AddInt(VT_GetDouble(val->VT_index));
+			else
+				ERROR_exit(SEM_ERR_TYPE);
+		break;
+		case tkn_LIT:
+			if(par->type != tkn_STRING)
+				ERROR_exit(SEM_ERR_TYPE);
+		break;
+		case tkn_TRUE:
+		case tkn_FALSE:
+			if(par->type != tkn_BOOL)
+				ERROR_exit(SEM_ERR_TYPE);
+		break;
+		default:
+		break;
+	}
 
 	IL_AllocVar(par->ID, val->type, false);
 	IL_SetVal(par->ID, val);
