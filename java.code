@@ -1,14 +1,14 @@
 class Main{
+	static int a = 2;
 	static void Run(){
-		boolean a = B.A(2);
-		/*do{
-
-		}(B.A(2))*/
+		for(int i=0;i<3;i = i +1){
+			a = a + i;
+		}
 	}
 }
 
 class B{
-	static boolean A(int b){
-		return true;
+	static int A(int b){
+		return b;
 	}
 }

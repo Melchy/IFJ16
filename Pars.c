@@ -204,6 +204,11 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
         (*canElse) = true;
     }else{
         int jmpNesting = JL_GetNestingLevel();
+        if(jmpNesting < (*nestingLevel)){
+        	(*nestingLevel)--;
+        	(*canElse) = true;
+        	return false;
+        }
         if(JL_GetJumpType() == 3){ 
             FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition     
         }
@@ -289,7 +294,6 @@ void FR_tknID(bool canFce){
         }
         FR_FceParamsSyntax();
     }else if(token == tkn_ASSIGN){
-
         EXPR_AddVal(tkn_ID,NULL);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
@@ -516,16 +520,17 @@ t_Value * SolveFce(S_String * ID,bool run){
     }else{
         FIO_MoveToPosition(fce->offset);
         result = FceMat();
+
         CheckReturn(fce,result);
+
         FIO_MoveToPosition(returnPos);
     }
     IL_SetClass(class);
     MEM_free(class);
     MEM_free(newClass);
     EXPR_Dispose();
-	printf("%s\n", "pred volanim HASHVAR_RemoveTable melo by probehnout 2x (Pars.c radek 526)");
+
     HASHVAR_RemoveTable();
-    printf("%s\n", "po zavolani HASHVAR_RemoveTable melo by probehnout 2x (Pars.c radek 528)");
     return result;
 }
 
@@ -693,7 +698,9 @@ bool RBool(int * nestingLevel){
     int type = JL_GetJumpType();
 
     if(type == 3){//do
+
         if(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true))){
+
             FIO_MoveToPosition(JL_GetOffset());
         }else{
             (*nestingLevel)--;
@@ -894,6 +901,7 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             continue;
         }
         EXPR_AddVal(token,SCAN_GetAttr());
+
     }
     return NULL;
 }

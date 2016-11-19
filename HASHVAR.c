@@ -50,8 +50,6 @@ void HASHVAR_PrintL()
 void HASHVAR_RemoveTable()
 {
 	htabL *tmp = local->prev;
-	printf("%s\n", "vypis toho co by se melo smazat (HASHVAR.c rade 53)");
-	HASHVAR_PrintL();
 	if(local != NULL){
 		S_Var *act; S_Var *prev = NULL;
 		for (int i = 0; i < SIZETAB; i++)
