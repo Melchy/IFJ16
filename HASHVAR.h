@@ -16,8 +16,8 @@ typedef struct htabL{
 	struct htabL *prev;
 }htabL;
 
-void HASHVAR_PrintL();
 void HASHVAR_InitGlobal();
+void HASHVAR_PrintL();
 bool HASHVAR_AddG(S_Var *data);
 S_Var *HASHVAR_FindG(S_String *ID);
 bool HASHVAR_RemoveG(S_String *ID);

@@ -3,8 +3,11 @@ CFLAGS=-Wall -Wextra -std=c11 -pedantic
 
 all: ifj16_rtg
 
-ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o
-	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o -o ifj16_rtg
+ifj16_rtg: main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o HASHLOCAL.o
+	$(CC) $(CFLAGS) main.o SCAN.o FIO.o ERROR.o MEM.o Tree.o Node.o EXPR.o VARTAB.o STR.o HASHVAR.o HASH.o IDLogic.o HASHFCE.o JL.o Pars.o ial.o HASHLOCAL.o -o ifj16_rtg
+
+HASHLOCAL.o: HASHLOCAL.c HASHLOCAL.h HASH.h STR.h VARTAB.h
+	$(CC) $(CFLAGS) -c HASHLOCAL.c -o HASHLOCAL.o
 
 IDLogic.o: IDLogic.c IDLogic.h STR.h VARTAB.h HASHVAR.h HASHFCE.h
 	$(CC) $(CFLAGS) -c IDLogic.c -o IDLogic.o

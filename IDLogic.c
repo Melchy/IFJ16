@@ -2,11 +2,29 @@
 #include "STR.h"
 #include "VARTAB.h"
 #include "HASHVAR.h"
+#include "HASHLOCAL.h"
 #include "HASHFCE.h"
 #include "MEM.h"
 #include "ERROR.h"
 
 static S_String *ActClass;
+static int nesting;
+static int reachableNesting;
+
+void IL_NestDown()
+{ nesting++; }
+
+void IL_NestUp()
+{ HASHLOCAL_RemoveNest(nesting--); }
+
+int IL_GetNesting()
+{ return nesting; }
+
+void IL_SetReachable(int n)
+{ reachableNesting = n; }
+
+int IL_GetReachable()
+{ return reachableNesting; }
 
 void IL_SetClass(S_String *newClass)
 {
@@ -18,47 +36,67 @@ S_String *IL_GetClass()
 	return ActClass;
 }
 
+static void allocLocal(S_String *ID, int token){
+	S_VarL *new = MEM_malloc(sizeof(S_VarL));
+	new->value = VT_GetEmpty(token);
+	new->ID = STR_Create(ID->str);
+	new->nest = nesting;
+	S_VarL *found = HASHLOCAL_Find(new->ID);
+	if(found != NULL && found->nest >= reachableNesting){
+		printf("nastalo\n");
+		ERROR_exit(SEM_ERR_DEF);
+	}
+	HASHLOCAL_Add(new);
+}
+
 void IL_AllocVar(S_String *ID, int token, bool global)
 {
+	if(!global){
+		allocLocal(ID,token);
+		return;
+	}
+
 	S_Var *new = MEM_malloc(sizeof(S_Var));
-	if(global){
+	new->value = VT_GetEmpty(token);
+	new->next = NULL;
+	if(global) {
 		S_String *fullID = STR_Create(ActClass->str);
 		STR_AddChar(fullID, '.');
 		STR_ConCat(fullID, ID);
 		new->ID = fullID;
-	} else {
-		new->ID = STR_Create(ID->str);
-	}
-	new->value = VT_GetEmpty(token);
-
-	new->next = NULL;
-	if(global){
 		if(HASHVAR_FindG(new->ID) != NULL || HASHFCE_Find(new->ID) != NULL){
 			ERROR_exit(SEM_ERR_DEF);
 		}
 		HASHVAR_AddG(new);
 	}
-	else{
+	/* 
+	else {
+		new->ID = STR_Create(ID->str);
 		if(HASHVAR_FindL(new->ID) != NULL){
 			ERROR_exit(SEM_ERR_DEF);
 		}
 		HASHVAR_AddL(new);
-	}
+	}*/
 }
 
 void IL_SetVal(S_String *ID, t_Value *value)
 {
 	S_Var *var;
+	S_VarL *varl;
 	if(STR_FindChar(ID, '.') != -1)
 		var = HASHVAR_FindG(ID);
 	else{
-		var = HASHVAR_FindL(ID);
-		if(var == NULL)
+		varl = HASHLOCAL_Find(ID);
+		if(varl == NULL || varl->nest < reachableNesting)
 		{
 			S_String *fullID = STR_Create(ActClass->str);
 			STR_AddChar(fullID, '.');
 			STR_ConCat(fullID, ID);
 			var = HASHVAR_FindG(fullID);
+		}
+		else{
+			varl->value = value;
+			return;
 		}
 	}
 	if(var == NULL){
@@ -71,16 +109,20 @@ void IL_SetVal(S_String *ID, t_Value *value)
 t_Value *IL_GetVal(S_String *ID)
 {
 	S_Var *var;
+	S_VarL *varl;
 	if(STR_FindChar(ID, '.') != -1)
 		var = HASHVAR_FindG(ID);
 	else{
-		var = HASHVAR_FindL(ID);
-		if(var == NULL)
+		varl = HASHLOCAL_Find(ID);
+		if(varl == NULL || varl->nest < reachableNesting)		
 		{
 			S_String *fullID = STR_Create(ActClass->str);
 			STR_AddChar(fullID, '.');
 			STR_ConCat(fullID, ID);
 			var = HASHVAR_FindG(fullID);
+		}
+		else{
+			return varl->value;
 		}
 	}
 	if(var == NULL){

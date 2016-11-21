@@ -399,6 +399,7 @@ t_Value *EXPR_Solve()
 	if(res == NULL)
 		ERROR_exit(SEM_ERR_TYPE);
 	makeAssigns(res);
+	HASHVAR_PrintL();
 	Tree_Dispose();
 	Tree_Create();
 	return res;

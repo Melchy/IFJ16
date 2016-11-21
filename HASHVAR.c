@@ -13,9 +13,7 @@ void HASHVAR_InitGlobal()
 {
 	global = MEM_malloc(SIZETAB*(sizeof(S_Var *)));
 	for (int i = 0; i < SIZETAB; i++)
-	{
 		global[i] = NULL;
-	}
 }
 
 void HASHVAR_AddTable()
@@ -49,6 +47,7 @@ void HASHVAR_PrintL()
 
 void HASHVAR_RemoveTable()
 {
+	//HASHVAR_PrintL();
 	htabL *tmp = local->prev;
 	if(local != NULL){
 		S_Var *act; S_Var *prev = NULL;

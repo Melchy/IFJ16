@@ -7,6 +7,16 @@
 
 #include <stdbool.h>
 
+void IL_NestDown();
+
+void IL_NestUp();
+
+int IL_GetNesting();
+
+void IL_SetReachable(int n);
+
+int IL_GetReachable();
+
 void IL_SetClass(S_String *newClass);
 
 S_String *IL_GetClass();

@@ -7,6 +7,7 @@
 #include "Tokens.h"
 #include "VARTAB.h"
 #include "HASHVAR.h"
+#include "HASHLOCAL.h"
 #include "IDLogic.h"
 #include "HASHFCE.h"
 #include "JL.h"
@@ -22,9 +23,9 @@ static void initAll()
 	FIO_Open("java.code");
 	SCAN_InitAttr();
 	VT_InitTabs();
+	HASHFCE_InitFceTab();
 	HASHVAR_InitGlobal();
-	HASHFCE_InitFceTab();   
-	
+	HASHLOCAL_InitLocal();
 }
 /*
 
@@ -264,6 +265,42 @@ void test_IL()
 	//bool IL_AllocParam(S_Fce *fce, t_Value *val, int argNumber)
 }
 
+void test_HASHLOCAL(){
+	initAll();
+	IL_SetClass(STR_Create("trida"));
+	printf("**Pridame 4 promenne\n"); 
+	IL_AllocVar(STR_Create("a"), tkn_NUM, false); // false == local
+	IL_AllocVar(STR_Create("b"), tkn_NUM, false);
+	IL_AllocVar(STR_Create("c"), tkn_NUM, false);
+	IL_AllocVar(STR_Create("d"), tkn_NUM, false);
+	HASHLOCAL_Print();
+	printf("**Nastavime hodnoty a, b\n");
+	IL_SetVal(STR_Create("a"), VT_AddInt(33));
+	IL_SetVal(STR_Create("b"), VT_AddInt(66));
+	HASHLOCAL_Print();
+	printf("**Zvysime nesting a reachable, vytvorime nove b a nastavime hodnotu\n");
+	IL_NestDown();	IL_SetReachable(IL_GetNesting());
+	IL_AllocVar(STR_Create("b"), tkn_NUM, false);
+	IL_SetVal(STR_Create("b"), VT_AddInt(99));
+	HASHLOCAL_Print();
+	printf("**Aktualni viditelne b: "); VT_PrintOne(IL_GetVal(STR_Create("b")));
+	printf("**Snizime reachable a pokusime se pristoupit k a: ");
+	IL_SetReachable(IL_GetNesting()-1); VT_PrintOne(IL_GetVal(STR_Create("a")));
+	printf("**Vytvorime dalsi promenne: \n");
+	IL_AllocVar(STR_Create("e"), tkn_REAL, false);
+	IL_AllocVar(STR_Create("f"), tkn_REAL, false);
+	IL_AllocVar(STR_Create("g"), tkn_REAL, false);
+	IL_AllocVar(STR_Create("h"), tkn_REAL, false);
+	HASHLOCAL_Print();
+	printf("**Vynorime se o uroven vys (maze aktualni promenne): \n");
+	IL_NestUp();
+	HASHLOCAL_Print();
+	printf("**Zvysime nesting a reachable, pokusime se pristoupit k a - SEM_ERR_DEF\n");
+	IL_NestDown();	IL_SetReachable(IL_GetNesting());
+	IL_GetVal(STR_Create("a")); // tady nastane SEM_ERR_DEF - nevidim acko z nestingu 0
+	MEM_clearAll();
+	FIO_Close();
+}
 
 
 int main(void)
@@ -276,8 +313,9 @@ int main(void)
 	//test_VARTABBool();
 	//test_STRSearch();
 	//JL_Add(10, 2, 2);
-	initAll();
-	PARS_Run();
+	//initAll();
+	//PARS_Run();
+	test_HASHLOCAL();
 	//PH_MakeTree();
 	//PH_AllocTable();
 	return 0;
