@@ -12,10 +12,13 @@ static int nesting;
 static int reachableNesting;
 
 void IL_NestDown()
-{ nesting++; }
+{ nesting--; }
 
 void IL_NestUp()
-{ HASHLOCAL_RemoveNest(nesting--); }
+{ nesting++; }
+
+void IL_RemoveNest()
+{ HASHLOCAL_RemoveNest(nesting); }
 
 int IL_GetNesting()
 { return nesting; }

@@ -11,6 +11,8 @@ void IL_NestDown();
 
 void IL_NestUp();
 
+void IL_RemoveNest();
+
 int IL_GetNesting();
 
 void IL_SetReachable(int n);

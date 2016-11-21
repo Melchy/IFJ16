@@ -279,7 +279,7 @@ void test_HASHLOCAL(){
 	IL_SetVal(STR_Create("b"), VT_AddInt(66));
 	HASHLOCAL_Print();
 	printf("**Zvysime nesting a reachable, vytvorime nove b a nastavime hodnotu\n");
-	IL_NestDown();	IL_SetReachable(IL_GetNesting());
+	IL_NestUp();	IL_SetReachable(IL_GetNesting());
 	IL_AllocVar(STR_Create("b"), tkn_NUM, false);
 	IL_SetVal(STR_Create("b"), VT_AddInt(99));
 	HASHLOCAL_Print();
@@ -292,11 +292,12 @@ void test_HASHLOCAL(){
 	IL_AllocVar(STR_Create("g"), tkn_REAL, false);
 	IL_AllocVar(STR_Create("h"), tkn_REAL, false);
 	HASHLOCAL_Print();
-	printf("**Vynorime se o uroven vys (maze aktualni promenne): \n");
-	IL_NestUp();
+	printf("**Smazeme aktualni promenne a vynorime se: \n");
+	IL_RemoveNest();
+	IL_NestDown();
 	HASHLOCAL_Print();
 	printf("**Zvysime nesting a reachable, pokusime se pristoupit k a - SEM_ERR_DEF\n");
-	IL_NestDown();	IL_SetReachable(IL_GetNesting());
+	IL_NestUp();	IL_SetReachable(IL_GetNesting());
 	IL_GetVal(STR_Create("a")); // tady nastane SEM_ERR_DEF - nevidim acko z nestingu 0
 	MEM_clearAll();
 	FIO_Close();
