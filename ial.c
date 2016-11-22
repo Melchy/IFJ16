@@ -9,7 +9,7 @@ int readInt()
 
     if(s->str[0] == '-' || s->str[0] == '+')
     {
-        return -7;
+        ERROR_exit(NUM_ERR);
     }
     
     control = STR_StringToInt(s, result);
@@ -20,8 +20,9 @@ int readInt()
     }
     else
     {
-        return -7;
+        ERROR_exit(NUM_ERR);
     }
+    return 0;
 }
 
 double readDouble()
@@ -33,7 +34,7 @@ double readDouble()
 
     if(s->str[0] == '-' || s->str[0] == '+')
     {
-        return -7;
+        ERROR_exit(NUM_ERR);
     }
     
     control = STR_StringToDouble(s, result);
@@ -44,8 +45,9 @@ double readDouble()
     }
     else
     {
-        return -7;
+        ERROR_exit(NUM_ERR);
     }
+    return 0.0;
 }
 
 S_String *readString()

@@ -7,6 +7,7 @@
 
 #include "STR.h"
 #include "MEM.h"
+#include "ERROR.h"
 
 /* --- Macro declaration --- */
 
