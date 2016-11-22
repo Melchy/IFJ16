@@ -4,6 +4,7 @@
 #include "STR.h"
 #include "VARTAB.h"
 #include "HASHFCE.h"
+#include "HASHLOCAL.h"
 
 #include <stdbool.h>
 

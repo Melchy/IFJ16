@@ -5,8 +5,9 @@ int State = -1;
 //PARSER
 void PARS_Run(){
     //TODO neoveruje stejna jmena trid
-    //TODO platnost promenych jen v cyklu
-    //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti
+    //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti (zpusobeno spatnym odstranovanim stringu)
+    //TODO lze udelat vice elsu
+    //TODO mazani struktury jumpu
     EXPR_Create();
     S_String * foo = STR_Create("Main");
     State = st_Start;
@@ -14,7 +15,7 @@ void PARS_Run(){
     IntitIfj16Fce();
     IL_SetClass(foo);
     foo->str = "run";
-    EXPR_Dispose();
+    PH_DisposeTree();
     SolveFce(foo,true);
     MEM_free(foo);
 }
@@ -59,7 +60,6 @@ void IntitIfj16Fce(){
     
     IL_InitFce(compare,tkn_INT, -1,str1);//str str
     IL_InitFce(find,tkn_INT, -1,str1);//str str
-
     str1 = MEM_malloc(sizeof(S_Param));
     str1->ID = frst;
     str1->type = tkn_STRING;
@@ -90,10 +90,10 @@ void IntitIfj16Fce(){
     MEM_free(length);
     MEM_free(substr);
     MEM_free(compare);
+
     MEM_free(find);
     MEM_free(sort);
 
-    HASHFCE_Print();
 }
 
 
@@ -121,10 +121,10 @@ void FR_fceMat(){
         prevCanElse = (*canElse);
         switch(SCAN_GetToken()){
             case tkn_ID: FR_tknID(true);  break;
-            case tkn_BOOL: FR_DECLR(); break;
-            case tkn_INT: FR_DECLR(); break;
-            case tkn_DOUBLE: FR_DECLR(); break;
-            case tkn_STRING: FR_DECLR(); break;
+            case tkn_BOOL: FR_DECLR(*nestingLevel); break;
+            case tkn_INT: FR_DECLR(*nestingLevel); break;
+            case tkn_DOUBLE: FR_DECLR(*nestingLevel); break;
+            case tkn_STRING: FR_DECLR(*nestingLevel); break;
             case tkn_BREAK: FR_BreakSt(nestingLevel); break;
             case tkn_CONT: FR_ContinueSt(nestingLevel); break;
 
@@ -159,10 +159,11 @@ void FR_ElseSt(int * nestingLevel,bool canElse){
     }
     checkIfNextTokenIsSmt(tkn_LBLOCK);
     (*nestingLevel)++;
+    JL_Add(0, ifTrueType, (*nestingLevel));
 }
 void FR_IfSt(int * nestingLevel){
-    
     FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
+    JL_Add(0, ifFalseType, (*nestingLevel));
     (*nestingLevel)++;
 }
 
@@ -171,50 +172,31 @@ void FR_ReturnSt(){
 }
 
 bool FR_RBool(int * nestingLevel,bool * canElse){
-    bool JmpEmpty = FR_jmpEmpty();
-    if((*nestingLevel) == 0){
-        if(!JmpEmpty){
-            FR_SynError();
-        }
+    if(FR_jmpEmpty()){
         State = st_Class;
         return true;
     }
-    if(JmpEmpty){
-        (*nestingLevel)--;
-        (*canElse) = true;
-    }else{
-        int jmpNesting = JL_GetNestingLevel();
-        if(jmpNesting < (*nestingLevel)){
-        	(*nestingLevel)--;
-        	(*canElse) = true;
-        	return false;
-        }
-        if(JL_GetJumpType() == 3){ 
-            FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition     
-        }
-        if((*nestingLevel) == jmpNesting){
-            (*nestingLevel)--;
-            JL_Remove();
-        }else if((*nestingLevel) > jmpNesting){
-            (*canElse) = true;
-            (*nestingLevel)--;
-        }else{
-            FR_SynError(); //divny error
-        }
+    int type = JL_GetJumpType();
+    if(type == doType){ 
+        FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition
+    }else if(type == ifFalseType){ 
+        (*canElse) = true;   
     }
+    (*nestingLevel)--;
+    JL_Remove();
     return false;
 }
 void FR_cycleWhile(int * nestingLevel){
     FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
     (*nestingLevel)++;
-    JL_Add(0, 1, (*nestingLevel));
+    JL_Add(0, whileType, (*nestingLevel));
 }
 void FR_cycleFor(int * nestingLevel){
     checkIfNextTokenIsSmt(tkn_LPAREN);
     int token = SCAN_GetToken();
     //for("zde")
     if(FR_checkVarType(token)){
-        FR_DECLR();
+        FR_DECLR(0);
     }else{
         
         EXPR_AddVal(token, SCAN_GetAttr());
@@ -229,12 +211,12 @@ void FR_cycleFor(int * nestingLevel){
     //for("";"";"zde"){
     checkIfNextTokenIsSmt(tkn_LBLOCK);
     (*nestingLevel)++;
-    JL_Add(0, 2, (*nestingLevel));
+    JL_Add(0, forType, (*nestingLevel));
 }
 void FR_cycleDo(int * nestingLevel){
     checkIfNextTokenIsSmt(tkn_LBLOCK);
     (*nestingLevel)++;
-    JL_Add(0, 3, (*nestingLevel));
+    JL_Add(0, doType, (*nestingLevel));
 }
 
 
@@ -261,8 +243,11 @@ void checkIfNextTokenIsSmt(int token){
     }
 }
 
-void FR_DECLR(){
+void FR_DECLR(int nesting){
     checkIfNextTokenIsSmt(tkn_ID);
+    if(nesting > 0){
+        FR_SynError();
+    }
     FR_tknID(false);
 }
 
@@ -289,11 +274,11 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
     int token;
     bool skipToken = false;
     int nesting = 0;
-    if(EndToken1  == tkn_RPAREN || 
-            EndToken1  == tkn_RBLOCK || 
-            EndToken2  == tkn_RPAREN || 
-            EndToken2  == tkn_RBLOCK){
-    	nesting++;
+    if(EndToken1  == tkn_LPAREN || 
+            EndToken1  == tkn_LBLOCK || 
+            EndToken2  == tkn_LPAREN || 
+            EndToken2  == tkn_LBLOCK){
+        nesting--;
     }
     while(true)
     {
@@ -307,7 +292,6 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
         } 
         skipToken = false;     
         if(token == EndToken1 || token == EndToken2){
-
             if(rEndToken != NULL){
                 (*rEndToken) = token;
             }
@@ -315,10 +299,14 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
             if(addEndToken){
                 EXPR_AddVal(token,NULL);
             }
+
             if(nesting <= 0){
+
                 EXPR_CheckSyntax(canEmpty);
                 return; 
             }  
+        }else{
+
         }
         if(!PH_checkValidToken(token)){
             FR_SynError();
@@ -341,21 +329,18 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
 }
 
 void FR_FceParamsSyntax(){
-
     EXPR_Create();
     int * token = MEM_malloc(sizeof(int));
     while(true){
         FR_checkExpr(tkn_COMMA,tkn_RPAREN, token, false,true);
         if((*token) == tkn_RPAREN){
-            EXPR_Dispose();
+            PH_DisposeTree();
             return;
         }
     }
 }
 
-
 void FR_HandleClass(){
-
     int token = SCAN_GetToken();
     if(token != tkn_CLASS){
         if(token == tkn_EOF){
@@ -370,9 +355,11 @@ void FR_HandleClass(){
 
     State = st_Class;
 }
+
 void FR_SynError(){
     ERROR_exit(SYN_ERR);
 }
+
 void FR_InClass(){
     int token = SCAN_GetToken();
     if(token == tkn_RBLOCK){
@@ -411,11 +398,8 @@ void FR_DeclrFceGlobal(S_String * ID,int type){
         MEM_free(param);
         firstParam = NULL;
     }
-
     while(token != tkn_RPAREN){
-
         if(!FR_checkVarType(token)) FR_SynError();
-
         param->type = token;
         if((token = SCAN_GetToken()) != tkn_ID) FR_SynError();
         param->ID = STR_Create(SCAN_GetAttr()->str);
@@ -434,6 +418,7 @@ void FR_DeclrFceGlobal(S_String * ID,int type){
     IL_InitFce(ID,type, FIO_GetPosition(),firstParam);
     State = st_InFce;
 }
+
 void FR_DeclrVarGlobal(S_String * ID,int type,int token){
     IL_AllocVar(ID, type,true);
     if(token == tkn_ASSIGN){
@@ -455,7 +440,6 @@ void FR_Solve(){
     EXPR_Solve();
 }
 
-
 bool FR_checkVarType(int token){
     if(token == tkn_BOOL || token == tkn_INT || token == tkn_DOUBLE || token == tkn_STRING){
         return true;
@@ -472,10 +456,16 @@ bool FR_checkFceType(int token){
 
 //second ---------------------------------------------------------------------------------------------
 t_Value * SolveFce(S_String * ID,bool run){
-    printf("%s\n", "syntax good");
+    //printf("%s\n", "syntax good");
     int returnPos;
+    S_Fce * fce = IL_GetFce(ID);
+    PH_MakeTree();
+    if(!run){
+        FC_LoadArgs(fce);
+    }
+
+
     S_String * class = STR_Create(IL_GetClass()->str);
-    
     //Set new CLass
     S_String * newClass;
     newClass = STR_GetBefore(ID, '.');
@@ -484,33 +474,29 @@ t_Value * SolveFce(S_String * ID,bool run){
     }
     IL_SetClass(newClass);
     //end
-    S_Fce * fce = IL_GetFce(ID);
 
-    FC_Call();
 
-    if(!run){
-
-        FC_LoadArgs(fce);
-    }
+    PH_AllocTable(-1);
     returnPos = FIO_GetPosition();
     t_Value * result;
+    S_String * fooStr = STR_Create(IL_GetClass()->str);
+    STR_AddChar(fooStr, '.');
+    if(STR_Compare(fooStr, STR_GetIfj16Dot()) == 0){
 
-    if(STR_Compare(IL_GetClass(), STR_GetIfj16Dot()) == 0){
         result = PA_ifj16(ID);
     }else{
         FIO_MoveToPosition(fce->offset);
         result = FceMat();
-
         CheckReturn(fce,result);
-
         FIO_MoveToPosition(returnPos);
     }
+    MEM_free(fooStr);
     IL_SetClass(class);
     MEM_free(class);
     MEM_free(newClass);
-    EXPR_Dispose();
+    PH_DisposeTree();
 
-    HASHVAR_RemoveTable();
+    PH_DisposeTable(-1);
     return result;
 }
 
@@ -608,21 +594,12 @@ void CheckReturn(S_Fce * fce,t_Value * result){
     }
 }
 
-void FC_Call(){
-    PH_AllocTable();
-    PH_MakeTree();
-}
-
 void FC_LoadArgs(S_Fce * fce){
     t_Value * val = MEM_malloc(sizeof(t_Value));
     int * endToken = MEM_malloc(sizeof(int));
     int argNumber = 0;
-    
     bool noNextParam = false;
-
-    
     val = PH_Solve(tkn_RPAREN,tkn_COMMA,endToken,false);
-
     while((*endToken) != tkn_RPAREN){
         if(noNextParam){
             ERROR();
@@ -631,6 +608,7 @@ void FC_LoadArgs(S_Fce * fce){
         }
         
         val = PH_Solve(tkn_RPAREN,tkn_COMMA,endToken,false);
+        argNumber++;
         if(val == NULL){
             ERROR();
         }
@@ -646,13 +624,20 @@ bool FC_AddParamToTable(S_Fce * fce, t_Value * val,int argNumber){
     if(val == NULL){
         return -1;
     }
-    return IL_AllocParam(fce, val, argNumber);
+    IL_NestUp();
+    int reachable = IL_GetReachable();
+    IL_SetReachable(IL_GetNesting());
+    bool result = IL_AllocParam(fce, val, argNumber);
+    IL_NestDown();
+    IL_SetReachable(reachable);
+    return result;
 }
 
 
 t_Value * FceMat(){
     int * nestingLevel = MEM_malloc(sizeof(int));
     *(nestingLevel) = 0;
+    bool * skipElse = MEM_malloc(sizeof(bool));
     while(true){
         switch(SCAN_GetToken()){
             case tkn_ID: tknID();  continue;
@@ -667,11 +652,11 @@ t_Value * FceMat(){
             case tkn_FOR: cycleFor(nestingLevel); continue;
             case tkn_WHILE: cycleWhile(nestingLevel); continue;
 
-            case tkn_IF: IfSt(nestingLevel); continue;
+            case tkn_IF: IfSt(nestingLevel,skipElse); continue;
             case tkn_RET: return ReturnSt();
             case tkn_RBLOCK: if(RBool(nestingLevel))  return NULL; else continue;
 
-            case tkn_ELSE:ElseSt(nestingLevel); continue; //muze byt jelikoz vime ze syntax je spravny
+            case tkn_ELSE:ElseSt(nestingLevel,skipElse); continue; //muze byt jelikoz vime ze syntax je spravny
 
             case tkn_SEMI: continue;
             default: ERROR();
@@ -683,16 +668,23 @@ t_Value * ReturnSt(){
     return PH_Solve(tkn_SEMI,-1, NULL, false);
 }
 
-void ElseSt(int * nestingLevel){
-    SCAN_GetToken();
-    (*nestingLevel)++;
+void ElseSt(int * nestingLevel,bool * skipElse){
+    if((*skipElse)){
+        SCAN_FindToken(tkn_RBLOCK);
+    }else{
+        SCAN_GetToken();
+        (*nestingLevel)++;
+    }
 }
 
-void IfSt(int * nestingLevel){
+void IfSt(int * nestingLevel,bool * skipElse){
     if(VT_GetBoolSafe(PH_Solve(tkn_LBLOCK, -1, NULL, false))){
         (*nestingLevel)++;
+        (*skipElse) = true;
+
     }else{
         SCAN_FindToken(tkn_RBLOCK);
+        (*skipElse) = false;
     }
 }
 
@@ -718,12 +710,10 @@ bool RBool(int * nestingLevel){
     }else if(type == 1){//while
         int position = FIO_GetPosition();
         FIO_MoveToPosition(JL_GetOffset());
-        if(!(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true)))){
+        if(!(VT_GetBoolSafe(PH_Solve(tkn_LBLOCK, -1, NULL, false)))){
             (*nestingLevel)--;
             JL_Remove();
             FIO_MoveToPosition(position);
-        }else{
-            SCAN_GetToken();
         }
     }else if(type == 2){//for
         int position = FIO_GetPosition();
@@ -732,9 +722,9 @@ bool RBool(int * nestingLevel){
         if(!(VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false)))){
             (*nestingLevel)--;
             JL_Remove();
+            PH_DisposeTable(IL_GetReachable());
             FIO_MoveToPosition(position);
         }else{
-            
             PH_Solve(tkn_RPAREN, -1, NULL, false);
             SCAN_GetToken();
         }
@@ -778,11 +768,11 @@ void DECLR(int type){
 void cycleDo(int * nestingLevel){
     SCAN_GetToken();
     (*nestingLevel)++;
-    MakeJump(3,*nestingLevel);
+    MakeJump(doType,*nestingLevel);
 }
 void cycleWhile(int * nestingLevel){
     (*nestingLevel)++;
-    MakeJump(1,*nestingLevel);
+    MakeJump(whileType,*nestingLevel);
     if(!VT_GetBoolSafe(PH_Solve(tkn_LBLOCK, -1, NULL, false))){
         JL_Remove();
         SCAN_FindToken(tkn_RBLOCK);
@@ -796,6 +786,7 @@ void cycleFor(int * nestingLevel){
     //for("zde")
     token = SCAN_GetToken();
     if(token == tkn_BOOL || token == tkn_DOUBLE || token == tkn_INT || token == tkn_STRING){
+        PH_AllocTable(IL_GetNesting()); //lokalni tabulka
         DECLR(token);
     }else{
         
@@ -804,7 +795,7 @@ void cycleFor(int * nestingLevel){
     }
     
     (*nestingLevel)++;
-    MakeJump(2,*nestingLevel);
+    MakeJump(forType,*nestingLevel);
     //for("";"zde")
     
     bool foo = VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false));
@@ -840,7 +831,6 @@ void ContinueSt(int * nestingLevel){
     long position = FIO_GetPosition();
     FIO_MoveToPosition(JL_GetOffset());
     if(type == 1){//while
-        
         if(!(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true)))){
             (*nestingLevel)--;
             JL_Remove();
@@ -855,7 +845,6 @@ void ContinueSt(int * nestingLevel){
             JL_Remove();
             FIO_MoveToPosition(position);
         }else{
-            
             PH_Solve(tkn_RPAREN, -1, NULL, false);
             SCAN_GetToken();
         }
@@ -869,11 +858,11 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
     S_String * ID;
     bool skipToken = false;
     int nesting = 0;
-    if(EndToken1  == tkn_RPAREN || 
-            EndToken1  == tkn_RBLOCK || 
-            EndToken2  == tkn_RPAREN || 
-            EndToken2  == tkn_RBLOCK){
-    	nesting++;
+    if(EndToken1  == tkn_LPAREN || 
+            EndToken1  == tkn_LBLOCK || 
+            EndToken2  == tkn_LPAREN || 
+            EndToken2  == tkn_LBLOCK){
+        nesting--;
     }
     while(true)
     {
@@ -893,7 +882,6 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             if(addEndToken){
                 EXPR_AddVal(token,NULL);
             }
-            
             if(nesting <= 0){
                 return EXPR_Solve();
             }  
@@ -944,10 +932,30 @@ int PH_checkValidToken(int token){
     return false;
 }
 
-void PH_AllocTable(){
-    HASHVAR_AddTable();
+void PH_AllocTable(int reachable){
+    IL_NestUp();   
+    if(reachable == -1){
+        IL_SetReachable(IL_GetNesting());
+    }else{
+        IL_SetReachable(reachable);
+    }
+    
 }
 
 void PH_MakeTree(){
     EXPR_Create();
+}
+
+void PH_DisposeTree(){
+    EXPR_Dispose();
+}
+
+void PH_DisposeTable(int reachable){
+    IL_RemoveNest();
+    IL_NestDown();
+    if(reachable == -1){
+        IL_SetReachable(IL_GetNesting());
+    }else{
+        IL_SetReachable(reachable);
+    }
 }

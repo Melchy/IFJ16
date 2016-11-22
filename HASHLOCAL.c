@@ -39,10 +39,13 @@ S_VarL *HASHLOCAL_Find(S_String *ID){
 
 void HASHLOCAL_RemoveNest(int nest){
 	S_VarL *act; S_VarL *prev = NULL;
+
 	for (int i = 0; i < SIZETAB; i++)
 	{
+		
 		act = local[i];
 		while(act != NULL && act->nest == nest){
+
 			prev = act;
 			MEM_free(act->ID);
 			if(act->value->type != tkn_TRUE && act->value->type != tkn_FALSE && act->value->VT_index != -1)

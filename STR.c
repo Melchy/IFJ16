@@ -384,6 +384,6 @@ S_String * STR_GetBefore(S_String * str, char ch){
     return NULL;
   }
   S_String * result = STR_Create(str->str);
-  result->str[dotPos+1] = '\0';
+  result->str[dotPos] = '\0';
   return result;
 }

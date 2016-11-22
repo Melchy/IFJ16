@@ -385,7 +385,6 @@ t_Value *EXPR_Solve()
 {
 	Add_IDVal();
 	//Tree_Print();
-
 	Tree_RemoveParen(); // pred solve pro zjednoduseni odstranime zavorky
 	if(Tree_Empty())
 		return NULL;
@@ -399,7 +398,6 @@ t_Value *EXPR_Solve()
 	if(res == NULL)
 		ERROR_exit(SEM_ERR_TYPE);
 	makeAssigns(res);
-	HASHVAR_PrintL();
 	Tree_Dispose();
 	Tree_Create();
 	return res;

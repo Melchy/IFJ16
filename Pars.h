@@ -22,13 +22,19 @@
 	#include "HASHFCE.h"
 	#include "JL.h"
 	#include "ial.h"
-
-
+	
+	#define whileType 1
+	#define forType 2
+	#define doType 3
+	#define ifTrueType 4
+	#define ifFalseType 5
 
 	#define st_Start 0
 	#define st_Class 1
 	#define st_InFce 2
 	#define st_StartPrg 3
+
+
 	void PARS_Run();
 
 	
@@ -50,21 +56,23 @@
 	void cycleWhile();
 	void cycleFor();
 	void MakeJump(int JumpType, int nestingLevel);
-	void IfSt(int * nestingLevel);
+	void IfSt(int * nestingLevel,bool * skipElse);
 	void BreakSt(int * NestingLevel);
 	void ContinueSt(int * NestingLevel);
 	t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken);
 	int PH_checkValidToken(int token);
 	void PH_AllocTable();
 	void PH_MakeTree();
-	void ElseSt(int * nestingLevel);
+	void PH_DisposeTree();
+	void PH_DisposeTable();
+	void ElseSt(int * nestingLevel,bool * skipElse);
 	void CheckReturn(S_Fce * fce,t_Value * result);
 	void IntitIfj16Fce();
 	t_Value * PA_ifj16(S_String * ID);
 
 	void checkIfNextTokenIsSmt(int token);
 	void FR_tknID(bool canFce);
-	void FR_DECLR();
+	void FR_DECLR(int nesting);
 	void FR_BreakSt();
 	void FR_ContinueSt();
 	void FR_cycleDo(int * nestingLevel);

@@ -17,6 +17,7 @@ void IL_NestDown()
 void IL_NestUp()
 { nesting++; }
 
+
 void IL_RemoveNest()
 { HASHLOCAL_RemoveNest(nesting); }
 
@@ -46,7 +47,6 @@ static void allocLocal(S_String *ID, int token){
 	new->nest = nesting;
 	S_VarL *found = HASHLOCAL_Find(new->ID);
 	if(found != NULL && found->nest >= reachableNesting){
-		printf("nastalo\n");
 		ERROR_exit(SEM_ERR_DEF);
 	}
 	HASHLOCAL_Add(new);
@@ -55,6 +55,7 @@ static void allocLocal(S_String *ID, int token){
 void IL_AllocVar(S_String *ID, int token, bool global)
 {
 	if(!global){
+
 		allocLocal(ID,token);
 		return;
 	}
