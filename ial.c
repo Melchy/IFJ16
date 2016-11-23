@@ -28,24 +28,19 @@ int readInt()
 double readDouble()
 {
     double *result = MEM_malloc(sizeof(int));;
-    int control;
 
+    // Creates a string from standard input.
     S_String *s = STR_Create(read_line());
 
-    if(s->str[0] == '-' || s->str[0] == '+')
-    {
-        ERROR_exit(NUM_ERR);
-    }
-    
-    control = STR_StringToDouble(s, result);
-
-    if(control == 0)
+    // Term meets requirements for double literal.
+    if(verify_double(s, result) == true)
     {
         return *result;
     }
+    // Term doesn't meet requirements for double literal.
     else
     {
-        ERROR_exit(NUM_ERR);
+    	ERROR_exit(NUM_ERR);
     }
     return 0.0;
 }
@@ -59,21 +54,17 @@ S_String *readString()
 void print(S_String *s)
 {
     double *result = MEM_malloc(sizeof(double));
-    S_String *s_after = NULL; 
 
-    if(((STR_GetAfter(s, &s_after, '.') == 0)|| 
-        ((STR_StringToDouble(s, result) == 0) && 
-        ((strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))) && 
-        STR_StringToDouble(s, result) == 0 && 
-        (s->str[0] != '-' || s->str[0] != '+'))
+    // Term meets requirements for double literal.
+    if(verify_double(s, result) == true)
     {
         printf("G:%g", *result);
     }
+    // Term is either integer or string literal.
     else
     {
         printf("S:%s", s->str);
     }
-
     MEM_free(result);
 }
 
@@ -256,4 +247,31 @@ char *read_line()
     }
     *line = '\0';
     return line_start;
+}
+
+bool verify_double(S_String *s, double *result)
+{
+	S_String *s_after = NULL;
+	S_String *s_before = NULL;
+
+    if(!(STR_StringToDouble(s, result) == 0))
+    {
+    	return false;
+    }
+
+    if((s->str[0] == '-' || s->str[0] == '+'))
+    {
+    	return false;
+    }
+
+    if(!(STR_GetBeforeEmpty(s, &s_before ,'.') == 0))
+    {
+    	return false;
+    }
+
+    if(!((STR_GetAfter(s, &s_after, '.') == 0) || (strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))
+    {
+    	return false;
+    }
+    return true;
 }

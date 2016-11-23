@@ -4,6 +4,7 @@
 /* --- Libraries list --- */
 
 #include <string.h>
+#include <stdbool.h>
 
 #include "STR.h"
 #include "MEM.h"
@@ -35,5 +36,6 @@ void HS_Sort(S_String *s);
 void HS_Heapify(S_String *s, int i);
 int BM_BCR(S_String *s, S_String *search);
 char *read_line();
+bool verify_double(S_String *s, double *result);
 
 #endif

@@ -274,6 +274,40 @@ int STR_GetAfter(S_String *s, S_String **s_after, char separator)
 
 /*
 Return values:
+------------------------------------
+0 ... Success
+1 ... Serapator not found.
+2 ... No String after the separator.
+------------------------------------
+*/
+
+int STR_GetBeforeEmpty(S_String *s, S_String **s_before, char separator)
+{
+  int position = STR_FindChar(s, separator);
+  
+  if(position == -1)
+  {
+    return 1;
+  }
+
+  S_String *tmp = STR_Create(s->str);
+  tmp->str[position] = '\0';
+
+  *s_before = STR_Create(tmp->str);
+  MEM_free(tmp);
+
+  if((*s_before)->str[0] == '\0')
+  {
+  	return 2;
+  }
+  else
+  {
+  	return 0;
+  }
+}
+
+/*
+Return values:
 -----------------------------
 0 ... Successful.
 1 ... Unconvertable content.

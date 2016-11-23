@@ -34,6 +34,7 @@ int STR_Compare2(S_String *s1, char * str);
 int STR_FindChar(S_String *s, char subChar);
 int STR_SubStr(S_String *s, S_String *s_sub, int start);
 int STR_GetAfter(S_String *s, S_String **s_after, char separator);
+int STR_GetBeforeEmpty(S_String *s, S_String **s_before, char separator);
 
 int STR_StringToInt(S_String *s, int *result);
 int STR_StringToLong(S_String *s, long *result);
