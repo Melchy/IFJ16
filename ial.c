@@ -2,22 +2,17 @@
 
 int readInt()
 {
-    int *result = MEM_malloc(sizeof(int));;
-    int control;
+    int *result = MEM_malloc(sizeof(int));
 
+    // Creates a string from standard input.
     S_String *s = STR_Create(read_line());
-
-    if(s->str[0] == '-' || s->str[0] == '+')
-    {
-        ERROR_exit(NUM_ERR);
-    }
     
-    control = STR_StringToInt(s, result);
-
-    if(control == 0)
+    // Term meets requirements for integer literal.
+    if(verify_integer(s, result) == true)
     {
-        return (int)*result;
+        return *result;
     }
+    // Term doesn't meet requirements for integer literal.
     else
     {
         ERROR_exit(NUM_ERR);
@@ -209,6 +204,51 @@ int BM_BCR(S_String *s, S_String *search)
     return -1;
 }
 
+bool verify_integer(S_String *s, int *result)
+{
+    // Term can't be converted to a value of integer literal.
+    if(!(STR_StringToInt(s, result) == 0))
+    {
+        return false;
+    }
+    // Term contains unwanted sign characters.
+    if((s->str[0] == '-' || s->str[0] == '+'))
+    {
+        return false;
+    }
+    // If term doesn't break any of the above rules it can be verified as a valid integer literal.
+    return true;
+}
+
+bool verify_double(S_String *s, double *result)
+{
+	S_String *s_after = NULL;
+	S_String *s_before = NULL;
+
+    // Term can't be converted to a value of double literal.
+    if(!(STR_StringToDouble(s, result) == 0))
+    {
+    	return false;
+    }
+    // Term contains unwanted sign characters.
+    if((s->str[0] == '-' || s->str[0] == '+'))
+    {
+    	return false;
+    }
+    // Term does not contain an integer part before the dot character.
+    if(!(STR_GetBeforeEmpty(s, &s_before ,'.') == 0))
+    {
+    	return false;
+    }
+    // Term has to be either in the dot notation or the exponential (scientific) notation.
+    if(!((STR_GetAfter(s, &s_after, '.') == 0) || (strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))
+    {
+    	return false;
+    }
+    // If term doesn't break any of the above rules it can be verified as a valid double literal.
+    return true;
+}
+
 char *read_line()
 {
     char *line = MEM_malloc(100);
@@ -217,61 +257,45 @@ char *read_line()
     size_t length = length_max;
     int c;
 
+    // Unsuccessful allocation of memory.
     if(line == NULL)
     {
         return NULL;
     }
-
+    // Main read cycle for stdin.
     while((c = fgetc(stdin)) != EOF)
     {    
+        // When the whole allocated memory is filled.
         if(--length == 0) 
         {
+            // Increase the length back to maximum.
             length = length_max;
+            // Make a reallocation of memory for doubled length (size).
             char * line_new = MEM_realloc(line_start, length_max *= 2);
 
+            // Unsuccessful reallocation of memory.
             if(line_new == NULL)
             {
+                // Free the first chunk of allocated memory.
                 MEM_free(line_start);
                 return NULL;
             }
-
+            // Pointer to the current position of saved line.
             line = line_new + (line - line_start);
+            // Pointer to the starting position of saved line.
             line_start = line_new;
         }
-
+        // Following character is '\n'.
         if((*line++ = c) == '\n')
         {
+            // Decrease the pointer value (move one character back).
             line--;
+            // Force the end of the main read cycle.
             break;
         }
     }
+    // Insert a null character.
     *line = '\0';
+    // Return the read line from stdin.
     return line_start;
-}
-
-bool verify_double(S_String *s, double *result)
-{
-	S_String *s_after = NULL;
-	S_String *s_before = NULL;
-
-    if(!(STR_StringToDouble(s, result) == 0))
-    {
-    	return false;
-    }
-
-    if((s->str[0] == '-' || s->str[0] == '+'))
-    {
-    	return false;
-    }
-
-    if(!(STR_GetBeforeEmpty(s, &s_before ,'.') == 0))
-    {
-    	return false;
-    }
-
-    if(!((STR_GetAfter(s, &s_after, '.') == 0) || (strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))
-    {
-    	return false;
-    }
-    return true;
 }
