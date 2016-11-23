@@ -9,8 +9,10 @@
 static S_String * ifj16Dot;
 
 
-S_String * STR_GetIfj16Dot(){
-  if(ifj16Dot == NULL){
+S_String *STR_GetIfj16Dot()
+{
+  if(ifj16Dot == NULL)
+  {
     ifj16Dot = STR_Create("ifj16.");
   }
   return ifj16Dot;
@@ -23,7 +25,6 @@ S_String *STR_Create(char *value)
 	s->size = s->len + 1;
 	s->str = MEM_malloc(s->size);
 	strcpy(s->str, value);
-	
 	return s;
 }
 
@@ -55,6 +56,26 @@ S_String *STR_DoubleToString(double value)
   snprintf(buffer, n + 1, "%g", value);
   S_String *s = STR_Create(buffer);
   return s;
+}
+
+S_String *STR_GetBefore(S_String *str, char ch)
+{
+  int dotPos = STR_FindChar(str, ch);
+
+  if(dotPos == -1)
+  {
+    return NULL;
+  }
+
+  S_String * result = STR_Create(str->str);
+  result->str[dotPos] = '\0';
+  return result;
+}
+
+void STR_Dispose(S_String *s)
+{
+  MEM_free(s->str);
+  MEM_free(s);
 }
 
 void STR_PrintStr(S_String *s)
@@ -102,8 +123,7 @@ void STR_ConCat(S_String *s1, S_String *s2)
 
 void STR_Copy(S_String *s1, S_String *s2)
 {
-  MEM_free(s1);
-
+  STR_Dispose(s1);
   s1 = STR_Create(s2->str);
 }
 
@@ -410,14 +430,4 @@ int STR_StringToDouble(S_String *s, double *result)
   }
 
   return 0;
-}
-
-S_String * STR_GetBefore(S_String * str, char ch){
-  int dotPos = STR_FindChar(str, ch);
-  if(dotPos == -1){
-    return NULL;
-  }
-  S_String * result = STR_Create(str->str);
-  result->str[dotPos] = '\0';
-  return result;
 }

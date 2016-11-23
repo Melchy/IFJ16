@@ -21,7 +21,9 @@ S_String *STR_Create(char *value);
 S_String *STR_IntToString(int value);
 S_String *STR_LongToString(long value);
 S_String *STR_DoubleToString(double value);
+S_String *STR_GetBefore(S_String *str, char ch);
 
+void STR_Dispose(S_String *s);
 void STR_PrintStr(S_String *s);
 void STR_AddChar(S_String *s, int lastChar);
 void STR_ChangeSize(S_String *s, int newSize);
@@ -40,5 +42,4 @@ int STR_StringToInt(S_String *s, int *result);
 int STR_StringToLong(S_String *s, long *result);
 int STR_StringToDouble(S_String *s, double *result);
 
-S_String * STR_GetBefore(S_String * str, char ch);
 #endif

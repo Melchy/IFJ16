@@ -1,5 +1,10 @@
+/* --- Libraries list --- */
 #include "ial.h"
 
+/* --- Static global variables --- */
+static int hs_total;
+
+/* --- Function definition --- */
 int readInt()
 {
     int *result = MEM_malloc(sizeof(int));
@@ -46,6 +51,7 @@ S_String *readString()
 
     return s;
 }
+
 void print(S_String *s)
 {
     double *result = MEM_malloc(sizeof(double));
@@ -75,21 +81,34 @@ int compare(S_String *s1, S_String *s2)
 
 S_String *substr(S_String *s, int i, int n)
 {
+    // Invalid arguments.
+    if(i < 0 || n < 0)
+    {
+    	ERROR_exit(RANDOM_ERR);
+    }
+    // Starting index is out of bonds or pointing at null character.
+    else if(i >= s->len)
+    {
+    	ERROR_exit(RANDOM_ERR);
+    }
+    // The resulting string will exceed the null character.
+    else if(i + n > s->len)
+    {
+    	ERROR_exit(RANDOM_ERR);
+    }
+    // Inicialization of a temporary array.
     char tmp[n];
-
+    // Cycle copies values from the string array to the temporary array.
     for(int j = 0; j < n; j++, i++)
     {
         tmp[j] = s->str[i];
     }
-
+    // Insert null character to the end of the temporary array.
     tmp[n] = '\0';
+    // Create the resulting string string from the temporary array.
     S_String *s_result = STR_Create(tmp);
-
     return s_result;
 }
-
-static int total;
-static int max_value(int a, int b) { return (a > b)? a: b; }
 
 S_String *sort(S_String *s)
 {
@@ -99,20 +118,20 @@ S_String *sort(S_String *s)
 
 void HS_Sort(S_String *s)
 {
-    total = strlen(s->str) - 1;
+    hs_total = strlen(s->str) - 1;
 
     // Rearrange the heap according to heap property (maxheap ... root > children).
-    for (int level = total / 2; level >= 0; level--)
+    for (int level = hs_total / 2; level >= 0; level--)
     {
         HS_Heapify(s, level);
     }
 
     // Extraction of the "maximal" element.
-    for (int last = total; last > 0; last--)
+    for (int last = hs_total; last > 0; last--)
     {
         // Move current root to the end.
         SWAP(s->str, 0, last);
-        total--;
+        hs_total--;
         // Rearrange the reduced heap.
         HS_Heapify(s, 0);
     }
@@ -125,12 +144,12 @@ void HS_Heapify(S_String *s, int i)
     int right = 2 * i + 1;  // Right child.
 
     // If left child is larger than root.
-    if (left <= total && s->str[left] > s->str[largest]) 
+    if (left <= hs_total && s->str[left] > s->str[largest]) 
     {
         largest = left;
     }
     // If right child is larger than root or root's left child.
-    if (right <= total && s->str[right] > s->str[largest])
+    if (right <= hs_total && s->str[right] > s->str[largest])
     {
         largest = right;
     }
@@ -198,7 +217,8 @@ int BM_BCR(S_String *s, S_String *search)
                shift. We may get a negative shift if the last occurrence
                of bad character in pattern is on the right side of the
                current character. */
-            shift += max_value(1, j - charJump[(int)s->str[shift+j]]);
+            int max_value = (1 > j - charJump[(int)s->str[shift+j]]) ? 1 : j - charJump[(int)s->str[shift+j]];
+            shift += max_value;
         }
     }
     return -1;
