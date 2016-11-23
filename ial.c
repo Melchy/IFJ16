@@ -56,6 +56,26 @@ S_String *readString()
 
     return s;
 }
+void print(S_String *s)
+{
+    double *result = MEM_malloc(sizeof(double));
+    S_String *s_after = NULL; 
+
+    if(((STR_GetAfter(s, &s_after, '.') == 0)|| 
+        ((STR_StringToDouble(s, result) == 0) && 
+        ((strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))) && 
+        STR_StringToDouble(s, result) == 0 && 
+        (s->str[0] != '-' || s->str[0] != '+'))
+    {
+        printf("G:%g", *result);
+    }
+    else
+    {
+        printf("S:%s", s->str);
+    }
+
+    MEM_free(result);
+}
 
 int length(S_String *s)
 {
@@ -82,8 +102,8 @@ S_String *substr(S_String *s, int i, int n)
     return s_result;
 }
 
-int total;
-int max_value(int a, int b) { return (a > b)? a: b; }
+static int total;
+static int max_value(int a, int b) { return (a > b)? a: b; }
 
 S_String *sort(S_String *s)
 {

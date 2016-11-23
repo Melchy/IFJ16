@@ -23,6 +23,7 @@
 int readInt();
 double readDouble();
 S_String *readString();
+void print(S_String *s);
 
 int length(S_String *s);
 int compare(S_String *s1, S_String *s2);
