@@ -34,10 +34,16 @@
 	#define st_InFce 2
 	#define st_StartPrg 3
 
+	typedef struct classNameList
+	{
+		S_String * name;
+		struct classNameList * next;
+	} classNameList;
+
 
 	void PARS_Run();
 
-	
+	void addClass(S_String * name);
 	void GetNewClass(S_String * ID,S_String * newClass);
 	t_Value * SolveFce(S_String * ID,bool run);
 	void FC_Call();

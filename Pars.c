@@ -2,11 +2,11 @@
 
 int State = -1;
 
+classNameList * firstClass = NULL;
+
 //PARSER
 void PARS_Run(){
-    //TODO neoveruje stejna jmena trid
     //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti (zpusobeno spatnym odstranovanim stringu)
-    //TODO lze udelat vice elsu
     //TODO mazani struktury jumpu
     EXPR_Create();
     S_String * foo = STR_Create("Main");
@@ -17,7 +17,6 @@ void PARS_Run(){
     foo->str = "run";
     PH_DisposeTree();
     SolveFce(foo,true);
-    MEM_free(foo);
 }
 
 void IntitIfj16Fce(){
@@ -82,18 +81,17 @@ void IntitIfj16Fce(){
 
     IL_InitFce(prnt,tkn_VOID, -1,bool1);
 
-    MEM_free(cl);
-    MEM_free(readInt);
-    MEM_free(readDouble);
-    MEM_free(readString);
-    MEM_free(prnt);
-    MEM_free(length);
-    MEM_free(substr);
-    MEM_free(compare);
+    STR_Dispose(cl);
+    STR_Dispose(readInt);
+    STR_Dispose(readDouble);
+    STR_Dispose(readString);
+    STR_Dispose(prnt);
+    STR_Dispose(length);
+    STR_Dispose(substr);
+    STR_Dispose(compare);
 
-    MEM_free(find);
-    MEM_free(sort);
-
+    STR_Dispose(find);
+    STR_Dispose(sort);
 }
 
 
@@ -350,10 +348,33 @@ void FR_HandleClass(){
         FR_SynError();
     }
     checkIfNextTokenIsSmt(tkn_ID);
+    addClass(SCAN_GetAttr());
     IL_SetClass(SCAN_GetAttr());
     checkIfNextTokenIsSmt(tkn_LBLOCK);
 
     State = st_Class;
+}
+
+void addClass(S_String * name){
+    classNameList * foo;
+    classNameList * class;
+    class = firstClass;
+    while(class != NULL){
+        if(STR_Compare(class->name, name) == 0){
+           FR_SynError();
+        }
+        foo = class;
+        class = class->next;
+    }
+
+    class = MEM_malloc(sizeof(classNameList));
+    class->name = STR_Create(name->str);
+    class->next = NULL;
+    if(firstClass != NULL){
+        foo->next = class;
+    }else{
+        firstClass = class;
+    }
 }
 
 void FR_SynError(){
@@ -383,7 +404,7 @@ void FR_InClass(){
     }else{
         FR_SynError();
     }
-    MEM_free(ID);
+    STR_Dispose(ID);
 }
 
 void FR_DeclrFceGlobal(S_String * ID,int type){
@@ -458,12 +479,13 @@ bool FR_checkFceType(int token){
 t_Value * SolveFce(S_String * ID,bool run){
     //printf("%s\n", "syntax good");
     int returnPos;
+    int reachableNest = IL_GetReachable();
+    int nest = IL_GetNesting();
     S_Fce * fce = IL_GetFce(ID);
     PH_MakeTree();
     if(!run){
         FC_LoadArgs(fce);
     }
-
 
     S_String * class = STR_Create(IL_GetClass()->str);
     //Set new CLass
@@ -490,13 +512,15 @@ t_Value * SolveFce(S_String * ID,bool run){
         CheckReturn(fce,result);
         FIO_MoveToPosition(returnPos);
     }
-    MEM_free(fooStr);
+    STR_Dispose(fooStr);
     IL_SetClass(class);
-    MEM_free(class);
-    MEM_free(newClass);
+    STR_Dispose(class);
+    STR_Dispose(newClass);
     PH_DisposeTree();
-
-    PH_DisposeTable(-1);
+    PH_DisposeTable(reachableNest);
+    if(nest != IL_GetNesting()){
+        PH_DisposeTable(reachableNest);
+    }
     return result;
 }
 
@@ -718,15 +742,16 @@ bool RBool(int * nestingLevel){
     }else if(type == 2){//for
         int position = FIO_GetPosition();
         FIO_MoveToPosition(JL_GetOffset());
-        
+        SCAN_FindToken(tkn_SEMI);
+        PH_Solve(tkn_RPAREN, -1, NULL, false);
+        FIO_MoveToPosition(JL_GetOffset());
         if(!(VT_GetBoolSafe(PH_Solve(tkn_SEMI, -1, NULL, false)))){
             (*nestingLevel)--;
             JL_Remove();
             PH_DisposeTable(IL_GetReachable());
             FIO_MoveToPosition(position);
         }else{
-            PH_Solve(tkn_RPAREN, -1, NULL, false);
-            SCAN_GetToken();
+            SCAN_FindToken(tkn_LBLOCK);
         }
     }
     return false;
@@ -744,7 +769,7 @@ void tknID(){
     }else if(token == tkn_ASSIGN){
         
         EXPR_AddVal(tkn_ID,ID);
-        MEM_free(ID);
+        STR_Dispose(ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         PH_Solve(tkn_SEMI, -1, NULL, false);
     }
@@ -758,7 +783,7 @@ void DECLR(int type){
     token = SCAN_GetToken();
     if(token == tkn_ASSIGN){
         EXPR_AddVal(tkn_ID,ID);
-        MEM_free(ID);
+        STR_Dispose(ID);
         EXPR_AddVal(tkn_ASSIGN,NULL);
         PH_Solve(tkn_SEMI, -1, NULL, false);
     }
@@ -893,7 +918,7 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
             if(token != tkn_LPAREN){
                 skipToken = true;
                 EXPR_AddVal(tkn_ID, ID);
-                MEM_free(ID);
+                STR_Dispose(ID);
             }else{
                 EXPR_AddVal2(SolveFce(ID,false));
             }
