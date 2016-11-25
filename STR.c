@@ -174,7 +174,8 @@ int STR_Compare(S_String *s1, S_String *s2)
   return strcmp(s1->str, s2->str);
 }
 
-int STR_Compare2(S_String *s1, char * str){
+int STR_Compare2(S_String *s1, char *str)
+{
   return strcmp(s1->str, str);
 }
 /*
