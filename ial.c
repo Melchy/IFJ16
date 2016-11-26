@@ -59,12 +59,12 @@ void print(S_String *s)
     // Term meets requirements for double literal.
     if(verify_double(s, result) == true)
     {
-        printf("G:%g", *result);
+        printf("%g", *result);
     }
     // Term is either integer or string literal.
     else
     {
-        printf("S:%s", s->str);
+        printf("%s", s->str);
     }
     MEM_free(result);
 }
@@ -238,17 +238,17 @@ bool verify_double(S_String *s, double *result)
     // Term can't be converted to a value of double literal.
     if(!(STR_StringToDouble(s, result) == 0))
     {
-    	return false;
+        return false;
     }
     // Term contains unwanted sign characters.
     if((s->str[0] == '-' || s->str[0] == '+'))
     {
     	return false;
     }
-    // Term does not contain an integer part before the dot character.
-    if(!(STR_GetBeforeEmpty(s, &s_before ,'.') == 0))
+    // Term does not contain an integer part before the dot character if term is in dot notation.
+    if((STR_FindChar(s, '.') != -1) && !(STR_GetBeforeEmpty(s, &s_before ,'.') == 0))
     {
-    	return false;
+        return false;
     }
     // Term has to be either in the dot notation or the exponential (scientific) notation.
     if(!((STR_GetAfter(s, &s_after, '.') == 0) || (strchr(s->str, 'e') != NULL) || (strchr(s->str, 'E') != NULL)))
