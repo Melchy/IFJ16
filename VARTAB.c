@@ -9,6 +9,8 @@ static t_Value *Bools;
 static t_Value *LParen;
 static t_Value *Zero;
 static t_Value *AnyStr;
+static t_Value *TrueStr;
+static t_Value *FalseStr;
 static t_Value *Empty;
 
 //testovano
@@ -28,6 +30,8 @@ void VT_InitTabs()
 
 	Zero = VT_AddInt(0);
 	AnyStr = VT_AddStr(STR_Create(""));
+	TrueStr = VT_AddStr(STR_Create("true"));
+	FalseStr = VT_AddStr(STR_Create("false"));
 
 	Empty = MEM_malloc(4*sizeof(t_Value));
 	Empty[0].type = tkn_NUM; Empty[0].VT_index = -1;
@@ -168,6 +172,16 @@ t_Value *VT_GetZeroInt()
 t_Value *VT_GetEmptyString()
 {
 	return AnyStr;
+}
+
+t_Value *VT_GetTrueString()
+{
+	return TrueStr;
+}
+
+t_Value *VT_GetFalseString()
+{
+	return FalseStr;
 }
 //testovano
 t_Value *VT_GetEmpty(int token)

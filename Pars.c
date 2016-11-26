@@ -356,7 +356,7 @@ void FR_HandleClass(){
 }
 
 void addClass(S_String * name){
-    classNameList * foo;
+    classNameList * foo = NULL;
     classNameList * class;
     class = firstClass;
     while(class != NULL){

@@ -20,6 +20,7 @@ typedef struct t_Tree{
 	t_Assign *LastAssign;
 	S_String *ActStr;
 	bool assignable;
+	bool isconcat;
 	int nest;
 	t_Tree *prev;
 }t_Tree;
@@ -69,5 +70,9 @@ void Tree_Print();
 t_Node *Tree_GetTopNode();
 
 int Tree_GetNest();
+
+bool Tree_GetConcat();
+
+void Tree_SetConcat();
 
 #endif

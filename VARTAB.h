@@ -55,6 +55,8 @@ t_Value *VT_GetOp(int tkn_op);
 t_Value *VT_GetLParen();
 t_Value *VT_GetZeroInt();
 t_Value *VT_GetEmptyString();
+t_Value *VT_GetTrueString();
+t_Value *VT_GetFalseString();
 t_Value *VT_GetEmpty(int token);
 
 // pouze pro ucely testovani

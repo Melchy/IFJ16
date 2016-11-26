@@ -259,7 +259,7 @@ int SCAN_GetToken()
 			case st_LIT: // v retezcovem literalu
 				if(c == '"')		{ Add_Null; return tkn_LIT; }
 				else if(c == '\\') 	{ state = st_LITESC; continue; }
-				else if(c == '\n') 	{ Add_Null; return LEX_ERR; }
+				else if(c == '\n') 	{ Add_Null; ERROR_exit(LEX_ERR); }
 				else 				{ Add_Char; continue; }
 			break;
 

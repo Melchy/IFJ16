@@ -18,9 +18,9 @@
 #include <stdbool.h>
 #include <string.h>
 
-static void initAll()
+static void initAll(char *file)
 {
-	FIO_Open("java.code");
+	FIO_Open(file);
 	SCAN_InitAttr();
 	VT_InitTabs();
 	HASHFCE_InitFceTab();
@@ -116,7 +116,7 @@ int test_Expr()
 	MEM_clearAll();
 	FIO_Close();
 	return 0;
-}*/
+}
 
 
 
@@ -302,9 +302,9 @@ void test_HASHLOCAL(){
 	MEM_clearAll();
 	FIO_Close();
 }
+*/
 
-
-int main(void)
+int main(int argc, char *argv[])
 {
 	//test_VARTAB();
 	//test_Expr();
@@ -314,8 +314,13 @@ int main(void)
 	//test_VARTABBool();
 	//test_STRSearch();
 	//JL_Add(10, 2, 2);
-	initAll();
+	if(argc != 2)
+		ERROR_exit(ENV_ERR);
+
+	initAll(argv[1]);
 	PARS_Run();
+	MEM_clearAll();
+	FIO_Close();
 	//test_HASHLOCAL();
 	//PH_MakeTree();
 	//PH_AllocTable();

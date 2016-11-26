@@ -4,21 +4,16 @@
 #include "Tokens.h"
 #include "ERROR.h"
 #include "VARTAB.h"
-#include "SEM.h"
 #include "IDLogic.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-static bool is_concat;
-
 void EXPR_Create()
 {
 	// pro kazdy vyraz vytvorime unikatni strom
 	Tree_Create();
-	if(is_concat)
-		is_concat = false;
 }
 
 /* Funkci volame pred kazdym pridanim do stromu */
@@ -44,7 +39,6 @@ void EXPR_AddVal(int token, S_String *attr)
 		Tree_AddAssignment();
 		return;
 	}
-
 	Add_IDVal();
 	int x; double y;
 
@@ -86,7 +80,7 @@ void EXPR_AddVal(int token, S_String *attr)
 		case tkn_ID:
 			Tree_AddID(attr);
 			return;
-		default: 
+		default:
 			ERROR_exit(SYN_ERR);
 	}
 }
@@ -126,6 +120,7 @@ static t_Value *solve_REAL_REAL(t_Value *l, t_Value *r, int op)
 	case tkn_MUL:
 		return VT_AddDouble(VT_GetDouble(l->VT_index) * VT_GetDouble(r->VT_index));
 	case tkn_DIV:
+		if(VT_GetDouble(r->VT_index) == 0.0) ERROR_exit(DIV_NULL_ERR);
 		return VT_AddDouble(VT_GetDouble(l->VT_index) / VT_GetDouble(r->VT_index));
 	case tkn_HIGHER:
 		return VT_GetDouble(l->VT_index) > VT_GetDouble(r->VT_index) ? VT_AddBool(tkn_TRUE) : VT_AddBool(tkn_FALSE);
@@ -154,6 +149,7 @@ static t_Value *solve_REAL_NUM(t_Value *l, t_Value *r, int op)
 	case tkn_MUL:
 		return VT_AddDouble(VT_GetDouble(l->VT_index) * VT_GetInt(r->VT_index));
 	case tkn_DIV:
+		if(VT_GetInt(r->VT_index) == 0) ERROR_exit(DIV_NULL_ERR);
 		return VT_AddDouble(VT_GetDouble(l->VT_index) / VT_GetInt(r->VT_index));
 	case tkn_HIGHER:
 		return VT_GetDouble(l->VT_index) > VT_GetInt(r->VT_index) ? VT_AddBool(tkn_TRUE) : VT_AddBool(tkn_FALSE);
@@ -182,6 +178,7 @@ static t_Value *solve_NUM_REAL(t_Value *l, t_Value *r, int op)
 	case tkn_MUL:
 		return VT_AddDouble(VT_GetInt(l->VT_index) * VT_GetDouble(r->VT_index));
 	case tkn_DIV:
+		if(VT_GetDouble(r->VT_index) == 0.0) ERROR_exit(DIV_NULL_ERR);
 		return VT_AddDouble(VT_GetInt(l->VT_index) / VT_GetDouble(r->VT_index));
 	case tkn_HIGHER:
 		return VT_GetInt(l->VT_index) > VT_GetDouble(r->VT_index) ? VT_AddBool(tkn_TRUE) : VT_AddBool(tkn_FALSE);
@@ -210,6 +207,7 @@ static t_Value *solve_NUM_NUM(t_Value *l, t_Value *r, int op)
 	case tkn_MUL:
 		return VT_AddInt(VT_GetInt(l->VT_index) * VT_GetInt(r->VT_index));
 	case tkn_DIV:
+		if(VT_GetInt(r->VT_index) == 0) ERROR_exit(DIV_NULL_ERR);
 		return VT_AddInt(VT_GetInt(l->VT_index) / VT_GetInt(r->VT_index));
 	case tkn_HIGHER:
 		return VT_GetInt(l->VT_index) > VT_GetInt(r->VT_index) ? VT_AddBool(tkn_TRUE) : VT_AddBool(tkn_FALSE);
@@ -292,6 +290,10 @@ static t_Value *toString(t_Value *v)
 			return VT_AddStr(STR_IntToString(VT_GetInt(v->VT_index)));
 		case tkn_REAL:
 			return VT_AddStr(STR_DoubleToString(VT_GetDouble(v->VT_index)));
+		case tkn_TRUE:
+			return VT_GetTrueString();
+		case tkn_FALSE:
+			return VT_GetFalseString();
 	}
 	return v;
 }
@@ -301,8 +303,8 @@ static t_Value *RecSolve(t_Node *n)
 	// IMPORTANT - pokud je jeden jediny operand literal, jedna se o konkatenaci 
 	// a je potreba volat easysolve se stringovymi operandy (tostring(value))
 
-	if(!is_concat && (Node_GetType(Node_GetLChild(n)) == tkn_LIT || Node_GetType(Node_GetRChild(n)) == tkn_LIT))
-		is_concat = true;
+	if(!Tree_GetConcat() && (Node_GetType(Node_GetLChild(n)) == tkn_LIT || Node_GetType(Node_GetRChild(n)) == tkn_LIT))
+		Tree_SetConcat();
 
 	t_Value *l; t_Value *r; int op = Node_GetType(n);
 	if(Node_GetLChild(n) == NULL) // osetreni unarniho minus (jako levy operand dosadime nulu)
@@ -328,7 +330,7 @@ static t_Value *RecSolve(t_Node *n)
 	if(r != NULL && r->VT_index == -1)
 		ERROR_exit(INIT_ERR);
 
-	if(is_concat)
+	if(Tree_GetConcat())
 		return EasySolve(toString(l), toString(r), op);
 
 	return EasySolve(l, r, op);
@@ -384,7 +386,6 @@ static void makeAssigns(t_Value *value)
 t_Value *EXPR_Solve()
 {
 	Add_IDVal();
-	//Tree_Print();
 	Tree_RemoveParen(); // pred solve pro zjednoduseni odstranime zavorky
 	if(Tree_Empty())
 		return NULL;
@@ -392,11 +393,16 @@ t_Value *EXPR_Solve()
 	t_Value *res;
 	t_Node *n = Tree_GetTopNode();
 	if(!Node_IsOp(n)) // pokud je na topu hodnota, rekurze nema smysl (napr. x=5;)
+	{
+		if(Node_GetValue(n)->VT_index == -1)
+			ERROR_exit(INIT_ERR);
 		res = VT_Copy(Node_GetValue(n));
+	}
 	else
 		res = RecSolve(n);
-	if(res == NULL)
+	if(res == NULL){
 		ERROR_exit(SEM_ERR_TYPE);
+	}
 	makeAssigns(res);
 	Tree_Dispose();
 	Tree_Create();

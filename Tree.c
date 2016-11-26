@@ -22,6 +22,7 @@ void Tree_Create()
 	T->LastAssign = NULL;
 	T->ActStr = NULL;
 	T->assignable = true;
+	T->isconcat = false;
 	T->nest = 0;
 }
 
@@ -350,4 +351,12 @@ t_Node *Tree_GetTopNode(){
 
 int Tree_GetNest(){
 	return T->nest;
+}
+
+bool Tree_GetConcat(){
+	return T->isconcat;
+}
+
+void Tree_SetConcat(){
+	T->isconcat = true;
 }

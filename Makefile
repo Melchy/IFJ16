@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -std=c11 -pedantic
+CFLAGS=-O3 -Wall -Wextra -std=c11 -pedantic
 
 all: ifj16_rtg
 

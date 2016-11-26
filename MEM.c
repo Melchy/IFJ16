@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 static t_listAddress HashMem[SIZE_HTAB_MEM];
 
 static int hashf_mem(long address)
@@ -77,7 +76,6 @@ void *MEM_realloc(void *ptr, size_t size)
 
 void MEM_ffree(void *ptr)
 {
-
 	t_Address *p = hash_remove(ptr);
 
 	free(p->ptr); 
