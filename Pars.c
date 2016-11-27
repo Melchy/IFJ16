@@ -8,8 +8,6 @@ classNameList * firstClass = NULL;
 void PARS_Run(){
     //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti (zpusobeno spatnym odstranovanim stringu)
     //TODO mazani struktury jumpu
-    //TODO break vnoreny
-    //prirazeni v podmince je sem error ma byt syn error (tom potreba)
     EXPR_Create();
     S_String * foo = STR_Create("Main");
     State = st_Start;
@@ -953,7 +951,6 @@ int PH_checkValidToken(int token){
         token == tkn_LOWER ||
         token == tkn_EHIGHER ||
         token == tkn_ELOWER ||
-        token == tkn_EQUAL ||
         token == tkn_NEQUAL ||
         token == tkn_EXCL ||
         token == tkn_AND ||
