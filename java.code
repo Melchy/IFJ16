@@ -1,10 +1,23 @@
-/*class Main{
+/*
+class Main{
 	static void run(){
-		for(int i = 0;i>-1;i){
-			
+	int y = 0;
+		while(true){
+			for(int i = 0;i<5;i = i +1){
+				if(i == 3){
+					break;
+				}
+				ifj16.print("cykl\n");
+			}
+			if(y == 2){
+				break;
+			}
+			ifj16.print(y + "\n");
+			y = y + 1;
 		}
 	}
-}
+}*/
+/*
 class Main{
 	static void b(){
 		for(int i = 0;i>-1;i){

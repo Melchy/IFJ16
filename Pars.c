@@ -8,6 +8,8 @@ classNameList * firstClass = NULL;
 void PARS_Run(){
     //TODO po urcite dobe behu nekonecneho cyklu naskoci nedostatek pameti (zpusobeno spatnym odstranovanim stringu)
     //TODO mazani struktury jumpu
+    //TODO break vnoreny
+    //prirazeni v podmince je sem error ma byt syn error (tom potreba)
     EXPR_Create();
     S_String * foo = STR_Create("Main");
     State = st_Start;
@@ -722,7 +724,7 @@ bool RBool(int * nestingLevel){
     }
     int type = JL_GetJumpType();
 
-    if(type == 3){//do
+    if(type == doType){//do
 
         if(VT_GetBoolSafe(PH_Solve(tkn_RPAREN, -1, NULL, true))){
 
@@ -731,7 +733,7 @@ bool RBool(int * nestingLevel){
             (*nestingLevel)--;
             JL_Remove();
         }
-    }else if(type == 1){//while
+    }else if(type == whileType){//while
         int position = FIO_GetPosition();
         FIO_MoveToPosition(JL_GetOffset());
         if(!(VT_GetBoolSafe(PH_Solve(tkn_LBLOCK, -1, NULL, false)))){
@@ -739,7 +741,7 @@ bool RBool(int * nestingLevel){
             JL_Remove();
             FIO_MoveToPosition(position);
         }
-    }else if(type == 2){//for
+    }else if(type == forType){//for
         int position = FIO_GetPosition();
         FIO_MoveToPosition(JL_GetOffset());
         SCAN_FindToken(tkn_SEMI);
@@ -838,18 +840,20 @@ void MakeJump(int JumpType, int nestingLevel){
     JL_Add(FIO_GetPosition(),JumpType,nestingLevel);
 }
 
-
-
 void BreakSt(int * NestingLevel){
     int neccesaryNesting = JL_GetNestingLevel();
-    while(neccesaryNesting > (*NestingLevel)){
+    while((*NestingLevel) > neccesaryNesting){
         SCAN_FindToken(tkn_RBLOCK);
         (*NestingLevel)--;
+    }
+    if(JL_GetJumpType() == forType){
+    	PH_DisposeTable(IL_GetReachable());
     }
     SCAN_FindToken(tkn_RBLOCK);
     (*NestingLevel)--;
     JL_Remove();
 }
+
 void ContinueSt(int * nestingLevel){
     (*nestingLevel) = JL_GetNestingLevel();
     int type = JL_GetJumpType();
