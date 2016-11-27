@@ -160,13 +160,13 @@ void FR_ElseSt(int * nestingLevel,bool canElse){
     JL_Add(0, ifTrueType, (*nestingLevel));
 }
 void FR_IfSt(int * nestingLevel){
-    FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
+    FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false,false);
     JL_Add(0, ifFalseType, (*nestingLevel));
     (*nestingLevel)++;
 }
 
 void FR_ReturnSt(){
-    FR_checkExpr(tkn_SEMI,-1, NULL, false,true);
+    FR_checkExpr(tkn_SEMI,-1, NULL, false,true,false);
 }
 
 bool FR_RBool(int * nestingLevel,bool * canElse){
@@ -176,7 +176,7 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
     }
     int type = JL_GetJumpType();
     if(type == doType){ 
-        FR_checkExpr(tkn_RPAREN,-1, NULL, true,false);//"do" condition
+        FR_checkExpr(tkn_RPAREN,-1, NULL, true,false,false);//"do" condition
     }else if(type == ifFalseType){ 
         (*canElse) = true;   
     }
@@ -185,7 +185,7 @@ bool FR_RBool(int * nestingLevel,bool * canElse){
     return false;
 }
 void FR_cycleWhile(int * nestingLevel){
-    FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false);
+    FR_checkExpr(tkn_LBLOCK,-1, NULL, false,false,false);
     (*nestingLevel)++;
     JL_Add(0, whileType, (*nestingLevel));
 }
@@ -198,14 +198,14 @@ void FR_cycleFor(int * nestingLevel){
     }else{
         
         EXPR_AddVal(token, SCAN_GetAttr());
-        FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
+        FR_checkExpr(tkn_SEMI,-1, NULL, false,false,false);
     }
     
     //for("";"zde")
-    FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
+    FR_checkExpr(tkn_SEMI,-1, NULL, false,false,false);
      //for("";"";"zde")
     
-    FR_checkExpr(tkn_RPAREN,-1, NULL, false,false);
+    FR_checkExpr(tkn_RPAREN,-1, NULL, false,false,true);
     //for("";"";"zde"){
     checkIfNextTokenIsSmt(tkn_LBLOCK);
     (*nestingLevel)++;
@@ -259,7 +259,7 @@ void FR_tknID(bool canFce){
     }else if(token == tkn_ASSIGN){
         EXPR_AddVal(tkn_ID,NULL);
         EXPR_AddVal(tkn_ASSIGN,NULL);
-        FR_checkExpr(tkn_SEMI,-1, NULL, false,false);
+        FR_checkExpr(tkn_SEMI,-1, NULL, false,false,false);
     }else{
         if(token == tkn_SEMI){
             return;
@@ -268,7 +268,7 @@ void FR_tknID(bool canFce){
     }
 }
 
-void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty){
+void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty,bool canEq){
     int token;
     bool skipToken = false;
     int nesting = 0;
@@ -306,7 +306,7 @@ void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken
         }else{
 
         }
-        if(!PH_checkValidToken(token)){
+        if(!PH_checkValidToken(token,canEq)){
             FR_SynError();
         }
         if(token == tkn_ID){
@@ -330,7 +330,7 @@ void FR_FceParamsSyntax(){
     EXPR_Create();
     int * token = MEM_malloc(sizeof(int));
     while(true){
-        FR_checkExpr(tkn_COMMA,tkn_RPAREN, token, false,true);
+        FR_checkExpr(tkn_COMMA,tkn_RPAREN, token, false,true,false);
         if((*token) == tkn_RPAREN){
             PH_DisposeTree();
             return;
@@ -459,7 +459,7 @@ void FR_Solve(){
     int token = SCAN_GetToken();
     while(token != tkn_SEMI)
     {
-        PH_checkValidToken(token);
+        PH_checkValidToken(token,false);
         EXPR_AddVal(token,SCAN_GetAttr());
         token = SCAN_GetToken();
     }
@@ -936,7 +936,7 @@ t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToke
     return NULL;
 }
 
-int PH_checkValidToken(int token){
+int PH_checkValidToken(int token,bool canEq){
     if(token == tkn_ID || 
         token == tkn_NUM ||
         token == tkn_LIT ||
@@ -959,6 +959,11 @@ int PH_checkValidToken(int token){
         token == tkn_TRUE ||
         token == tkn_FALSE){
         return true;
+    }
+    if(canEq){
+    	if(token == tkn_ASSIGN){
+    		return true;
+    	}
     }
     return false;
 }
