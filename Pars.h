@@ -66,7 +66,7 @@
 	void BreakSt(int * NestingLevel);
 	void ContinueSt(int * NestingLevel);
 	t_Value * PH_Solve(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken);
-	int PH_checkValidToken(int token);
+	int PH_checkValidToken(int token, bool canEq);
 	void PH_AllocTable();
 	void PH_MakeTree();
 	void PH_DisposeTree();
@@ -97,7 +97,7 @@
 	void FR_SynError();
 	void FR_HandleClass();
 	void FR_FceParamsSyntax();
-	void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty);
+	void FR_checkExpr(int EndToken1,int EndToken2, int * rEndToken, bool addEndToken,bool canEmpty, bool canEq);
 	void FR_fceMat();
 	void FR_load();
 	bool FR_jmpEmpty();
