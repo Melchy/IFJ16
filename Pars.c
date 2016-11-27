@@ -422,9 +422,13 @@ void FR_DeclrFceGlobal(S_String * ID,int type){
         firstParam = NULL;
     }
     while(token != tkn_RPAREN){
-        if(!FR_checkVarType(token)) FR_SynError();
+        if(!FR_checkVarType(token)) {
+        	FR_SynError();
+        }
         param->type = token;
-        if((token = SCAN_GetToken()) != tkn_ID) FR_SynError();
+        if((token = SCAN_GetToken()) != tkn_ID) {
+        	FR_SynError();
+        }
         param->ID = STR_Create(SCAN_GetAttr()->str);
         token = SCAN_GetToken();
         if(token == tkn_RPAREN){
@@ -436,6 +440,7 @@ void FR_DeclrFceGlobal(S_String * ID,int type){
         }else{
             FR_SynError();
         }
+        token = SCAN_GetToken();
     }
     if(SCAN_GetToken() != tkn_LBLOCK) FR_SynError();
     IL_InitFce(ID,type, FIO_GetPosition(),firstParam);

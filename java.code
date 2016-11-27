@@ -1,3 +1,16 @@
+class Main{
+	static void run(){
+		ifj16.print(func2(5,5));
+	}
+
+	static int func2(int x,int y){
+		y=y*20;
+		y=-y;
+		return y;
+	}
+}
+
+
 /*
 class Main{
 	static void run(){
