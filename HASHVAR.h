@@ -1,3 +1,13 @@
+/* 
+* Implementace interpretu imperativniho jazyka IFJ16
+* Tym 028
+* xopich00 | Tomas Opichal
+* xkolar64 | Michal Kolar
+* xstehl17 | Vaclav Stehlik
+* xleont01 | Leonteva Valeriia
+* xmotyc06 | Michal Motycka
+*/
+
 #ifndef HASHVAR_H
 #define HASHVAR_H
 
@@ -11,24 +21,11 @@ typedef struct S_Var{
 }S_Var;
 
 typedef S_Var** htabG;
-typedef struct htabL{
-	S_Var** tab;
-	struct htabL *prev;
-}htabL;
 
 void HASHVAR_InitGlobal();
-void HASHVAR_PrintL();
 bool HASHVAR_AddG(S_Var *data);
 S_Var *HASHVAR_FindG(S_String *ID);
 bool HASHVAR_RemoveG(S_String *ID);
 void HASHVAR_PrintG();
-
-void HASHVAR_AddTable();
-void HASHVAR_RemoveTable();
-bool HASHVAR_AddL(S_Var *data);
-S_Var *HASHVAR_FindL(S_String *ID);
-bool HASHVAR_RemoveL(S_String *ID);
-
-
 
 #endif

@@ -1,3 +1,13 @@
+/* 
+* Implementace interpretu imperativniho jazyka IFJ16
+* Tym 028
+* xopich00 | Tomas Opichal
+* xkolar64 | Michal Kolar
+* xstehl17 | Vaclav Stehlik
+* xleont01 | Leonteva Valeriia
+* xmotyc06 | Michal Motycka
+*/
+
 #include "Tree.h"
 #include "Tokens.h"
 #include "MEM.h"
