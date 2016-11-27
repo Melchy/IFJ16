@@ -955,7 +955,7 @@ int PH_checkValidToken(int token){
         token == tkn_EXCL ||
         token == tkn_AND ||
         token == tkn_OR ||
-        token == tkn_ASSIGN ||
+        token == tkn_EQUAL ||
         token == tkn_TRUE ||
         token == tkn_FALSE){
         return true;
