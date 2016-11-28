@@ -8,7 +8,7 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "HASHLOCAL.h"
+#include "hashlocal.h"
 
 static tabLocal local;
 

@@ -8,7 +8,7 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "JL.h"
+#include "jl.h"
 
 static S_JMP * active = NULL;
 

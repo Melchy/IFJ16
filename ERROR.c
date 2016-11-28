@@ -8,9 +8,9 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "ERROR.h"
-#include "MEM.h"
-#include "FIO.h"
+#include "error.h"
+#include "mem.h"
+#include "fio.h"
 
 #include <stdio.h>
 #include <stdlib.h>

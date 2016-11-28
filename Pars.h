@@ -15,22 +15,22 @@
 	#include <stdlib.h>
 	#include <stdbool.h>
 
-	#include "STR.h"
-	#include "Tokens.h"
-	#include "VARTAB.h"
+	#include "str.h"
+	#include "tokens.h"
+	#include "vartab.h"
 
-	#include "FIO.h"
-	#include "SCAN.h"
-	#include "STR.h"
-	#include "MEM.h"
-	#include "Tree.h"
-	#include "EXPR.h"
-	#include "Tokens.h"
-	#include "VARTAB.h"
-	#include "HASHVAR.h"
-	#include "IDLogic.h"
-	#include "HASHFCE.h"
-	#include "JL.h"
+	#include "fio.h"
+	#include "scan.h"
+	#include "str.h"
+	#include "mem.h"
+	#include "tree.h"
+	#include "expr.h"
+	#include "tokens.h"
+	#include "vartab.h"
+	#include "hashvar.h"
+	#include "idlogic.h"
+	#include "hashfce.h"
+	#include "jl.h"
 	#include "ial.h"
 	
 	#define whileType 1

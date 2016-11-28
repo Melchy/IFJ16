@@ -11,9 +11,9 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "STR.h"
-#include "HASHVAR.h"
-#include "VARTAB.h"
+#include "str.h"
+#include "hashvar.h"
+#include "vartab.h"
 
 #include <stdbool.h>
 

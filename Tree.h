@@ -11,9 +11,9 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "STR.h"
-#include "Node.h"
-#include "VARTAB.h"
+#include "str.h"
+#include "node.h"
+#include "vartab.h"
 
 #include <stdbool.h>
 

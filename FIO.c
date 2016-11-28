@@ -8,8 +8,8 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "FIO.h"
-#include "ERROR.h"
+#include "fio.h"
+#include "error.h"
 
 #include <stdio.h>
 

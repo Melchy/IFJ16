@@ -8,14 +8,14 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "Tree.h"
-#include "Tokens.h"
-#include "MEM.h"
-#include "STR.h"
-#include "Node.h"
-#include "VARTAB.h"
-#include "SCAN.h"
-#include "ERROR.h"
+#include "tree.h"
+#include "tokens.h"
+#include "mem.h"
+#include "str.h"
+#include "node.h"
+#include "vartab.h"
+#include "scan.h"
+#include "error.h"
 
 #include <stdio.h>
 #include <stdbool.h>

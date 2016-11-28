@@ -11,9 +11,9 @@
 #ifndef HASHLOCAL_H
 #define HASHLOCAL_H
 
-#include "HASH.h"
-#include "STR.h"
-#include "VARTAB.h"
+#include "hash.h"
+#include "str.h"
+#include "vartab.h"
 
 #include <stdlib.h>
 

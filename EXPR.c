@@ -8,13 +8,13 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "EXPR.h"
-#include "Tree.h"
-#include "Node.h"
-#include "Tokens.h"
-#include "ERROR.h"
-#include "VARTAB.h"
-#include "IDLogic.h"
+#include "expr.h"
+#include "tree.h"
+#include "node.h"
+#include "tokens.h"
+#include "error.h"
+#include "vartab.h"
+#include "idlogic.h"
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -8,7 +8,7 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "VARTAB.h"
+#include "vartab.h"
 
 static ArrInt_t 	int_arr;
 static ArrDouble_t 	double_arr;
@@ -52,7 +52,7 @@ void VT_InitTabs()
 	Operators = MEM_malloc(OPS_COUNT*sizeof(t_Value));
 	for (int i = 0; i < 14; i++)
 	{
-		Operators[i].type = OPS_OFFSET+i; 		// pluskem zacinaji operatory v Tokens.h, to ma hodnotu 12 == OPS_OFFSET
+		Operators[i].type = OPS_OFFSET+i; 		// pluskem zacinaji operatory v tokens.h, to ma hodnotu 12 == OPS_OFFSET
 		Operators[i].VT_index = -1;
 	}
 

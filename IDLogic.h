@@ -11,10 +11,10 @@
 #ifndef IDLOGIC_H
 #define IDLOGIC_H
 
-#include "STR.h"
-#include "VARTAB.h"
-#include "HASHFCE.h"
-#include "HASHLOCAL.h"
+#include "str.h"
+#include "vartab.h"
+#include "hashfce.h"
+#include "hashlocal.h"
 
 #include <stdbool.h>
 

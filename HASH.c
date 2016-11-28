@@ -8,8 +8,8 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "HASH.h"
-#include "STR.h"
+#include "hash.h"
+#include "str.h"
 
 #include <stdio.h>
 

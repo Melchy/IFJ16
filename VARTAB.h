@@ -11,10 +11,10 @@
 #ifndef VARTAB_H
 #define VARTAB_H
 
-#include "STR.h"
-#include "MEM.h"
-#include "Tokens.h"
-#include "ERROR.h"
+#include "str.h"
+#include "mem.h"
+#include "tokens.h"
+#include "error.h"
 
 #include <stdbool.h>
 

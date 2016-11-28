@@ -8,10 +8,10 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "Node.h"
-#include "Tokens.h"
-#include "HASHVAR.h"
-#include "VARTAB.h"
+#include "node.h"
+#include "tokens.h"
+#include "hashvar.h"
+#include "vartab.h"
 
 #include <stdio.h>
 #include <stdlib.h>

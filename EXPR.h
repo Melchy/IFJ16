@@ -11,8 +11,8 @@
 #ifndef EXPR_H
 #define EXPR_H
 
-#include "VARTAB.h"
-#include "STR.h"
+#include "vartab.h"
+#include "str.h"
 
 /* Vytvori novy vyraz */
 void EXPR_Create();

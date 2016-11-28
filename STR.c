@@ -8,10 +8,10 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "STR.h"
-#include "MEM.h"
-#include "ERROR.h"
-#include "FIO.h"
+#include "str.h"
+#include "mem.h"
+#include "error.h"
+#include "fio.h"
 
 #include <errno.h>
 

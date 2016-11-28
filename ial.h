@@ -16,9 +16,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "STR.h"
-#include "MEM.h"
-#include "ERROR.h"
+#include "str.h"
+#include "mem.h"
+#include "error.h"
 
 /* --- Macro declaration --- */
 

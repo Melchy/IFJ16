@@ -12,7 +12,7 @@
 #define JL_H
 	
 	#include <stdio.h>
-	#include "MEM.h"
+	#include "mem.h"
 
 	typedef struct S_JMP {
 		long Offset;

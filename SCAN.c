@@ -8,12 +8,12 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "SCAN.h"
-#include "FIO.h"
-#include "STR.h"
-#include "MEM.h"
-#include "ERROR.h"
-#include "Tokens.h"
+#include "scan.h"
+#include "fio.h"
+#include "str.h"
+#include "mem.h"
+#include "error.h"
+#include "tokens.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

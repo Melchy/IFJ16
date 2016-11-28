@@ -11,7 +11,7 @@
 #ifndef HASHFCE_H
 #define HASHFCE_H
 
-#include "STR.h"
+#include "str.h"
 
 #include <stdbool.h>
 

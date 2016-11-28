@@ -8,10 +8,10 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "HASHFCE.h"
-#include "STR.h"
-#include "HASH.h"
-#include "MEM.h"
+#include "hashfce.h"
+#include "str.h"
+#include "hash.h"
+#include "mem.h"
 
 #include <stdbool.h>
 

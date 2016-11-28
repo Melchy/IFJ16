@@ -5,7 +5,7 @@
 	#include <stdlib.h>
 	#include <stdbool.h>
 
-	#include "STR.h"
+	#include "str.h"
 	
 	void JL_Add(int Offset, bool ExprAtEnd, int StateAfterJump,int NestingLevel, S_String * ClassAfterJMP);
 	void JL_Remove();

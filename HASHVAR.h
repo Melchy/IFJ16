@@ -11,8 +11,8 @@
 #ifndef HASHVAR_H
 #define HASHVAR_H
 
-#include "STR.h"
-#include "VARTAB.h"
+#include "str.h"
+#include "vartab.h"
 
 typedef struct S_Var{
 	S_String *ID;

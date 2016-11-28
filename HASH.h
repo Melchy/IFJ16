@@ -11,7 +11,7 @@
 #ifndef HASH_H
 #define HASH_H
 
-#include "STR.h"
+#include "str.h"
 
 #define SIZETAB 20
 

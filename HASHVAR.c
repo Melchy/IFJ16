@@ -8,11 +8,11 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "HASH.h"
-#include "HASHVAR.h"
-#include "STR.h"
-#include "VARTAB.h"
-#include "MEM.h"
+#include "hash.h"
+#include "hashvar.h"
+#include "str.h"
+#include "vartab.h"
+#include "mem.h"
 
 #include <stdbool.h>
 

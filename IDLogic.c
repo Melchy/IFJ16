@@ -8,14 +8,14 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "IDLogic.h"
-#include "STR.h"
-#include "VARTAB.h"
-#include "HASHVAR.h"
-#include "HASHLOCAL.h"
-#include "HASHFCE.h"
-#include "MEM.h"
-#include "ERROR.h"
+#include "idlogic.h"
+#include "str.h"
+#include "vartab.h"
+#include "hashvar.h"
+#include "hashlocal.h"
+#include "hashfce.h"
+#include "mem.h"
+#include "error.h"
 
 static S_String *ActClass;
 static int nesting;

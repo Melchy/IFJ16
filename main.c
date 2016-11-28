@@ -8,20 +8,20 @@
 * xmotyc06 | Michal Motycka
 */
 
-#include "FIO.h"
-#include "SCAN.h"
-#include "STR.h"
-#include "MEM.h"
-#include "Tree.h"
-#include "EXPR.h"
-#include "Tokens.h"
-#include "VARTAB.h"
-#include "HASHVAR.h"
-#include "HASHLOCAL.h"
-#include "IDLogic.h"
-#include "HASHFCE.h"
-#include "JL.h"
-#include "Pars.h"
+#include "fio.h"
+#include "scan.h"
+#include "str.h"
+#include "mem.h"
+#include "tree.h"
+#include "expr.h"
+#include "tokens.h"
+#include "vartab.h"
+#include "hashvar.h"
+#include "hashlocal.h"
+#include "idlogic.h"
+#include "hashfce.h"
+#include "jl.h"
+#include "pars.h"
 
 #include <stdio.h>
 #include <stdlib.h>

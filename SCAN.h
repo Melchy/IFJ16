@@ -11,7 +11,7 @@
 #ifndef SCAN_H
 #define SCAN_H
 
-#include "STR.h"
+#include "str.h"
 
 #include <stdio.h>
 #include <stdbool.h>
